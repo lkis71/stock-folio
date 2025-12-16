@@ -167,7 +167,7 @@ struct FloatingAddButton: View {
         Button(action: action) {
             Image(systemName: "plus.circle.fill")
                 .font(.system(size: 56))
-                .foregroundStyle(.accent)
+                .foregroundStyle(Color.accentColor)
                 .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
         }
         .padding()

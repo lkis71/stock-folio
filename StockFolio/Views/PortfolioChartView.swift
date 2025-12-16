@@ -59,28 +59,36 @@ struct PortfolioChartView: View {
             }
         }
         .chartLegend(position: .bottom, spacing: 16)
-        .chartForegroundStyleScale(chartColors)
+        .chartForegroundStyleScale(domain: chartColorDomain, range: chartColorRange)
         .frame(height: 280)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityDescription)
     }
 
     // MARK: - Chart Colors
-    private var chartColors: [String: Color] {
-        var colors: [String: Color] = [:]
+    private var chartColorDomain: [String] {
+        var domain = viewModel.holdings.map { $0.stockName }
+        if viewModel.remainingCash > 0 {
+            domain.append("현금")
+        }
+        return domain
+    }
+
+    private var chartColorRange: [Color] {
         let baseColors: [Color] = [
             .blue, .green, .orange, .purple, .pink,
             .cyan, .indigo, .mint, .teal, .yellow
         ]
 
-        for (index, holding) in viewModel.holdings.enumerated() {
-            colors[holding.stockName] = baseColors[index % baseColors.count]
+        var range = viewModel.holdings.enumerated().map { index, _ in
+            baseColors[index % baseColors.count]
         }
 
-        // 현금은 항상 회색
-        colors["현금"] = .gray
+        if viewModel.remainingCash > 0 {
+            range.append(.gray)
+        }
 
-        return colors
+        return range
     }
 
     // MARK: - Accessibility

@@ -2,7 +2,7 @@ name: StockFolio
 options:
   bundleIdPrefix: com.stockfolio
   deploymentTarget:
-    iOS: "16.0"
+    iOS: "17.0"
   xcodeVersion: "15.0"
   groupSortPosition: top
   createIntermediateGroups: true
