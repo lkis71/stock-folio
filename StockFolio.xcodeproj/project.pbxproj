@@ -1,0 +1,570 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0D0DA9B0DC7E7DDB311A1064 /* MockInputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 259470EA0AA644E24CD7256C /* MockInputValidator.swift */; };
+		1B095E80F7A1B5862BBF0FE5 /* CurrencyFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1366FBF80D4223BCC0E84B37 /* CurrencyFormatter.swift */; };
+		1C224A85BB78576556F32CC6 /* StockListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDAB33513D2AD1DA74EE11D4 /* StockListView.swift */; };
+		242A59D215ED2F321713D794 /* CurrencyFormatterProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CBE976689C431B385673077 /* CurrencyFormatterProtocol.swift */; };
+		2B89B1DF6F9DB9326CF01445 /* PersistenceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61EC8F40BCF45AA2D66CE293 /* PersistenceController.swift */; };
+		30761D1045840FEC57A8E064 /* MainDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0519B6625910A060091F73B7 /* MainDashboardView.swift */; };
+		4B5A34114BB4EB98B36AF37F /* MockSeedMoneyStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ACBB87E403CA9DDF995AA8D /* MockSeedMoneyStorage.swift */; };
+		4B67F302A7197C7C456EFF43 /* InputValidatorProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = A903A562D8565017AF10AF4B /* InputValidatorProtocol.swift */; };
+		4F6A5AAE9A36FF106720DA52 /* StockHoldingEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 232147FDBD7E5787441266FB /* StockHoldingEntity.swift */; };
+		6B60830F2F2BE42731212A21 /* StockRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 019E03798673FBAC33BC3774 /* StockRepositoryProtocol.swift */; };
+		6B9CF098CFE58264BD7B191B /* StockInputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3360FE42EB5F827C16CE8C2 /* StockInputValidator.swift */; };
+		6E37CB233CA095CA4D971871 /* MockStockRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6B86B194DFC0C93E7F79FB /* MockStockRepository.swift */; };
+		74C60D10E9E3F06EE69053E8 /* Portfolio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0E054F5B4F42F8B4045A61 /* Portfolio.swift */; };
+		769F48CBBD3358750D71823A /* CoreDataStockRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B158C559CBD0A56DE691AF1C /* CoreDataStockRepository.swift */; };
+		81278FC16D39B02504C03B7D /* PortfolioViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D5370E7FF55371C708C25C /* PortfolioViewModelTests.swift */; };
+		8331E93E5E0AEA79895B7A9E /* StockFolioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8D9C32A2D2F7D59C29662B7 /* StockFolioApp.swift */; };
+		95D86B7008542FF86E305963 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19A422537B5C2F498E8B9618 /* ContentView.swift */; };
+		A2D0DF21033515E60378976E /* PortfolioChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FC16F1BF608633BF640E449 /* PortfolioChartView.swift */; };
+		A3535E58FBB146A60FEE2A13 /* AddStockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72CF46F4B36059BC4A020B4F /* AddStockView.swift */; };
+		BAAE37DA70BD7F0BAFECBE5F /* PortfolioViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC51E2C31AAB2B551C58D42F /* PortfolioViewModel.swift */; };
+		C5918ACE2AA453E23D115EBE /* SeedMoneySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C1045F96A64BD96333784D /* SeedMoneySettingsView.swift */; };
+		D8157D14276E3BBD5AA51748 /* InputValidatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A03E81BC911BD4B8E4C1A6E /* InputValidatorTests.swift */; };
+		DB4042AE8B0E1DBC394F96A6 /* PortfolioTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C8265CCAFB24A914D2397AE /* PortfolioTests.swift */; };
+		F21F6506B57CDD3890FB80CA /* SeedMoneyStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4AA7DF51BB58F775BD88B2 /* SeedMoneyStorage.swift */; };
+		F8C7BF441DDA3D74C254492C /* StockFolio.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A3D600E7582742FA0DE46E1B /* StockFolio.xcdatamodeld */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BBB2C3752347D728215F96B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 607DCFC6C3EFDB68192346AC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3B1B049B8FA8184AABFECCCE;
+			remoteInfo = StockFolio;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		019E03798673FBAC33BC3774 /* StockRepositoryProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockRepositoryProtocol.swift; sourceTree = "<group>"; };
+		0519B6625910A060091F73B7 /* MainDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainDashboardView.swift; sourceTree = "<group>"; };
+		0B4AA7DF51BB58F775BD88B2 /* SeedMoneyStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedMoneyStorage.swift; sourceTree = "<group>"; };
+		0FC16F1BF608633BF640E449 /* PortfolioChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioChartView.swift; sourceTree = "<group>"; };
+		1366FBF80D4223BCC0E84B37 /* CurrencyFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatter.swift; sourceTree = "<group>"; };
+		15CA99EA741812D574BECF28 /* StockFolio.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = StockFolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		19A422537B5C2F498E8B9618 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		232147FDBD7E5787441266FB /* StockHoldingEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockHoldingEntity.swift; sourceTree = "<group>"; };
+		259470EA0AA644E24CD7256C /* MockInputValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockInputValidator.swift; sourceTree = "<group>"; };
+		2B0E054F5B4F42F8B4045A61 /* Portfolio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Portfolio.swift; sourceTree = "<group>"; };
+		31C1045F96A64BD96333784D /* SeedMoneySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedMoneySettingsView.swift; sourceTree = "<group>"; };
+		3ACBB87E403CA9DDF995AA8D /* MockSeedMoneyStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSeedMoneyStorage.swift; sourceTree = "<group>"; };
+		3D43BF0CCD6CA89CB6CF9BCA /* StockFolio.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = StockFolio.xcdatamodel; sourceTree = "<group>"; };
+		5A03E81BC911BD4B8E4C1A6E /* InputValidatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputValidatorTests.swift; sourceTree = "<group>"; };
+		5C8265CCAFB24A914D2397AE /* PortfolioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioTests.swift; sourceTree = "<group>"; };
+		61EC8F40BCF45AA2D66CE293 /* PersistenceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistenceController.swift; sourceTree = "<group>"; };
+		72CF46F4B36059BC4A020B4F /* AddStockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStockView.swift; sourceTree = "<group>"; };
+		73D5370E7FF55371C708C25C /* PortfolioViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioViewModelTests.swift; sourceTree = "<group>"; };
+		7B471012F1D5882BF911AB32 /* StockFolioTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StockFolioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		8CBE976689C431B385673077 /* CurrencyFormatterProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatterProtocol.swift; sourceTree = "<group>"; };
+		9B6B86B194DFC0C93E7F79FB /* MockStockRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStockRepository.swift; sourceTree = "<group>"; };
+		A903A562D8565017AF10AF4B /* InputValidatorProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputValidatorProtocol.swift; sourceTree = "<group>"; };
+		B158C559CBD0A56DE691AF1C /* CoreDataStockRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStockRepository.swift; sourceTree = "<group>"; };
+		B8D9C32A2D2F7D59C29662B7 /* StockFolioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockFolioApp.swift; sourceTree = "<group>"; };
+		DDAB33513D2AD1DA74EE11D4 /* StockListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockListView.swift; sourceTree = "<group>"; };
+		E3360FE42EB5F827C16CE8C2 /* StockInputValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockInputValidator.swift; sourceTree = "<group>"; };
+		FC51E2C31AAB2B551C58D42F /* PortfolioViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioViewModel.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		04CBAE52D3AA33A0224FEE68 /* StockFolio */ = {
+			isa = PBXGroup;
+			children = (
+				653FFD9A19072EBA71E1DDB2 /* App */,
+				7E8EFC349D13C274639486A4 /* Models */,
+				197962F2BFD99EFAF1C7F305 /* Protocols */,
+				489C73C2C514F0550CF6C77C /* Resources */,
+				B277A72164F0961BED3FB950 /* Services */,
+				27715F1234BAC97C9A773DDC /* Utils */,
+				C8B3AC85E466E94FB7EFD053 /* ViewModels */,
+				5C144AEE9E5603DD81071572 /* Views */,
+			);
+			path = StockFolio;
+			sourceTree = "<group>";
+		};
+		151A0376B03AC1C549FC3655 = {
+			isa = PBXGroup;
+			children = (
+				04CBAE52D3AA33A0224FEE68 /* StockFolio */,
+				A43F9F45CB2CD75D8A116AEC /* StockFolioTests */,
+				23CBBA7E1921044E611CAE1E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		197962F2BFD99EFAF1C7F305 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				8CBE976689C431B385673077 /* CurrencyFormatterProtocol.swift */,
+				A903A562D8565017AF10AF4B /* InputValidatorProtocol.swift */,
+				019E03798673FBAC33BC3774 /* StockRepositoryProtocol.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		23CBBA7E1921044E611CAE1E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				15CA99EA741812D574BECF28 /* StockFolio.app */,
+				7B471012F1D5882BF911AB32 /* StockFolioTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		27715F1234BAC97C9A773DDC /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		489C73C2C514F0550CF6C77C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A3D600E7582742FA0DE46E1B /* StockFolio.xcdatamodeld */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		5C144AEE9E5603DD81071572 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				72CF46F4B36059BC4A020B4F /* AddStockView.swift */,
+				0519B6625910A060091F73B7 /* MainDashboardView.swift */,
+				0FC16F1BF608633BF640E449 /* PortfolioChartView.swift */,
+				31C1045F96A64BD96333784D /* SeedMoneySettingsView.swift */,
+				DDAB33513D2AD1DA74EE11D4 /* StockListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		653FFD9A19072EBA71E1DDB2 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				19A422537B5C2F498E8B9618 /* ContentView.swift */,
+				B8D9C32A2D2F7D59C29662B7 /* StockFolioApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		7E8EFC349D13C274639486A4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2B0E054F5B4F42F8B4045A61 /* Portfolio.swift */,
+				232147FDBD7E5787441266FB /* StockHoldingEntity.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		850DF617A7AC7139BE9D6692 /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				259470EA0AA644E24CD7256C /* MockInputValidator.swift */,
+				3ACBB87E403CA9DDF995AA8D /* MockSeedMoneyStorage.swift */,
+				9B6B86B194DFC0C93E7F79FB /* MockStockRepository.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
+		A43F9F45CB2CD75D8A116AEC /* StockFolioTests */ = {
+			isa = PBXGroup;
+			children = (
+				850DF617A7AC7139BE9D6692 /* Mocks */,
+				5A03E81BC911BD4B8E4C1A6E /* InputValidatorTests.swift */,
+				5C8265CCAFB24A914D2397AE /* PortfolioTests.swift */,
+				73D5370E7FF55371C708C25C /* PortfolioViewModelTests.swift */,
+			);
+			path = StockFolioTests;
+			sourceTree = "<group>";
+		};
+		B277A72164F0961BED3FB950 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				B158C559CBD0A56DE691AF1C /* CoreDataStockRepository.swift */,
+				1366FBF80D4223BCC0E84B37 /* CurrencyFormatter.swift */,
+				61EC8F40BCF45AA2D66CE293 /* PersistenceController.swift */,
+				0B4AA7DF51BB58F775BD88B2 /* SeedMoneyStorage.swift */,
+				E3360FE42EB5F827C16CE8C2 /* StockInputValidator.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C8B3AC85E466E94FB7EFD053 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				FC51E2C31AAB2B551C58D42F /* PortfolioViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		3B1B049B8FA8184AABFECCCE /* StockFolio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3652BF8D57430D464EFC44F8 /* Build configuration list for PBXNativeTarget "StockFolio" */;
+			buildPhases = (
+				83102CE421BC401ABD80FED1 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StockFolio;
+			packageProductDependencies = (
+			);
+			productName = StockFolio;
+			productReference = 15CA99EA741812D574BECF28 /* StockFolio.app */;
+			productType = "com.apple.product-type.application";
+		};
+		DB8DFD65118D36ADA35D0DD2 /* StockFolioTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 53EEE0229A2115580DAE0601 /* Build configuration list for PBXNativeTarget "StockFolioTests" */;
+			buildPhases = (
+				BD061B1CDE9610B5C71D06FE /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				3BA9F072359B4F304E43D087 /* PBXTargetDependency */,
+			);
+			name = StockFolioTests;
+			packageProductDependencies = (
+			);
+			productName = StockFolioTests;
+			productReference = 7B471012F1D5882BF911AB32 /* StockFolioTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		607DCFC6C3EFDB68192346AC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = AD9560CDA22089974703070A /* Build configuration list for PBXProject "StockFolio" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 151A0376B03AC1C549FC3655;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				3B1B049B8FA8184AABFECCCE /* StockFolio */,
+				DB8DFD65118D36ADA35D0DD2 /* StockFolioTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		83102CE421BC401ABD80FED1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A3535E58FBB146A60FEE2A13 /* AddStockView.swift in Sources */,
+				95D86B7008542FF86E305963 /* ContentView.swift in Sources */,
+				769F48CBBD3358750D71823A /* CoreDataStockRepository.swift in Sources */,
+				1B095E80F7A1B5862BBF0FE5 /* CurrencyFormatter.swift in Sources */,
+				242A59D215ED2F321713D794 /* CurrencyFormatterProtocol.swift in Sources */,
+				4B67F302A7197C7C456EFF43 /* InputValidatorProtocol.swift in Sources */,
+				30761D1045840FEC57A8E064 /* MainDashboardView.swift in Sources */,
+				2B89B1DF6F9DB9326CF01445 /* PersistenceController.swift in Sources */,
+				74C60D10E9E3F06EE69053E8 /* Portfolio.swift in Sources */,
+				A2D0DF21033515E60378976E /* PortfolioChartView.swift in Sources */,
+				BAAE37DA70BD7F0BAFECBE5F /* PortfolioViewModel.swift in Sources */,
+				C5918ACE2AA453E23D115EBE /* SeedMoneySettingsView.swift in Sources */,
+				F21F6506B57CDD3890FB80CA /* SeedMoneyStorage.swift in Sources */,
+				F8C7BF441DDA3D74C254492C /* StockFolio.xcdatamodeld in Sources */,
+				8331E93E5E0AEA79895B7A9E /* StockFolioApp.swift in Sources */,
+				4F6A5AAE9A36FF106720DA52 /* StockHoldingEntity.swift in Sources */,
+				6B9CF098CFE58264BD7B191B /* StockInputValidator.swift in Sources */,
+				1C224A85BB78576556F32CC6 /* StockListView.swift in Sources */,
+				6B60830F2F2BE42731212A21 /* StockRepositoryProtocol.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BD061B1CDE9610B5C71D06FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D8157D14276E3BBD5AA51748 /* InputValidatorTests.swift in Sources */,
+				0D0DA9B0DC7E7DDB311A1064 /* MockInputValidator.swift in Sources */,
+				4B5A34114BB4EB98B36AF37F /* MockSeedMoneyStorage.swift in Sources */,
+				6E37CB233CA095CA4D971871 /* MockStockRepository.swift in Sources */,
+				DB4042AE8B0E1DBC394F96A6 /* PortfolioTests.swift in Sources */,
+				81278FC16D39B02504C03B7D /* PortfolioViewModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3BA9F072359B4F304E43D087 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3B1B049B8FA8184AABFECCCE /* StockFolio */;
+			targetProxy = BBB2C3752347D728215F96B7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		09C94D9684093E86139D449B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Stock Portfolio";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.stockfolio.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		59521E77711DD032306589C7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.stockfolio.app.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StockFolio.app/StockFolio";
+			};
+			name = Debug;
+		};
+		6411D59753B3BDAE40340CDE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		7B974ACB2386FC3B7BC5DD83 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		879A3991F1120DF8CAD74C74 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Stock Portfolio";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.stockfolio.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A9D033065E120F3241D1B852 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.stockfolio.app.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/StockFolio.app/StockFolio";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		3652BF8D57430D464EFC44F8 /* Build configuration list for PBXNativeTarget "StockFolio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				09C94D9684093E86139D449B /* Debug */,
+				879A3991F1120DF8CAD74C74 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		53EEE0229A2115580DAE0601 /* Build configuration list for PBXNativeTarget "StockFolioTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				59521E77711DD032306589C7 /* Debug */,
+				A9D033065E120F3241D1B852 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AD9560CDA22089974703070A /* Build configuration list for PBXProject "StockFolio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B974ACB2386FC3B7BC5DD83 /* Debug */,
+				6411D59753B3BDAE40340CDE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		A3D600E7582742FA0DE46E1B /* StockFolio.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				3D43BF0CCD6CA89CB6CF9BCA /* StockFolio.xcdatamodel */,
+			);
+			currentVersion = 3D43BF0CCD6CA89CB6CF9BCA /* StockFolio.xcdatamodel */;
+			path = StockFolio.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 607DCFC6C3EFDB68192346AC /* Project object */;
+}
