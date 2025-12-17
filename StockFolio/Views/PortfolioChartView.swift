@@ -5,6 +5,7 @@ import Charts
 /// SRP: 차트 시각화만 담당
 struct PortfolioChartView: View {
     @ObservedObject var viewModel: PortfolioViewModel
+    @State private var selectedItem: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -12,9 +13,16 @@ struct PortfolioChartView: View {
                 .font(.headline)
                 .padding(.horizontal)
 
+            if let selected = selectedItem {
+                selectedItemInfo(selected)
+                    .padding(.horizontal)
+                    .transition(.scale.combined(with: .opacity))
+            }
+
             chartContent
                 .padding(.horizontal)
         }
+        .animation(.easeInOut(duration: 0.3), value: selectedItem)
     }
 
     // MARK: - Chart Content
@@ -60,9 +68,68 @@ struct PortfolioChartView: View {
         }
         .chartLegend(position: .bottom, spacing: 16)
         .chartForegroundStyleScale(domain: chartColorDomain, range: chartColorRange)
+        .chartAngleSelection(value: $selectedItem)
         .frame(height: 280)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilityDescription)
+    }
+
+    // MARK: - Selected Item Info
+    @ViewBuilder
+    private func selectedItemInfo(_ itemName: String) -> some View {
+        if itemName == "현금" {
+            cashInfoCard
+        } else if let holding = viewModel.holdings.first(where: { $0.stockName == itemName }) {
+            stockInfoCard(holding)
+        }
+    }
+
+    private var cashInfoCard: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("현금")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text(viewModel.remainingCash.currencyFormatted)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
+            }
+
+            Spacer()
+
+            Text(String(format: "%.1f%%", viewModel.cashPercentage))
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(.gray)
+        }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func stockInfoCard(_ holding: StockHoldingEntity) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(holding.stockName)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
+                Text(holding.purchaseAmount.currencyFormatted)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
+            }
+
+            Spacer()
+
+            Text(String(format: "%.1f%%", viewModel.percentage(for: holding)))
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundStyle(.blue)
+        }
+        .padding()
+        .background(Color.blue.opacity(0.1))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: - Chart Colors
