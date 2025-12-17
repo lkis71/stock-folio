@@ -101,6 +101,14 @@ struct AddStockView: View {
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
                     }
+
+                    // 편집 모드에서 삭제 힌트 표시 (화면 설계서 기반)
+                    if editingStock != nil {
+                        Text("삭제는 리스트에서 스와이프")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                            .padding(.top, 4)
+                    }
                 }
                 .padding(.horizontal)
                 .padding(.bottom, 8)

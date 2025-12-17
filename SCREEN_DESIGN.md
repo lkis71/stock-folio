@@ -463,11 +463,11 @@
 3. **주황색**: `Color.orange`
 4. **보라색**: `Color.purple`
 5. **분홍색**: `Color.pink`
-6. **민트색**: `Color.mint`
-7. **청록색**: `Color.teal`
-8. **인디고**: `Color.indigo`
-9. **노란색**: `Color.yellow`
-10. **갈색**: `Color.brown`
+6. **시안색**: `Color.cyan`
+7. **인디고**: `Color.indigo`
+8. **민트색**: `Color.mint`
+9. **청록색**: `Color.teal`
+10. **노란색**: `Color.yellow`
 
 ### 5.2 시스템 색상
 

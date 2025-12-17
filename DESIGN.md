@@ -190,7 +190,7 @@ StockFolio/
 │   ├── StockFolioApp.swift
 │   └── ContentView.swift
 ├── Models/
-│   ├── StockHolding.swift (Core Data Entity)
+│   ├── StockHoldingEntity.swift    # Core Data Entity
 │   └── Portfolio.swift
 ├── Views/
 │   ├── MainDashboardView.swift
@@ -200,11 +200,18 @@ StockFolio/
 │   └── SeedMoneySettingsView.swift
 ├── ViewModels/
 │   └── PortfolioViewModel.swift
+├── Protocols/
+│   ├── CurrencyFormatterProtocol.swift
+│   ├── InputValidatorProtocol.swift
+│   └── StockRepositoryProtocol.swift
 ├── Services/
-│   └── CoreDataManager.swift
+│   ├── CoreDataStockRepository.swift
+│   ├── CurrencyFormatter.swift
+│   ├── PersistenceController.swift
+│   ├── SeedMoneyStorage.swift
+│   └── StockInputValidator.swift
 └── Utils/
-    ├── Extensions/
-    └── Constants.swift
+    └── Logger.swift
 ```
 
 ## 9. UI/UX 디자인 가이드
