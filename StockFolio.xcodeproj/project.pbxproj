@@ -19,6 +19,7 @@
 		6B60830F2F2BE42731212A21 /* StockRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 019E03798673FBAC33BC3774 /* StockRepositoryProtocol.swift */; };
 		6B9CF098CFE58264BD7B191B /* StockInputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3360FE42EB5F827C16CE8C2 /* StockInputValidator.swift */; };
 		6E37CB233CA095CA4D971871 /* MockStockRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6B86B194DFC0C93E7F79FB /* MockStockRepository.swift */; };
+		71A77030AC537EA566FE1C08 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BBAC83E41A374982311886 /* Logger.swift */; };
 		74C60D10E9E3F06EE69053E8 /* Portfolio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0E054F5B4F42F8B4045A61 /* Portfolio.swift */; };
 		769F48CBBD3358750D71823A /* CoreDataStockRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B158C559CBD0A56DE691AF1C /* CoreDataStockRepository.swift */; };
 		81278FC16D39B02504C03B7D /* PortfolioViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73D5370E7FF55371C708C25C /* PortfolioViewModelTests.swift */; };
@@ -69,6 +70,7 @@
 		A903A562D8565017AF10AF4B /* InputValidatorProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputValidatorProtocol.swift; sourceTree = "<group>"; };
 		B158C559CBD0A56DE691AF1C /* CoreDataStockRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataStockRepository.swift; sourceTree = "<group>"; };
 		B8D9C32A2D2F7D59C29662B7 /* StockFolioApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockFolioApp.swift; sourceTree = "<group>"; };
+		D5BBAC83E41A374982311886 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		DDAB33513D2AD1DA74EE11D4 /* StockListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockListView.swift; sourceTree = "<group>"; };
 		E3360FE42EB5F827C16CE8C2 /* StockInputValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockInputValidator.swift; sourceTree = "<group>"; };
 		FC51E2C31AAB2B551C58D42F /* PortfolioViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioViewModel.swift; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 		27715F1234BAC97C9A773DDC /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				D5BBAC83E41A374982311886 /* Logger.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -282,6 +285,7 @@
 				1B095E80F7A1B5862BBF0FE5 /* CurrencyFormatter.swift in Sources */,
 				242A59D215ED2F321713D794 /* CurrencyFormatterProtocol.swift in Sources */,
 				4B67F302A7197C7C456EFF43 /* InputValidatorProtocol.swift in Sources */,
+				71A77030AC537EA566FE1C08 /* Logger.swift in Sources */,
 				30761D1045840FEC57A8E064 /* MainDashboardView.swift in Sources */,
 				2B89B1DF6F9DB9326CF01445 /* PersistenceController.swift in Sources */,
 				74C60D10E9E3F06EE69053E8 /* Portfolio.swift in Sources */,

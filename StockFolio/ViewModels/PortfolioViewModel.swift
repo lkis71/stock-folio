@@ -84,7 +84,7 @@ final class PortfolioViewModel: ObservableObject {
             try repository.save(stock)
             fetchHoldings()
         } catch {
-            print("Save error: \(error)")
+            Logger.error("Save error: \(error.localizedDescription)")
         }
     }
 
@@ -103,7 +103,7 @@ final class PortfolioViewModel: ObservableObject {
             try repository.update(updatedStock)
             fetchHoldings()
         } catch {
-            print("Update error: \(error)")
+            Logger.error("Update error: \(error.localizedDescription)")
         }
     }
 
@@ -112,7 +112,7 @@ final class PortfolioViewModel: ObservableObject {
             try repository.delete(stock)
             fetchHoldings()
         } catch {
-            print("Delete error: \(error)")
+            Logger.error("Delete error: \(error.localizedDescription)")
         }
     }
 

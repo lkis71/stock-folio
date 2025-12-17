@@ -31,7 +31,7 @@ final class CoreDataStockRepository: StockRepositoryProtocol {
                 )
             }
         } catch {
-            print("Fetch error: \(error)")
+            Logger.error("Fetch error: \(error.localizedDescription)")
             return []
         }
     }
