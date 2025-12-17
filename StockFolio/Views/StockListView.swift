@@ -5,7 +5,6 @@ import SwiftUI
 struct StockListView: View {
     @ObservedObject var viewModel: PortfolioViewModel
     @State private var selectedStock: StockHoldingEntity?
-    @State private var showingEditSheet = false
     @State private var isExpanded = false
 
     /// 기본 표시 개수 (설계서: 최대 6개)
@@ -63,9 +62,14 @@ struct StockListView: View {
         isExpanded ? viewModel.holdings.count : min(defaultVisibleCount, viewModel.holdings.count)
     }
 
-    /// 표시할 종목 목록
+    /// 비중 기준 내림차순 정렬된 종목 목록
+    private var sortedHoldings: [StockHoldingEntity] {
+        viewModel.holdings.sorted { viewModel.percentage(for: $0) > viewModel.percentage(for: $1) }
+    }
+
+    /// 표시할 종목 목록 (비중 기준 내림차순 정렬)
     private var displayedHoldings: [(offset: Int, element: StockHoldingEntity)] {
-        let holdings = Array(viewModel.holdings.enumerated())
+        let holdings = Array(sortedHoldings.enumerated())
         if isExpanded {
             return holdings
         } else {
@@ -90,49 +94,57 @@ struct StockListView: View {
 
     // MARK: - Stock List Content
     private var stockListContent: some View {
-        LazyVStack(spacing: 8) {
-            ForEach(displayedHoldings, id: \.element.id) { index, holding in
-                StockRowView(
-                    holding: holding,
-                    percentage: viewModel.percentage(for: holding),
-                    color: stockColor(at: index)
-                )
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    selectedStock = holding
-                    showingEditSheet = true
-                }
-                // 스와이프 삭제 기능 (화면 설계서: 스와이프로 삭제)
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    Button(role: .destructive) {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            viewModel.deleteStock(holding)
-                        }
-                    } label: {
-                        Label("삭제", systemImage: "trash")
+        VStack(spacing: 0) {
+            // List를 사용하여 swipeActions 활성화
+            List {
+                ForEach(displayedHoldings, id: \.element.id) { index, holding in
+                    StockRowView(
+                        holding: holding,
+                        percentage: viewModel.percentage(for: holding),
+                        color: stockColor(at: index)
+                    )
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedStock = holding
                     }
+                    // 스와이프 삭제 기능 (화면 설계서: 스와이프로 삭제)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                        Button(role: .destructive) {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                viewModel.deleteStock(holding)
+                            }
+                        } label: {
+                            Label("삭제", systemImage: "trash")
+                        }
+                    }
+                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityHint("탭하여 편집, 스와이프하여 삭제")
                 }
-                .transition(.asymmetric(
-                    insertion: .scale.combined(with: .opacity),
-                    removal: .opacity.combined(with: .move(edge: .trailing))
-                ))
-                .accessibilityElement(children: .combine)
-                .accessibilityHint("탭하여 편집, 스와이프하여 삭제")
             }
+            .listStyle(.plain)
+            .scrollDisabled(true)
+            .frame(height: calculateListHeight())
+            .animation(.easeInOut(duration: 0.3), value: viewModel.holdings)
+            .animation(.easeInOut(duration: 0.3), value: isExpanded)
 
             // 더보기 힌트 (접힌 상태에서 6개 초과 시)
             if !isExpanded && viewModel.holdings.count > defaultVisibleCount {
                 moreItemsHint
+                    .padding(.horizontal)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.holdings)
-        .animation(.easeInOut(duration: 0.3), value: isExpanded)
-        .padding(.horizontal)
-        .sheet(isPresented: $showingEditSheet) {
-            if let stock = selectedStock {
-                AddStockView(viewModel: viewModel, editingStock: stock)
-            }
+        .sheet(item: $selectedStock) { stock in
+            AddStockView(viewModel: viewModel, editingStock: stock)
         }
+    }
+
+    /// List 높이 계산 (각 행 약 72pt + 상하 패딩 8pt)
+    private func calculateListHeight() -> CGFloat {
+        let rowHeight: CGFloat = 80
+        return CGFloat(displayedCount) * rowHeight
     }
 
     // MARK: - More Items Hint

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -62,7 +62,7 @@
 		0B4AA7DF51BB58F775BD88B2 /* SeedMoneyStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedMoneyStorage.swift; sourceTree = "<group>"; };
 		0FC16F1BF608633BF640E449 /* PortfolioChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioChartView.swift; sourceTree = "<group>"; };
 		1366FBF80D4223BCC0E84B37 /* CurrencyFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatter.swift; sourceTree = "<group>"; };
-		15CA99EA741812D574BECF28 /* StockFolio.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = StockFolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		15CA99EA741812D574BECF28 /* StockFolio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StockFolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19A422537B5C2F498E8B9618 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1CB853656FBAB45896A2396D /* StockFolioUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockFolioUITests.swift; sourceTree = "<group>"; };
 		232147FDBD7E5787441266FB /* StockHoldingEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockHoldingEntity.swift; sourceTree = "<group>"; };
@@ -324,7 +324,6 @@
 			);
 			mainGroup = 151A0376B03AC1C549FC3655;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -409,6 +408,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = T2FH95PSY3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stock Portfolio";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -607,6 +607,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = T2FH95PSY3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stock Portfolio";
 				LD_RUNPATH_SEARCH_PATHS = (

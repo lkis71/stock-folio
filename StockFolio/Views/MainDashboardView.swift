@@ -18,17 +18,33 @@ struct MainDashboardView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingSeedMoneySettings = true
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .accessibilityLabel("설정")
+                    HStack(spacing: 12) {
+                        // 종목 추가 버튼 (주요 액션)
+                        Button {
+                            showingAddStock = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.system(size: 14, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 32, height: 32)
+                                .background(Color.accentColor)
+                                .clipShape(Circle())
+                        }
+                        .accessibilityLabel("종목 추가")
+
+                        // 설정 버튼 (보조 액션)
+                        Button {
+                            showingSeedMoneySettings = true
+                        } label: {
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 14))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 32, height: 32)
+                                .background(Color(.tertiarySystemFill))
+                                .clipShape(Circle())
+                        }
+                        .accessibilityLabel("설정")
                     }
-                }
-            }
-            .overlay(alignment: .bottomTrailing) {
-                FloatingAddButton {
-                    showingAddStock = true
                 }
             }
             .sheet(isPresented: $showingAddStock) {
@@ -140,35 +156,6 @@ struct InvestmentSummaryCard: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title) \(amount.currencyFormatted), \(String(format: "%.1f", percentage))%")
-    }
-}
-
-// MARK: - Floating Add Button
-struct FloatingAddButton: View {
-    let action: () -> Void
-    @State private var isPressed = false
-
-    var body: some View {
-        Button(action: {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                isPressed = true
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
-                    isPressed = false
-                }
-                action()
-            }
-        }) {
-            Image(systemName: "plus.circle.fill")
-                .font(.system(size: 56))
-                .foregroundStyle(Color.accentColor)
-                .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
-                .scaleEffect(isPressed ? 0.9 : 1.0)
-        }
-        .padding()
-        .accessibilityLabel("종목 추가")
-        .accessibilityHint("새로운 종목을 포트폴리오에 추가합니다")
     }
 }
 
