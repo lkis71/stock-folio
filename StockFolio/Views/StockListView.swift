@@ -49,11 +49,16 @@ struct StockListView: View {
                     selectedStock = holding
                     showingEditSheet = true
                 }
+                .transition(.asymmetric(
+                    insertion: .scale.combined(with: .opacity),
+                    removal: .opacity.combined(with: .move(edge: .trailing))
+                ))
                 .accessibilityElement(children: .combine)
                 .accessibilityHint("탭하여 편집")
             }
             .onDelete(perform: viewModel.deleteStocks)
         }
+        .animation(.easeInOut(duration: 0.3), value: viewModel.holdings)
         .padding(.horizontal)
         .sheet(isPresented: $showingEditSheet) {
             if let stock = selectedStock {

@@ -162,13 +162,25 @@ struct InvestmentSummaryCard: View {
 // MARK: - Floating Add Button
 struct FloatingAddButton: View {
     let action: () -> Void
+    @State private var isPressed = false
 
     var body: some View {
-        Button(action: action) {
+        Button(action: {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                isPressed = true
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    isPressed = false
+                }
+                action()
+            }
+        }) {
             Image(systemName: "plus.circle.fill")
                 .font(.system(size: 56))
                 .foregroundStyle(Color.accentColor)
                 .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
+                .scaleEffect(isPressed ? 0.9 : 1.0)
         }
         .padding()
         .accessibilityLabel("종목 추가")
