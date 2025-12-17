@@ -162,6 +162,83 @@ final class StockFolioUITests: XCTestCase {
         }
     }
 
+    // MARK: - UI Layout Tests
+
+    func test_addStockView_buttonAreaShouldBeVisible() throws {
+        // Given: 종목 추가 화면 열기
+        let addButton = app.buttons["종목 추가"]
+        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
+        addButton.tap()
+
+        // Then: 저장 및 취소 버튼이 화면 하단에 표시되어야 함
+        let saveButton = app.buttons["저장"]
+        let cancelButton = app.buttons["취소"]
+
+        XCTAssertTrue(saveButton.waitForExistence(timeout: 3))
+        XCTAssertTrue(cancelButton.exists)
+
+        // 버튼이 화면에서 보이고 터치 가능해야 함
+        XCTAssertTrue(saveButton.isHittable)
+        XCTAssertTrue(cancelButton.isHittable)
+    }
+
+    func test_seedMoneySettings_buttonAreaShouldBeVisible() throws {
+        // Given: 시드머니 설정 화면 열기
+        let settingsButton = app.buttons["설정"]
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
+        settingsButton.tap()
+
+        // Then: 저장 및 취소 버튼이 화면 하단에 표시되어야 함
+        let saveButton = app.buttons["저장"]
+        let cancelButton = app.buttons["취소"]
+
+        XCTAssertTrue(saveButton.waitForExistence(timeout: 3))
+        XCTAssertTrue(cancelButton.exists)
+
+        // 버튼이 화면에서 보이고 터치 가능해야 함
+        XCTAssertTrue(saveButton.isHittable)
+        XCTAssertTrue(cancelButton.isHittable)
+    }
+
+    func test_addStockView_scrollContentShouldNotOverlapButtons() throws {
+        // Given: 종목 추가 화면 열기
+        let addButton = app.buttons["종목 추가"]
+        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
+        addButton.tap()
+
+        // When: 스크롤 가능한 컨텐츠 영역 확인
+        let stockNameField = app.textFields["종목명 입력"]
+        let amountField = app.textFields["매수 금액 입력"]
+        let saveButton = app.buttons["저장"]
+
+        XCTAssertTrue(stockNameField.waitForExistence(timeout: 3))
+        XCTAssertTrue(amountField.exists)
+        XCTAssertTrue(saveButton.exists)
+
+        // Then: 모든 요소가 동시에 화면에 표시되고 접근 가능해야 함
+        XCTAssertTrue(stockNameField.isHittable)
+        XCTAssertTrue(amountField.isHittable)
+        XCTAssertTrue(saveButton.isHittable)
+    }
+
+    func test_seedMoneySettings_contentShouldNotOverlapButtons() throws {
+        // Given: 시드머니 설정 화면 열기
+        let settingsButton = app.buttons["설정"]
+        XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
+        settingsButton.tap()
+
+        // When: 컨텐츠 영역 확인
+        let seedMoneyField = app.textFields["시드머니 입력"]
+        let saveButton = app.buttons["저장"]
+
+        XCTAssertTrue(seedMoneyField.waitForExistence(timeout: 3))
+        XCTAssertTrue(saveButton.exists)
+
+        // Then: 모든 요소가 화면에 표시되고 접근 가능해야 함
+        XCTAssertTrue(seedMoneyField.isHittable)
+        XCTAssertTrue(saveButton.isHittable)
+    }
+
     // MARK: - Accessibility Tests
 
     func test_accessibility_allButtonsShouldHaveLabels() throws {

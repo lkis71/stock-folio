@@ -59,8 +59,9 @@ struct SeedMoneySettingsView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .background(isValidAmount ? Color.accentColor : Color.gray)
+                            .background(Color.accentColor)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .opacity(isValidAmount ? 1.0 : 0.5)
                     }
                     .disabled(!isValidAmount)
 
@@ -74,8 +75,16 @@ struct SeedMoneySettingsView: View {
                     }
                 }
                 .padding(.horizontal)
+                .padding(.top, 16)
                 .padding(.bottom, 8)
-                .background(Color(.systemBackground))
+                .background(
+                    VStack(spacing: 0) {
+                        Rectangle()
+                            .fill(Color(.separator))
+                            .frame(height: 0.5)
+                        Color(.systemBackground)
+                    }
+                )
             }
             .navigationTitle("시드머니 설정")
             .navigationBarTitleDisplayMode(.inline)

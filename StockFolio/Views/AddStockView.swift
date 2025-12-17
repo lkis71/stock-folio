@@ -126,8 +126,9 @@ struct AddStockView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .background(isValidInput ? Color.accentColor : Color.gray)
+                            .background(Color.accentColor)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .opacity(isValidInput ? 1.0 : 0.5)
                     }
                     .disabled(!isValidInput)
 
@@ -151,8 +152,16 @@ struct AddStockView: View {
                     }
                 }
                 .padding(.horizontal)
+                .padding(.top, 16)
                 .padding(.bottom, 8)
-                .background(Color(.systemBackground))
+                .background(
+                    VStack(spacing: 0) {
+                        Rectangle()
+                            .fill(Color(.separator))
+                            .frame(height: 0.5)
+                        Color(.systemBackground)
+                    }
+                )
             }
             .navigationTitle(editingStock == nil ? "종목 추가" : "종목 편집")
             .navigationBarTitleDisplayMode(.inline)
