@@ -15,7 +15,7 @@ struct MainDashboardView: View {
                     mainContentView
                 }
             }
-            .navigationTitle("Stock Portfolio")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
@@ -48,7 +48,6 @@ struct MainDashboardView: View {
 
                 if !viewModel.holdings.isEmpty {
                     PortfolioChartView(viewModel: viewModel)
-                        .frame(height: 360)
                 }
 
                 StockListView(viewModel: viewModel)
@@ -88,41 +87,26 @@ struct MainDashboardView: View {
 }
 
 // MARK: - Seed Money Section
+/// 투자 금액/남은 현금 요약 카드 (총 시드머니는 숨김 - 설계서 반영)
 struct SeedMoneySectionView: View {
     @ObservedObject var viewModel: PortfolioViewModel
 
     var body: some View {
-        VStack(spacing: 16) {
-            // 총 시드머니
-            VStack(alignment: .leading, spacing: 4) {
-                Text("총 시드머니")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+        // 투자/현금 요약 (총 시드머니 레이블/금액은 숨김)
+        HStack(spacing: 16) {
+            InvestmentSummaryCard(
+                title: "투자 금액",
+                amount: viewModel.totalInvestedAmount,
+                percentage: viewModel.investedPercentage,
+                color: .blue
+            )
 
-                Text(viewModel.seedMoney.currencyFormatted)
-                    .font(.largeTitle)
-                    .bold()
-                    .monospacedDigit()
-                    .accessibilityLabel("총 시드머니 \(viewModel.seedMoney.currencyFormatted)")
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            // 투자/현금 요약
-            HStack(spacing: 16) {
-                InvestmentSummaryCard(
-                    title: "투자 금액",
-                    amount: viewModel.totalInvestedAmount,
-                    percentage: viewModel.investedPercentage,
-                    color: .blue
-                )
-
-                InvestmentSummaryCard(
-                    title: "남은 현금",
-                    amount: viewModel.remainingCash,
-                    percentage: viewModel.cashPercentage,
-                    color: .green
-                )
-            }
+            InvestmentSummaryCard(
+                title: "남은 현금",
+                amount: viewModel.remainingCash,
+                percentage: viewModel.cashPercentage,
+                color: .green
+            )
         }
         .padding(.horizontal)
     }

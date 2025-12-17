@@ -6,11 +6,15 @@ struct StockListView: View {
     @ObservedObject var viewModel: PortfolioViewModel
     @State private var selectedStock: StockHoldingEntity?
     @State private var showingEditSheet = false
+    @State private var isExpanded = false
+
+    /// 기본 표시 개수 (설계서: 최대 6개)
+    private let defaultVisibleCount = 6
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("보유 종목")
-                .font(.headline)
+            // 섹션 헤더 (표시개수/전체개수)
+            sectionHeader
                 .padding(.horizontal)
 
             if viewModel.holdings.isEmpty {
@@ -18,6 +22,54 @@ struct StockListView: View {
             } else {
                 stockListContent
             }
+        }
+    }
+
+    // MARK: - Section Header
+    private var sectionHeader: some View {
+        HStack {
+            if viewModel.holdings.count > defaultVisibleCount {
+                Text("보유 종목 (\(displayedCount)/\(viewModel.holdings.count))")
+                    .font(.headline)
+            } else {
+                Text("보유 종목")
+                    .font(.headline)
+            }
+
+            Spacer()
+
+            // 확장/축소 버튼 (6개 초과 시)
+            if viewModel.holdings.count > defaultVisibleCount {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        isExpanded.toggle()
+                    }
+                } label: {
+                    HStack(spacing: 4) {
+                        Text(isExpanded ? "접기" : "더보기")
+                            .font(.subheadline)
+                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                            .font(.caption)
+                    }
+                    .foregroundStyle(.secondary)
+                }
+                .accessibilityLabel(isExpanded ? "목록 접기" : "더 많은 종목 보기")
+            }
+        }
+    }
+
+    /// 현재 표시되는 종목 수
+    private var displayedCount: Int {
+        isExpanded ? viewModel.holdings.count : min(defaultVisibleCount, viewModel.holdings.count)
+    }
+
+    /// 표시할 종목 목록
+    private var displayedHoldings: [(offset: Int, element: StockHoldingEntity)] {
+        let holdings = Array(viewModel.holdings.enumerated())
+        if isExpanded {
+            return holdings
+        } else {
+            return Array(holdings.prefix(defaultVisibleCount))
         }
     }
 
@@ -39,7 +91,7 @@ struct StockListView: View {
     // MARK: - Stock List Content
     private var stockListContent: some View {
         LazyVStack(spacing: 8) {
-            ForEach(Array(viewModel.holdings.enumerated()), id: \.element.id) { index, holding in
+            ForEach(displayedHoldings, id: \.element.id) { index, holding in
                 StockRowView(
                     holding: holding,
                     percentage: viewModel.percentage(for: holding),
@@ -57,15 +109,39 @@ struct StockListView: View {
                 .accessibilityElement(children: .combine)
                 .accessibilityHint("탭하여 편집")
             }
-            .onDelete(perform: viewModel.deleteStocks)
+
+            // 더보기 힌트 (접힌 상태에서 6개 초과 시)
+            if !isExpanded && viewModel.holdings.count > defaultVisibleCount {
+                moreItemsHint
+            }
         }
         .animation(.easeInOut(duration: 0.3), value: viewModel.holdings)
+        .animation(.easeInOut(duration: 0.3), value: isExpanded)
         .padding(.horizontal)
         .sheet(isPresented: $showingEditSheet) {
             if let stock = selectedStock {
                 AddStockView(viewModel: viewModel, editingStock: stock)
             }
         }
+    }
+
+    // MARK: - More Items Hint
+    private var moreItemsHint: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                isExpanded = true
+            }
+        } label: {
+            HStack {
+                Spacer()
+                Text("↓ \(viewModel.holdings.count - defaultVisibleCount)개 더보기")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                Spacer()
+            }
+            .padding(.vertical, 12)
+        }
+        .accessibilityLabel("\(viewModel.holdings.count - defaultVisibleCount)개 종목 더 보기")
     }
 
     // MARK: - Color Helper

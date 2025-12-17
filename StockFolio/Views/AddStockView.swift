@@ -20,61 +20,63 @@ struct AddStockView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                // 종목명 입력
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("종목명")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+            ScrollView {
+                VStack(spacing: 24) {
+                    // 종목명 입력
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("종목명")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
 
-                    TextField("예: 삼성전자", text: $stockName)
-                        .font(.title3)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .focused($focusedField, equals: .name)
-                        .onChange(of: stockName) { _, newValue in
-                            validateName(newValue)
-                        }
-                        .textContentType(.none)
-                        .autocorrectionDisabled()
-                        .accessibilityLabel("종목명 입력")
+                        TextField("예: 삼성전자", text: $stockName)
+                            .font(.title3)
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .focused($focusedField, equals: .name)
+                            .onChange(of: stockName) { _, newValue in
+                                validateName(newValue)
+                            }
+                            .textContentType(.none)
+                            .autocorrectionDisabled()
+                            .accessibilityLabel("종목명 입력")
+                    }
+                    .padding(.horizontal)
+
+                    // 매수 금액 입력
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("매수 금액")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+
+                        TextField("₩ 0", text: $amountText)
+                            .keyboardType(.numberPad)
+                            .font(.title3)
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .focused($focusedField, equals: .amount)
+                            .onChange(of: amountText) { _, newValue in
+                                formatAmountInput(newValue)
+                            }
+                            .textContentType(.none)
+                            .autocorrectionDisabled()
+                            .accessibilityLabel("매수 금액 입력")
+                    }
+                    .padding(.horizontal)
+
+                    // 검증 에러 메시지
+                    if let error = validationError {
+                        Text(error)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                            .padding(.horizontal)
+                    }
                 }
-                .padding(.horizontal)
-
-                // 매수 금액 입력
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("매수 금액")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-
-                    TextField("₩ 0", text: $amountText)
-                        .keyboardType(.numberPad)
-                        .font(.title3)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .focused($focusedField, equals: .amount)
-                        .onChange(of: amountText) { _, newValue in
-                            formatAmountInput(newValue)
-                        }
-                        .textContentType(.none)
-                        .autocorrectionDisabled()
-                        .accessibilityLabel("매수 금액 입력")
-                }
-                .padding(.horizontal)
-
-                // 검증 에러 메시지
-                if let error = validationError {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundStyle(.red)
-                        .padding(.horizontal)
-                }
-
-                Spacer()
-
-                // 버튼
+                .padding(.top)
+            }
+            .safeAreaInset(edge: .bottom) {
+                // 버튼 (항상 하단에 고정, Safe Area 존중)
                 VStack(spacing: 12) {
                     Button {
                         saveStock()
@@ -113,7 +115,8 @@ struct AddStockView: View {
                     }
                 }
                 .padding(.horizontal)
-                .padding(.bottom)
+                .padding(.bottom, 8)
+                .background(Color(.systemBackground))
             }
             .navigationTitle(editingStock == nil ? "종목 추가" : "종목 편집")
             .navigationBarTitleDisplayMode(.inline)

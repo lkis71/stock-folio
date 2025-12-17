@@ -12,42 +12,44 @@ struct SeedMoneySettingsView: View {
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                // 입력 섹션
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("총 시드머니")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+            ScrollView {
+                VStack(spacing: 24) {
+                    // 입력 섹션
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("총 시드머니")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
 
-                    TextField("₩ 0", text: $seedMoneyText)
-                        .keyboardType(.numberPad)
-                        .font(.title2)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .focused($isTextFieldFocused)
-                        .onChange(of: seedMoneyText) { _, newValue in
-                            formatInput(newValue)
-                        }
-                        .textContentType(.none)
-                        .autocorrectionDisabled()
-                        .accessibilityLabel("시드머니 입력")
+                        TextField("₩ 0", text: $seedMoneyText)
+                            .keyboardType(.numberPad)
+                            .font(.title2)
+                            .padding()
+                            .background(Color(.secondarySystemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .focused($isTextFieldFocused)
+                            .onChange(of: seedMoneyText) { _, newValue in
+                                formatInput(newValue)
+                            }
+                            .textContentType(.none)
+                            .autocorrectionDisabled()
+                            .accessibilityLabel("시드머니 입력")
+                    }
+                    .padding(.horizontal)
+
+                    // 안내 문구
+                    HStack {
+                        Image(systemName: "lightbulb.fill")
+                            .foregroundStyle(.yellow)
+                        Text("투자 가능한 총 금액을 입력하세요")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
-
-                // 안내 문구
-                HStack {
-                    Image(systemName: "lightbulb.fill")
-                        .foregroundStyle(.yellow)
-                    Text("투자 가능한 총 금액을 입력하세요")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal)
-
-                Spacer()
-
-                // 버튼
+                .padding(.top)
+            }
+            .safeAreaInset(edge: .bottom) {
+                // 버튼 (항상 하단에 고정, Safe Area 존중)
                 VStack(spacing: 12) {
                     Button {
                         saveAndDismiss()
@@ -72,7 +74,8 @@ struct SeedMoneySettingsView: View {
                     }
                 }
                 .padding(.horizontal)
-                .padding(.bottom)
+                .padding(.bottom, 8)
+                .background(Color(.systemBackground))
             }
             .navigationTitle("시드머니 설정")
             .navigationBarTitleDisplayMode(.inline)
