@@ -29,9 +29,18 @@ final class CurrencyFormatter: CurrencyFormatterProtocol {
     }
 }
 
+// MARK: - Shared Instance
+extension CurrencyFormatter {
+    static let shared = CurrencyFormatter()
+}
+
 // MARK: - Double Extension for convenience
 extension Double {
     var currencyFormatted: String {
-        CurrencyFormatter().format(self)
+        CurrencyFormatter.shared.format(self)
+    }
+
+    var formattedWithoutSymbol: String {
+        CurrencyFormatter.shared.formatWithoutSymbol(self)
     }
 }

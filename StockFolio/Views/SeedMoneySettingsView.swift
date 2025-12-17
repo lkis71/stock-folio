@@ -88,7 +88,7 @@ struct SeedMoneySettingsView: View {
             }
             .onAppear {
                 if viewModel.seedMoney > 0 {
-                    seedMoneyText = formatNumber(viewModel.seedMoney)
+                    seedMoneyText = viewModel.seedMoney.formattedWithoutSymbol
                 }
                 isTextFieldFocused = true
             }
@@ -105,17 +105,10 @@ struct SeedMoneySettingsView: View {
         // 숫자와 콤마만 허용 (보안)
         let filtered = value.filter { $0.isNumber }
         if let number = Double(filtered) {
-            seedMoneyText = formatNumber(number)
+            seedMoneyText = number.formattedWithoutSymbol
         } else if filtered.isEmpty {
             seedMoneyText = ""
         }
-    }
-
-    private func formatNumber(_ number: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: number)) ?? ""
     }
 
     private func saveAndDismiss() {

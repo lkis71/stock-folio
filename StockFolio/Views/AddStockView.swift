@@ -130,7 +130,7 @@ struct AddStockView: View {
             .onAppear {
                 if let stock = editingStock {
                     stockName = stock.stockName
-                    amountText = formatNumber(stock.purchaseAmount)
+                    amountText = stock.purchaseAmount.formattedWithoutSymbol
                 }
                 focusedField = .name
             }
@@ -179,17 +179,10 @@ struct AddStockView: View {
     private func formatAmountInput(_ value: String) {
         let filtered = value.filter { $0.isNumber }
         if let number = Double(filtered) {
-            amountText = formatNumber(number)
+            amountText = number.formattedWithoutSymbol
         } else if filtered.isEmpty {
             amountText = ""
         }
-    }
-
-    private func formatNumber(_ number: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.numberStyle = .decimal
-        formatter.maximumFractionDigits = 0
-        return formatter.string(from: NSNumber(value: number)) ?? ""
     }
 
     private func saveStock() {
