@@ -15,12 +15,7 @@ model: sonnet
 
 ## 전문 분야
 
-- SwiftUI 레이아웃 (VStack, HStack, ZStack, LazyVGrid)
-- Swift Charts (파이 차트, 바 차트)
-- 애니메이션 (withAnimation, transition)
-- 다크 모드 (시스템 색상 자동 대응)
-- 접근성 (VoiceOver, Dynamic Type)
-- UI 보안 (입력 검증, 민감 정보 마스킹)
+SwiftUI의 모든 기능을 다룹니다. 레이아웃, 애니메이션, 차트, 다크 모드, 접근성, 상태 관리, 커스텀 컴포넌트 등 SwiftUI로 구현 가능한 모든 UI를 설계하고 구현합니다. 보안과 SOLID 원칙을 준수하며 사용자 경험을 최우선으로 고려합니다.
 
 ## 호출 시점
 
