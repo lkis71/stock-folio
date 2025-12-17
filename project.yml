@@ -49,3 +49,17 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.stockfolio.app.tests
         GENERATE_INFOPLIST_FILE: YES
+
+  StockFolioUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: StockFolioUITests
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - target: StockFolio
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.stockfolio.app.uitests
+        GENERATE_INFOPLIST_FILE: YES

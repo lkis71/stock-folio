@@ -337,6 +337,126 @@ final class PortfolioViewModelTests: XCTestCase {
 - 데이터 저장 보안
 - 인증/권한
 
+## UI 테스트 (XCUITest) 작성 가이드
+
+### UI 테스트 기본 구조
+```swift
+import XCTest
+
+final class StockFolioUITests: XCTestCase {
+    var app: XCUIApplication!
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+        app = XCUIApplication()
+        app.launchArguments = ["--uitesting"]
+        app.launch()
+    }
+
+    func test_addStockFlow_shouldAddNewStock() throws {
+        // Given: 메인 화면
+        let addButton = app.buttons["종목 추가"]
+        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
+
+        // When: 종목 추가
+        addButton.tap()
+        let nameField = app.textFields["종목명"]
+        nameField.tap()
+        nameField.typeText("삼성전자")
+
+        app.buttons["저장"].tap()
+
+        // Then: 종목이 리스트에 표시
+        XCTAssertTrue(app.staticTexts["삼성전자"].exists)
+    }
+}
+```
+
+### UI 테스트 접근성 레이블 활용
+```swift
+// View에서 접근성 레이블 설정
+Button("저장") { ... }
+    .accessibilityLabel("저장")
+
+// 테스트에서 접근성 레이블로 요소 찾기
+let saveButton = app.buttons["저장"]
+```
+
+### UI 테스트 실행 명령
+```bash
+xcodebuild test \
+  -project StockFolio.xcodeproj \
+  -scheme StockFolio \
+  -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.0' \
+  -only-testing:StockFolioUITests
+```
+
+## 통합 테스트 작성 가이드
+
+### Core Data 통합 테스트
+```swift
+import XCTest
+import CoreData
+@testable import StockFolio
+
+final class CoreDataIntegrationTests: XCTestCase {
+    private var persistenceController: PersistenceController!
+    private var repository: CoreDataStockRepository!
+
+    override func setUp() {
+        super.setUp()
+        // 인메모리 Core Data 스택 사용
+        persistenceController = PersistenceController(inMemory: true)
+        repository = CoreDataStockRepository(
+            context: persistenceController.container.viewContext
+        )
+    }
+
+    func test_saveAndFetch_shouldPersistData() throws {
+        // Given
+        let stock = StockHoldingEntity(stockName: "삼성전자", purchaseAmount: 1_000_000)
+
+        // When
+        try repository.save(stock)
+        let fetchedStocks = repository.fetchAll()
+
+        // Then
+        XCTAssertEqual(fetchedStocks.count, 1)
+        XCTAssertEqual(fetchedStocks.first?.stockName, "삼성전자")
+    }
+}
+```
+
+### ViewModel + Repository 통합 테스트
+```swift
+final class ViewModelIntegrationTests: XCTestCase {
+    private var viewModel: PortfolioViewModel!
+    private var repository: CoreDataStockRepository!
+
+    func test_fullAddStockFlow_shouldUpdateAllCalculations() {
+        // Given
+        viewModel.saveSeedMoney(10_000_000)
+
+        // When
+        viewModel.addStock(name: "삼성전자", amount: 3_000_000)
+
+        // Then
+        XCTAssertEqual(viewModel.totalInvestedAmount, 3_000_000)
+        XCTAssertEqual(viewModel.remainingCash, 7_000_000)
+        XCTAssertEqual(viewModel.investedPercentage, 30.0, accuracy: 0.01)
+    }
+}
+```
+
+### 통합 테스트 vs 단위 테스트 선택 기준
+| 상황 | 테스트 유형 |
+|------|-----------|
+| 비즈니스 로직 검증 | 단위 테스트 (Mock 사용) |
+| 데이터 영속성 검증 | 통합 테스트 (인메모리 DB) |
+| 다중 컴포넌트 협력 | 통합 테스트 |
+| UI 사용자 플로우 | UI 테스트 (XCUITest) |
+| 성능 측정 | 성능 테스트 (measure) |
+
 ## 테스트 네이밍 규칙
 
 ```
