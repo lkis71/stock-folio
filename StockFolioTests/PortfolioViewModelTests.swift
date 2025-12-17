@@ -99,12 +99,12 @@ final class PortfolioViewModelTests: XCTestCase {
 
     func test_updateStock_shouldUpdateInRepository() {
         // Given
-        var stock = StockHoldingEntity(stockName: "삼성전자", purchaseAmount: 1_000_000)
+        let stock = StockHoldingEntity(stockName: "삼성전자", purchaseAmount: 1_000_000)
         mockRepository.stocks = [stock]
         sut.fetchHoldings()
 
         // When
-        sut.updateStock(stock, name: "SK하이닉스", amount: 2_000_000)
+        sut.updateStock(stock, name: "SK하이닉스", amount: 2_000_000, colorName: "green")
 
         // Then
         XCTAssertEqual(mockRepository.updateCallCount, 1)

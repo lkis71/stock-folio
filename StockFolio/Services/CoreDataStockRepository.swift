@@ -23,10 +23,12 @@ final class CoreDataStockRepository: StockRepositoryProtocol {
                       let createdAt = managedObject.value(forKey: "createdAt") as? Date else {
                     return nil
                 }
+                let colorName = managedObject.value(forKey: "colorName") as? String ?? "blue"
                 return StockHoldingEntity(
                     id: id,
                     stockName: stockName,
                     purchaseAmount: purchaseAmount,
+                    colorName: colorName,
                     createdAt: createdAt
                 )
             }
@@ -43,6 +45,7 @@ final class CoreDataStockRepository: StockRepositoryProtocol {
         managedObject.setValue(stock.id, forKey: "id")
         managedObject.setValue(stock.stockName, forKey: "stockName")
         managedObject.setValue(stock.purchaseAmount, forKey: "purchaseAmount")
+        managedObject.setValue(stock.colorName, forKey: "colorName")
         managedObject.setValue(stock.createdAt, forKey: "createdAt")
 
         try viewContext.save()
@@ -59,6 +62,7 @@ final class CoreDataStockRepository: StockRepositoryProtocol {
 
         managedObject.setValue(stock.stockName, forKey: "stockName")
         managedObject.setValue(stock.purchaseAmount, forKey: "purchaseAmount")
+        managedObject.setValue(stock.colorName, forKey: "colorName")
 
         try viewContext.save()
     }

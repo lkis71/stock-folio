@@ -59,7 +59,7 @@ final class StockFolioUITests: XCTestCase {
         addButton.tap()
 
         // Then: 종목 추가 시트가 표시되어야 함
-        let stockNameField = app.textFields["종목명"]
+        let stockNameField = app.textFields["종목명 입력"]
         XCTAssertTrue(stockNameField.waitForExistence(timeout: 3))
     }
 
@@ -70,12 +70,12 @@ final class StockFolioUITests: XCTestCase {
         addButton.tap()
 
         // When: 종목 정보 입력
-        let stockNameField = app.textFields["종목명"]
+        let stockNameField = app.textFields["종목명 입력"]
         XCTAssertTrue(stockNameField.waitForExistence(timeout: 3))
         stockNameField.tap()
         stockNameField.typeText("테스트종목")
 
-        let amountField = app.textFields["매수 금액"]
+        let amountField = app.textFields["매수 금액 입력"]
         amountField.tap()
         amountField.typeText("1000000")
 
@@ -95,7 +95,7 @@ final class StockFolioUITests: XCTestCase {
         addButton.tap()
 
         // When: 금액만 입력하고 저장
-        let amountField = app.textFields["매수 금액"]
+        let amountField = app.textFields["매수 금액 입력"]
         XCTAssertTrue(amountField.waitForExistence(timeout: 3))
         amountField.tap()
         amountField.typeText("1000000")
@@ -118,7 +118,7 @@ final class StockFolioUITests: XCTestCase {
         settingsButton.tap()
 
         // Then: 시드머니 설정 시트가 표시되어야 함
-        let seedMoneyField = app.textFields["시드머니"]
+        let seedMoneyField = app.textFields["시드머니 입력"]
         XCTAssertTrue(seedMoneyField.waitForExistence(timeout: 3))
     }
 
@@ -129,7 +129,7 @@ final class StockFolioUITests: XCTestCase {
         settingsButton.tap()
 
         // When: 시드머니 입력 및 저장
-        let seedMoneyField = app.textFields["시드머니"]
+        let seedMoneyField = app.textFields["시드머니 입력"]
         XCTAssertTrue(seedMoneyField.waitForExistence(timeout: 3))
         seedMoneyField.tap()
 
@@ -181,14 +181,26 @@ final class StockFolioUITests: XCTestCase {
 
     func test_accessibility_investmentCardsShouldBeCombined() throws {
         // Given: 앱이 실행된 상태
+        // Wait for app to load
+        _ = app.buttons["설정"].waitForExistence(timeout: 5)
 
         // Then: 투자 카드가 접근성 요소로 결합되어 있어야 함
-        // 접근성 레이블이 "투자 금액"으로 시작하는 요소가 있어야 함
-        let investmentElements = app.staticTexts.matching(
-            NSPredicate(format: "label CONTAINS '투자 금액'")
-        )
+        // 접근성 레이블이 "투자 금액"과 "남은 현금"을 포함하는 요소가 있어야 함
+        // InvestmentSummaryCard uses .accessibilityElement(children: .combine)
+        // which creates a combined accessibility element
 
-        XCTAssertGreaterThan(investmentElements.count, 0)
+        // Try to find the cards by checking all descendants
+        let investmentCardExists = app.descendants(matching: .any).matching(
+            NSPredicate(format: "label CONTAINS '투자 금액'")
+        ).firstMatch.exists
+
+        let cashCardExists = app.descendants(matching: .any).matching(
+            NSPredicate(format: "label CONTAINS '남은 현금'")
+        ).firstMatch.exists
+
+        // 각 카드가 접근성 요소로 존재하는지 확인
+        XCTAssertTrue(investmentCardExists, "투자 금액 카드가 접근성 요소로 존재해야 함")
+        XCTAssertTrue(cashCardExists, "남은 현금 카드가 접근성 요소로 존재해야 함")
     }
 }
 

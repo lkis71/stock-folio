@@ -80,7 +80,7 @@ final class ViewModelIntegrationTests: XCTestCase {
         let originalStock = viewModel.holdings.first!
 
         // When: 종목 수정
-        viewModel.updateStock(originalStock, name: "카카오", amount: 5_000_000)
+        viewModel.updateStock(originalStock, name: "카카오", amount: 5_000_000, colorName: originalStock.colorName)
 
         // Then
         XCTAssertEqual(viewModel.holdings.count, 1)

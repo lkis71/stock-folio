@@ -48,10 +48,12 @@ struct PortfolioChartView: View {
                     .cornerRadius(4)
                     .annotation(position: .overlay) {
                         if viewModel.percentage(for: holding) >= 10 {
+                            let stockColor = StockColor(rawValue: holding.colorName) ?? .blue
                             Text(String(format: "%.0f%%", viewModel.percentage(for: holding)))
                                 .font(.caption2)
                                 .fontWeight(.bold)
-                                .foregroundStyle(.white)
+                                .foregroundStyle(stockColor.isLightColor ? .black : .white)
+                                .shadow(color: stockColor.isLightColor ? .white.opacity(0.8) : .black.opacity(0.5), radius: 2)
                         }
                     }
                 }
@@ -96,10 +98,10 @@ struct PortfolioChartView: View {
         ]
 
         return LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(Array(viewModel.holdings.enumerated()), id: \.element.id) { index, holding in
+            ForEach(viewModel.holdings) { holding in
                 legendItem(
                     name: holding.stockName,
-                    color: chartColorRange[safe: index] ?? .blue,
+                    color: holding.color,
                     percentage: viewModel.percentage(for: holding)
                 )
             }
@@ -205,14 +207,7 @@ struct PortfolioChartView: View {
     }
 
     private var chartColorRange: [Color] {
-        let baseColors: [Color] = [
-            .blue, .green, .orange, .purple, .pink,
-            .cyan, .indigo, .mint, .teal, .yellow
-        ]
-
-        var range = viewModel.holdings.enumerated().map { index, _ in
-            baseColors[index % baseColors.count]
-        }
+        var range = viewModel.holdings.map { $0.color }
 
         if viewModel.remainingCash > 0 {
             range.append(.gray)

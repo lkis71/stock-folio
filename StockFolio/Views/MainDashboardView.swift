@@ -17,34 +17,28 @@ struct MainDashboardView: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    HStack(spacing: 12) {
-                        // 종목 추가 버튼 (주요 액션)
-                        Button {
-                            showingAddStock = true
-                        } label: {
-                            Image(systemName: "plus")
-                                .font(.system(size: 14, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .frame(width: 32, height: 32)
-                                .background(Color.accentColor)
-                                .clipShape(Circle())
-                        }
-                        .accessibilityLabel("종목 추가")
-
-                        // 설정 버튼 (보조 액션)
-                        Button {
-                            showingSeedMoneySettings = true
-                        } label: {
-                            Image(systemName: "gearshape.fill")
-                                .font(.system(size: 14))
-                                .foregroundStyle(.secondary)
-                                .frame(width: 32, height: 32)
-                                .background(Color(.tertiarySystemFill))
-                                .clipShape(Circle())
-                        }
-                        .accessibilityLabel("설정")
+                ToolbarItem(placement: .topBarLeading) {
+                    // 설정 버튼 (왼쪽)
+                    Button {
+                        showingSeedMoneySettings = true
+                    } label: {
+                        Image(systemName: "gearshape.fill")
+                            .font(.system(size: 18))
+                            .foregroundStyle(.secondary)
                     }
+                    .accessibilityLabel("설정")
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    // 종목 추가 버튼 (오른쪽)
+                    Button {
+                        showingAddStock = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(Color.accentColor)
+                    }
+                    .accessibilityLabel("종목 추가")
                 }
             }
             .sheet(isPresented: $showingAddStock) {
@@ -69,6 +63,9 @@ struct MainDashboardView: View {
                 StockListView(viewModel: viewModel)
             }
             .padding(.vertical)
+        }
+        .refreshable {
+            viewModel.refresh()
         }
     }
 

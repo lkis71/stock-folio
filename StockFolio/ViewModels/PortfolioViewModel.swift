@@ -68,7 +68,7 @@ final class PortfolioViewModel: ObservableObject {
         holdings = repository.fetchAll()
     }
 
-    func addStock(name: String, amount: Double) {
+    func addStock(name: String, amount: Double, colorName: String = StockColor.random.rawValue) {
         // 입력 검증
         guard case .success(let validName) = validator.validateStockName(name),
               case .success(let validAmount) = validator.validateAmount(amount) else {
@@ -77,7 +77,8 @@ final class PortfolioViewModel: ObservableObject {
 
         let stock = StockHoldingEntity(
             stockName: validName,
-            purchaseAmount: validAmount
+            purchaseAmount: validAmount,
+            colorName: colorName
         )
 
         do {
@@ -88,7 +89,7 @@ final class PortfolioViewModel: ObservableObject {
         }
     }
 
-    func updateStock(_ stock: StockHoldingEntity, name: String, amount: Double) {
+    func updateStock(_ stock: StockHoldingEntity, name: String, amount: Double, colorName: String) {
         // 입력 검증
         guard case .success(let validName) = validator.validateStockName(name),
               case .success(let validAmount) = validator.validateAmount(amount) else {
@@ -98,6 +99,7 @@ final class PortfolioViewModel: ObservableObject {
         var updatedStock = stock
         updatedStock.stockName = validName
         updatedStock.purchaseAmount = validAmount
+        updatedStock.colorName = colorName
 
         do {
             try repository.update(updatedStock)
@@ -120,5 +122,11 @@ final class PortfolioViewModel: ObservableObject {
         for index in offsets {
             deleteStock(holdings[index])
         }
+    }
+
+    // MARK: - Refresh
+    func refresh() {
+        loadSeedMoney()
+        fetchHoldings()
     }
 }

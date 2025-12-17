@@ -7,6 +7,7 @@ struct AddStockView: View {
 
     @State private var stockName: String = ""
     @State private var amountText: String = ""
+    @State private var selectedColor: StockColor = .random
     @State private var validationError: String?
     @FocusState private var focusedField: Field?
 
@@ -62,6 +63,45 @@ struct AddStockView: View {
                             .textContentType(.none)
                             .autocorrectionDisabled()
                             .accessibilityLabel("매수 금액 입력")
+                    }
+                    .padding(.horizontal)
+
+                    // 색상 선택
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("차트 색상")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 5), spacing: 12) {
+                            ForEach(StockColor.allCases, id: \.self) { color in
+                                Button {
+                                    selectedColor = color
+                                } label: {
+                                    Circle()
+                                        .fill(color.color)
+                                        .frame(width: 40, height: 40)
+                                        .overlay(
+                                            Circle()
+                                                .stroke(Color.primary, lineWidth: selectedColor == color ? 3 : 0)
+                                        )
+                                        .overlay(
+                                            Image(systemName: "checkmark")
+                                                .font(.system(size: 16, weight: .bold))
+                                                .foregroundStyle(color.isLightColor ? .black : .white)
+                                                .opacity(selectedColor == color ? 1 : 0)
+                                                .shadow(color: color.isLightColor ? .white.opacity(0.8) : .black.opacity(0.3), radius: 2)
+                                        )
+                                }
+                                .accessibilityLabel(color.displayName)
+                                .accessibilityAddTraits(selectedColor == color ? .isSelected : [])
+                                .accessibilityHint(selectedColor == color ? "선택됨" : "탭하여 선택")
+                            }
+                        }
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .accessibilityElement(children: .contain)
+                        .accessibilityLabel("차트 색상 선택")
                     }
                     .padding(.horizontal)
 
@@ -130,6 +170,7 @@ struct AddStockView: View {
                 if let stock = editingStock {
                     stockName = stock.stockName
                     amountText = stock.purchaseAmount.formattedWithoutSymbol
+                    selectedColor = StockColor(rawValue: stock.colorName) ?? .blue
                 }
                 focusedField = .name
             }
@@ -189,9 +230,9 @@ struct AddStockView: View {
         guard let amount = Double(cleanedAmount) else { return }
 
         if let stock = editingStock {
-            viewModel.updateStock(stock, name: stockName.trimmingCharacters(in: .whitespaces), amount: amount)
+            viewModel.updateStock(stock, name: stockName.trimmingCharacters(in: .whitespaces), amount: amount, colorName: selectedColor.rawValue)
         } else {
-            viewModel.addStock(name: stockName.trimmingCharacters(in: .whitespaces), amount: amount)
+            viewModel.addStock(name: stockName.trimmingCharacters(in: .whitespaces), amount: amount, colorName: selectedColor.rawValue)
         }
         dismiss()
     }
