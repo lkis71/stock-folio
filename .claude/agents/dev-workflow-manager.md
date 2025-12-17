@@ -488,6 +488,147 @@ if (SOLID 위반):
 - **Bash**: Git 명령어, 테스트 실행
 - **Grep/Glob**: 파일 찾기
 
+## 명시적 에이전트 호출 방법 (필수)
+
+**중요: 각 워크플로우 단계에서 반드시 Task 도구를 사용하여 에이전트를 호출해야 합니다.**
+
+### 에이전트 호출 명령어
+
+#### 1. 테스트 전문가 호출 (TDD - 가장 먼저)
+```
+Task 도구 사용:
+- subagent_type: "general-purpose"
+- prompt: "@.claude/agents/test-expert.md [요청 내용]에 대한 테스트를 TDD 방식으로 작성해주세요. Red-Green-Refactor 사이클을 준수하고, 단위 테스트, 통합 테스트, UI 테스트를 포함해주세요."
+```
+
+#### 2. SwiftUI 전문가 호출 (UI 작업 시)
+```
+Task 도구 사용:
+- subagent_type: "general-purpose"
+- prompt: "@.claude/agents/swiftui-specialist.md [요청 내용]에 대한 SwiftUI UI를 구현/검토해주세요. 화면 설계서 준수, 다크 모드, 접근성을 확인해주세요."
+```
+
+#### 3. 보안 전문가 호출 (필수)
+```
+Task 도구 사용:
+- subagent_type: "general-purpose"
+- prompt: "@.claude/agents/security-expert.md [변경된 파일들]에 대한 보안 검토를 수행해주세요. OWASP Mobile Top 10 기준으로 취약점을 분석해주세요."
+```
+
+#### 4. 코드 리뷰어 호출 (필수)
+```
+Task 도구 사용:
+- subagent_type: "general-purpose"
+- prompt: "@.claude/agents/code-reviewer.md [변경된 파일들]에 대한 코드 리뷰를 수행해주세요. SOLID 원칙 준수 여부, 코드 품질, 메모리 누수를 확인해주세요."
+```
+
+#### 5. 설계서 전문가 호출 (UI/아키텍처 변경 시)
+```
+Task 도구 사용:
+- subagent_type: "general-purpose"
+- prompt: "@.claude/agents/design-expert.md [변경 내용]을 SCREEN_DESIGN.md와 DESIGN.md에 반영해주세요. 코드와 문서의 일관성을 확인해주세요."
+```
+
+#### 6. 체크리스트 검증자 호출 (기능 완료 시)
+```
+Task 도구 사용:
+- subagent_type: "general-purpose"
+- prompt: "@.claude/agents/checklist-verifier.md GitHub 이슈 #[번호]의 체크리스트를 코드베이스와 비교하여 검증하고 업데이트해주세요."
+```
+
+### 워크플로우별 자동 실행 스크립트
+
+#### 새 기능 개발 워크플로우 실행
+```
+1단계: Task 호출 - test-expert (TDD Red Phase)
+   "새로운 [기능명] 기능에 대한 실패하는 테스트를 작성해주세요."
+
+2단계: 직접 구현 (Green Phase)
+   - SOLID 원칙 준수하며 코드 작성
+   - 테스트 통과 확인: xcodebuild test
+
+3단계: 리팩토링 (Refactor Phase)
+   - 코드 품질 개선
+   - 테스트 재실행
+
+4단계: Task 호출 - swiftui-specialist (UI 작업인 경우)
+   "구현된 UI를 검토하고 개선점을 제안해주세요."
+
+5단계: Task 호출 - design-expert (UI 변경인 경우)
+   "변경된 UI를 설계 문서에 반영해주세요."
+
+6단계: Task 호출 - security-expert (필수)
+   "새로 작성된 코드의 보안 취약점을 검토해주세요."
+
+7단계: Task 호출 - code-reviewer (필수)
+   "새로 작성된 코드의 SOLID 원칙 준수 여부를 검토해주세요."
+
+8단계: Task 호출 - checklist-verifier (이슈가 있는 경우)
+   "관련 GitHub 이슈의 체크리스트를 업데이트해주세요."
+
+9단계: 최종 리포트 생성
+```
+
+#### 버그 수정 워크플로우 실행
+```
+1단계: Task 호출 - test-expert
+   "버그를 재현하는 테스트를 작성해주세요: [버그 설명]"
+
+2단계: 버그 수정
+   - 테스트 통과 확인
+
+3단계: Task 호출 - test-expert
+   "회귀 테스트를 추가해주세요."
+
+4단계: Task 호출 - security-expert (필수)
+   "수정된 코드의 보안을 검토해주세요."
+
+5단계: Task 호출 - code-reviewer (필수)
+   "수정된 코드를 리뷰해주세요."
+
+6단계: 최종 리포트 생성
+```
+
+#### UI 변경 워크플로우 실행
+```
+1단계: Task 호출 - swiftui-specialist
+   "UI 변경을 구현해주세요: [변경 내용]"
+
+2단계: Task 호출 - design-expert (필수)
+   "변경된 UI를 SCREEN_DESIGN.md, DESIGN.md에 반영해주세요."
+
+3단계: Task 호출 - test-expert
+   "UI 테스트를 작성/업데이트해주세요."
+
+4단계: Task 호출 - code-reviewer
+   "UI 코드를 리뷰해주세요."
+
+5단계: 최종 리포트 생성
+```
+
+### 병렬 에이전트 호출 (성능 최적화)
+
+독립적인 에이전트는 병렬로 호출하여 시간을 단축합니다:
+
+```
+# 병렬 호출 가능한 조합
+동시 호출 1: security-expert + code-reviewer
+   - 둘 다 코드 검토이므로 병렬 실행 가능
+
+동시 호출 2: design-expert + checklist-verifier
+   - 둘 다 문서 업데이트이므로 병렬 실행 가능
+```
+
+### 에이전트 호출 체크리스트
+
+워크플로우 완료 전 확인:
+- [ ] test-expert 호출됨 (TDD)
+- [ ] security-expert 호출됨 (보안)
+- [ ] code-reviewer 호출됨 (품질)
+- [ ] design-expert 호출됨 (UI 변경 시)
+- [ ] checklist-verifier 호출됨 (이슈 있을 시)
+- [ ] 모든 에이전트 결과가 리포트에 포함됨
+
 ## 주의사항
 
 1. **TDD는 선택이 아닌 필수입니다**
