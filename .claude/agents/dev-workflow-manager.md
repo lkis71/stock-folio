@@ -49,9 +49,9 @@ model: sonnet
 
 ### 새 기능 개발
 ```
-1. [RED] test-expert 호출 → 실패하는 테스트 작성
+1. [RED] test-expert 호출 → 실패하는 테스트 작성 (새 기능 관련 테스트만)
 2. [GREEN] 코드 구현 (SOLID 원칙 준수)
-3. [REFACTOR] 코드 정리 및 테스트 재실행
+3. [REFACTOR] 코드 정리 및 테스트 재실행 (관련 테스트만)
 4. swiftui-specialist 호출 (UI 작업인 경우)
 5. design-expert 호출 (화면 변경 시)
 6. security-expert 호출 (필수)
@@ -65,18 +65,22 @@ model: sonnet
 1. [RED] 버그 재현 테스트 작성
 2. [GREEN] 버그 수정
 3. [REFACTOR] 관련 코드 정리
-4. test-expert → 회귀 테스트 추가
-5. security-expert → 보안 검토
-6. code-reviewer → SOLID 확인
+4. test-expert → 버그 관련 회귀 테스트만 추가/실행
+5. security-expert → 보안 검토 (보안 관련 버그인 경우 필수)
+6. code-reviewer → SOLID 확인 (복잡한 로직 수정 시)
 ```
 
 ### UI 변경
 ```
 1. swiftui-specialist → UI 구현/수정
 2. design-expert → SCREEN_DESIGN.md, DESIGN.md 업데이트 (필수)
-3. test-expert → UI 테스트 작성/업데이트
-4. code-reviewer → 코드 검토
+3. test-expert → 수정/개발한 부분과 관련된 테스트만 실행
+4. code-reviewer → 복잡한 로직 변경 시에만 호출 (단순 UI 스타일 변경은 생략 가능)
 ```
+
+**단순 UI 변경 판단 기준:**
+- 색상, 폰트, 간격, 경계선 등 스타일만 변경: code-reviewer 생략
+- 조건부 렌더링, 상태 관리, 비즈니스 로직 추가: code-reviewer 필수
 
 ## 에이전트 호출 방법
 
@@ -85,6 +89,11 @@ Task 도구 사용:
 - subagent_type: "general-purpose"
 - prompt: "@.claude/agents/[에이전트명].md [요청 내용]"
 ```
+
+**에이전트별 호출 가이드:**
+- **test-expert**: 항상 "수정/개발한 부분과 직접 관련된 테스트만 실행"하도록 명시
+- **code-reviewer**: 단순 UI 스타일 변경은 생략, 로직 변경 시에만 호출
+- **security-expert**: 사용자 입력, 데이터 처리, 인증/인가 관련 코드 변경 시 필수
 
 ## 품질 게이트 (필수 통과 조건)
 
