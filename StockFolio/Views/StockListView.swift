@@ -39,10 +39,11 @@ struct StockListView: View {
     // MARK: - Stock List Content
     private var stockListContent: some View {
         LazyVStack(spacing: 8) {
-            ForEach(viewModel.holdings) { holding in
+            ForEach(Array(viewModel.holdings.enumerated()), id: \.element.id) { index, holding in
                 StockRowView(
                     holding: holding,
-                    percentage: viewModel.percentage(for: holding)
+                    percentage: viewModel.percentage(for: holding),
+                    color: stockColor(at: index)
                 )
                 .contentShape(Rectangle())
                 .onTapGesture {
@@ -66,6 +67,16 @@ struct StockListView: View {
             }
         }
     }
+
+    // MARK: - Color Helper
+    /// 차트와 동일한 색상 팔레트 사용 (화면 설계서 기반)
+    private func stockColor(at index: Int) -> Color {
+        let baseColors: [Color] = [
+            .blue, .green, .orange, .purple, .pink,
+            .cyan, .indigo, .mint, .teal, .yellow
+        ]
+        return baseColors[index % baseColors.count]
+    }
 }
 
 // MARK: - Stock Row View
@@ -73,31 +84,39 @@ struct StockListView: View {
 struct StockRowView: View {
     let holding: StockHoldingEntity
     let percentage: Double
+    let color: Color
 
     var body: some View {
-        HStack {
-            // 종목 정보
-            VStack(alignment: .leading, spacing: 4) {
-                Text(holding.stockName)
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .lineLimit(1)
+        HStack(spacing: 0) {
+            // 좌측 색상 인디케이터 (화면 설계서: 5pt 너비)
+            color
+                .frame(width: 5)
+                .clipShape(RoundedRectangle(cornerRadius: 2))
 
-                Text(holding.purchaseAmount.currencyFormatted)
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            HStack {
+                // 종목 정보
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(holding.stockName)
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .lineLimit(1)
+
+                    Text(holding.purchaseAmount.currencyFormatted)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+
+                Spacer()
+
+                // 비중
+                Text(String(format: "%.1f%%", percentage))
+                    .font(.headline)
+                    .foregroundStyle(color)
                     .monospacedDigit()
             }
-
-            Spacer()
-
-            // 비중
-            Text(String(format: "%.1f%%", percentage))
-                .font(.headline)
-                .foregroundStyle(.blue)
-                .monospacedDigit()
+            .padding()
         }
-        .padding()
         .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
     }
