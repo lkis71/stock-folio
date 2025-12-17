@@ -237,6 +237,34 @@ StockFolio/
 - 차트 중심 레이아웃: 파이 차트가 화면 중단에 배치
 - 종목 리스트: 접힌 상태로 6개만 표시, 필요 시 확장
 
+### 버튼 영역 구분선 및 여백
+- **적용 화면**: AddStockView, SeedMoneySettingsView
+- **구현**:
+  - safeAreaInset 버튼 영역 상단에 0.5pt separator 라인 추가
+  - `Color(.separator)` 사용으로 라이트/다크 모드 자동 대응
+  - 구분선과 버튼 사이 16pt top padding 추가 (`.padding(.top, 16)`)
+- **목적**:
+  - 페이지 내용과 버튼 영역을 시각적으로 명확히 구분
+  - 버튼 영역이 고정된 하단 액션 바임을 명확히 표현
+  - 일관된 UI 패턴 적용으로 사용성 개선
+  - 적절한 여백으로 시각적 호흡감 제공
+
+### 저장 버튼 Disabled 스타일 개선
+- **적용 화면**: AddStockView, SeedMoneySettingsView
+- **변경 내용**:
+  - **기존**: `isValidInput ? Color.accentColor : Color.gray` (회색으로 변경)
+  - **개선**: `Color.accentColor` + `.opacity(isValidInput ? 1.0 : 0.5)` (투명도로 표현)
+- **구현 방법**:
+  ```swift
+  .background(Color.accentColor)
+  .opacity(isValidInput ? 1.0 : 0.5)
+  ```
+- **이점**:
+  - 브랜드 일관성 유지: 버튼이 항상 브랜드 색상(accentColor)을 유지
+  - 현대적 디자인: 투명도로 비활성 상태를 표현하는 것이 최신 트렌드
+  - 시각적 연속성: 활성/비활성 상태 간 색상 변화 없이 자연스러운 전환
+  - 사용자 경험: 버튼 위치와 기능이 색상 변화 없이 명확하게 인식됨
+
 ## 10. 향후 확장 가능성
 
 - 매수일 추가 (날짜 기록)
