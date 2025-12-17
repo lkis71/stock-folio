@@ -102,12 +102,22 @@ struct StockListView: View {
                     selectedStock = holding
                     showingEditSheet = true
                 }
+                // 스와이프 삭제 기능 (화면 설계서: 스와이프로 삭제)
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.deleteStock(holding)
+                        }
+                    } label: {
+                        Label("삭제", systemImage: "trash")
+                    }
+                }
                 .transition(.asymmetric(
                     insertion: .scale.combined(with: .opacity),
                     removal: .opacity.combined(with: .move(edge: .trailing))
                 ))
                 .accessibilityElement(children: .combine)
-                .accessibilityHint("탭하여 편집")
+                .accessibilityHint("탭하여 편집, 스와이프하여 삭제")
             }
 
             // 더보기 힌트 (접힌 상태에서 6개 초과 시)

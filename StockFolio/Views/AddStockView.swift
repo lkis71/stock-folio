@@ -91,19 +91,7 @@ struct AddStockView: View {
                     }
                     .disabled(!isValidInput)
 
-                    if editingStock != nil {
-                        Button(role: .destructive) {
-                            deleteStock()
-                        } label: {
-                            Text("삭제")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .background(Color.red)
-                                .foregroundStyle(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 12))
-                        }
-                    }
+                    // 삭제 버튼 제거됨 - 종목 리스트에서 스와이프로 삭제
 
                     Button {
                         dismiss()
@@ -200,12 +188,7 @@ struct AddStockView: View {
         dismiss()
     }
 
-    private func deleteStock() {
-        if let stock = editingStock {
-            viewModel.deleteStock(stock)
-        }
-        dismiss()
-    }
+    // deleteStock 함수 제거됨 - 종목 리스트에서 스와이프로 삭제
 }
 
 #Preview {
