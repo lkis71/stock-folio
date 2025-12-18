@@ -299,286 +299,118 @@ Repository.fetchAll()
 통계 카드 및 차트 렌더링
 ```
 
-## 5. 비즈니스 로직
+## 5. 비즈니스 규칙
 
-### 5.1 입력 검증 로직
+### 5.1 입력 검증 규칙
 
-```swift
-class TradingJournalValidator {
-    // 종목명 검증
-    func validateStockName(_ name: String) -> Result<Void, ValidationError> {
-        // 1. 공백 체크
-        if name.trimmingCharacters(in: .whitespaces).isEmpty {
-            return .failure(.empty)
-        }
+#### 종목명 검증
+1. 공백 체크: 빈 문자열 불허
+2. 길이 체크: 최대 50자
+3. 문자 제한: 영문, 숫자, 한글, 일부 특수문자만 허용 `()&-.`
+4. SQL Injection 방지: 특수문자 필터링
 
-        // 2. 길이 체크 (최대 50자)
-        if name.count > 50 {
-            return .failure(.tooLong(50))
-        }
+#### 수량 검증
+1. 숫자 변환 가능 여부 확인
+2. 양수 체크: 0보다 큰 값만 허용
+3. 범위 체크: 1 ~ 1,000,000주
+4. 정수 체크: 소수점 불허
 
-        // 3. 특수문자 체크 (일부만 허용)
-        let allowedCharacters = CharacterSet.alphanumerics
-            .union(.whitespaces)
-            .union(CharacterSet(charactersIn: "()&-."))
+#### 가격 검증
+1. 천단위 콤마 제거 후 숫자 변환
+2. 양수 체크: 0보다 큰 값만 허용
+3. 범위 체크: 최대 10억원
+4. 소수점: 최대 2자리까지 허용
 
-        if name.rangeOfCharacter(from: allowedCharacters.inverted) != nil {
-            return .failure(.invalidCharacters)
-        }
+#### 날짜 검증
+1. 미래 날짜 불허
+2. 유효한 날짜 형식 확인
 
-        return .success(())
-    }
+### 5.2 손익 계산 규칙 (Phase 2)
 
-    // 수량 검증
-    func validateQuantity(_ quantity: String) -> Result<Int, ValidationError> {
-        // 1. 숫자 변환
-        guard let value = Int(quantity) else {
-            return .failure(.invalidNumber)
-        }
+#### FIFO (First In First Out) 방식
+1. 같은 종목의 매수 일지 필터링
+2. 날짜순 정렬 (오래된 것부터)
+3. 매도 수량만큼 순차적으로 매칭
+4. 손익 = 매도금액 - 매칭된 매수금액
 
-        // 2. 양수 체크
-        if value <= 0 {
-            return .failure(.mustBePositive)
-        }
+**예시**:
+```
+매수 1: 2024.01.10, 10주 × 50,000원 = 500,000원
+매수 2: 2024.02.15, 5주 × 55,000원 = 275,000원
+매도: 2024.03.01, 12주 × 60,000원 = 720,000원
 
-        // 3. 범위 체크 (최대 1,000,000주)
-        if value > 1_000_000 {
-            return .failure(.outOfRange)
-        }
-
-        return .success(value)
-    }
-
-    // 가격 검증
-    func validatePrice(_ price: String) -> Result<Double, ValidationError> {
-        // 1. 콤마 제거
-        let cleanedPrice = price.replacingOccurrences(of: ",", with: "")
-
-        // 2. 숫자 변환
-        guard let value = Double(cleanedPrice) else {
-            return .failure(.invalidNumber)
-        }
-
-        // 3. 양수 체크
-        if value <= 0 {
-            return .failure(.mustBePositive)
-        }
-
-        // 4. 범위 체크 (최대 10억)
-        if value > 1_000_000_000 {
-            return .failure(.outOfRange)
-        }
-
-        return .success(value)
-    }
-
-    // 날짜 검증
-    func validateDate(_ date: Date) -> Result<Void, ValidationError> {
-        // 미래 날짜 체크
-        if date > Date() {
-            return .failure(.futureDate)
-        }
-
-        return .success(())
-    }
-}
+→ 매칭: 매수1의 10주 + 매수2의 2주
+→ 비용: 500,000원 + (2 × 55,000원) = 610,000원
+→ 손익: 720,000원 - 610,000원 = +110,000원
 ```
 
-### 5.2 손익 계산 로직 (Phase 2)
+### 5.3 통계 계산 규칙
 
-```swift
-// Phase 2에서 구현 예정
-class ProfitCalculator {
-    // 매수-매도 매칭 (FIFO)
-    func calculateProfit(
-        buyJournals: [TradingJournalEntity],
-        sellJournal: TradingJournalEntity
-    ) -> Double {
-        // 1. 종목명이 같은 매수 일지만 필터링
-        let matchedBuys = buyJournals.filter {
-            $0.stockName == sellJournal.stockName &&
-            $0.tradeDate <= sellJournal.tradeDate
-        }
+#### 총 매매 횟수
+- 매수 일지 개수
+- 매도 일지 개수
 
-        // 2. 날짜순 정렬 (오래된 것부터)
-        let sortedBuys = matchedBuys.sorted { $0.tradeDate < $1.tradeDate }
+#### 실현 손익
+- **Phase 1**: 전체 매도금액 - 전체 매수금액 (단순 계산)
+- **Phase 2**: FIFO 매칭 기반 정확한 손익 계산
 
-        // 3. FIFO 방식으로 매칭
-        var remainingQuantity = sellJournal.quantity
-        var totalCost = 0.0
+#### 평균 수익률
+- 계산식: (실현 손익 / 총 매수금액) × 100
 
-        for buy in sortedBuys {
-            if remainingQuantity <= 0 { break }
+#### 승률
+- **Phase 1**: 매도 건수 대비 계산 (간단 버전)
+- **Phase 2**: 실제 손익 기반 (수익 건수 / 총 매도 건수) × 100
 
-            let matchedQty = min(remainingQuantity, buy.quantity)
-            totalCost += Double(matchedQty) * buy.price
-            remainingQuantity -= matchedQty
-        }
+#### 종목별 통계
+1. 종목별로 그룹화
+2. 각 종목의 매수/매도 횟수 집계
+3. 각 종목의 총 손익 계산
+4. 거래 횟수 기준 내림차순 정렬
+5. TOP 5 종목만 표시
 
-        // 4. 손익 계산
-        let sellAmount = Double(sellJournal.quantity) * sellJournal.price
-        let profit = sellAmount - totalCost
-
-        return profit
-    }
-}
-```
-
-### 5.3 통계 계산 로직
-
-```swift
-class StatsCalculator {
-    func calculateStats(journals: [TradingJournalEntity]) -> TradingStats {
-        let buyJournals = journals.filter { $0.tradeType == .buy }
-        let sellJournals = journals.filter { $0.tradeType == .sell }
-
-        // 총 매매 횟수
-        let totalBuyCount = buyJournals.count
-        let totalSellCount = sellJournals.count
-
-        // 실현 손익 계산 (Phase 1: 간단 버전)
-        let totalBuyAmount = buyJournals.reduce(0.0) { $0 + $1.totalAmount }
-        let totalSellAmount = sellJournals.reduce(0.0) { $0 + $1.totalAmount }
-        let realizedProfit = totalSellAmount - totalBuyAmount
-
-        // 평균 수익률
-        let avgProfitRate = totalBuyAmount > 0
-            ? (realizedProfit / totalBuyAmount) * 100
-            : 0
-
-        // 승률 계산
-        // Phase 1: 매도 건수 대비 계산 (간단 버전)
-        // Phase 2: 실제 손익 기반 계산
-        let winCount = sellJournals.filter { $0.totalAmount > 0 }.count
-        let winRate = totalSellCount > 0
-            ? Double(winCount) / Double(totalSellCount) * 100
-            : 0
-
-        // 종목별 통계
-        let stockStats = calculateStockStats(journals: journals)
-
-        // 월별 통계
-        let monthlyStats = calculateMonthlyStats(journals: journals)
-
-        return TradingStats(
-            totalBuyCount: totalBuyCount,
-            totalSellCount: totalSellCount,
-            realizedProfit: realizedProfit,
-            avgProfitRate: avgProfitRate,
-            winRate: winRate,
-            stockStats: stockStats,
-            monthlyStats: monthlyStats
-        )
-    }
-
-    private func calculateStockStats(journals: [TradingJournalEntity]) -> [StockStats] {
-        // 종목별로 그룹화
-        let grouped = Dictionary(grouping: journals) { $0.stockName }
-
-        return grouped.map { (stockName, journals) in
-            let buyCount = journals.filter { $0.tradeType == .buy }.count
-            let sellCount = journals.filter { $0.tradeType == .sell }.count
-            let totalProfit = journals
-                .filter { $0.tradeType == .sell }
-                .reduce(0.0) { $0 + $1.totalAmount }
-
-            return StockStats(
-                stockName: stockName,
-                buyCount: buyCount,
-                sellCount: sellCount,
-                totalProfit: totalProfit
-            )
-        }
-        .sorted { $0.buyCount + $0.sellCount > $1.buyCount + $1.sellCount }
-        .prefix(5)
-        .map { $0 }
-    }
-
-    private func calculateMonthlyStats(journals: [TradingJournalEntity]) -> [MonthlyStats] {
-        // 월별로 그룹화
-        let calendar = Calendar.current
-        let grouped = Dictionary(grouping: journals) { journal in
-            calendar.dateComponents([.year, .month], from: journal.tradeDate)
-        }
-
-        return grouped.map { (components, journals) in
-            let profit = journals
-                .filter { $0.tradeType == .sell }
-                .reduce(0.0) { $0 + $1.totalAmount }
-
-            return MonthlyStats(
-                year: components.year ?? 0,
-                month: components.month ?? 0,
-                profit: profit,
-                tradeCount: journals.count
-            )
-        }
-        .sorted {
-            ($0.year * 100 + $0.month) < ($1.year * 100 + $1.month)
-        }
-    }
-}
-```
+#### 월별 통계
+1. 년/월 기준으로 그룹화
+2. 각 월의 총 손익 계산
+3. 각 월의 거래 횟수 집계
+4. 시간순 정렬 (오래된 달부터)
 
 ## 6. 에러 처리
 
-### 6.1 에러 타입 정의
+### 6.1 에러 유형
 
-```swift
-enum TradingJournalError: Error, LocalizedError {
-    case invalidInput(ValidationError)
-    case saveFailed(Error)
-    case fetchFailed(Error)
-    case deleteFailed(Error)
-    case notFound
+#### 검증 에러 (ValidationError)
+- `empty`: 필수 항목 미입력
+- `tooLong`: 입력 길이 초과
+- `invalidCharacters`: 허용되지 않는 문자 포함
+- `invalidNumber`: 숫자 형식 오류
+- `mustBePositive`: 양수가 아님
+- `outOfRange`: 허용 범위 초과
+- `futureDate`: 미래 날짜 선택
 
-    var errorDescription: String? {
-        switch self {
-        case .invalidInput(let validationError):
-            return validationError.localizedDescription
-        case .saveFailed:
-            return "저장에 실패했습니다. 다시 시도해주세요."
-        case .fetchFailed:
-            return "데이터를 불러오는데 실패했습니다."
-        case .deleteFailed:
-            return "삭제에 실패했습니다."
-        case .notFound:
-            return "매매 일지를 찾을 수 없습니다."
-        }
-    }
-}
+#### 데이터 처리 에러 (TradingJournalError)
+- `invalidInput`: 입력 검증 실패
+- `saveFailed`: 저장 실패
+- `fetchFailed`: 조회 실패
+- `deleteFailed`: 삭제 실패
+- `notFound`: 데이터 없음
 
-enum ValidationError: Error, LocalizedError {
-    case empty
-    case tooLong(Int)
-    case invalidCharacters
-    case invalidNumber
-    case mustBePositive
-    case outOfRange
-    case futureDate
+### 6.2 에러 메시지
 
-    var errorDescription: String? {
-        switch self {
-        case .empty:
-            return "필수 항목입니다."
-        case .tooLong(let max):
-            return "\(max)자 이내로 입력해주세요."
-        case .invalidCharacters:
-            return "사용할 수 없는 문자가 포함되어 있습니다."
-        case .invalidNumber:
-            return "올바른 숫자를 입력해주세요."
-        case .mustBePositive:
-            return "0보다 큰 값을 입력해주세요."
-        case .outOfRange:
-            return "입력 가능한 범위를 초과했습니다."
-        case .futureDate:
-            return "미래 날짜는 선택할 수 없습니다."
-        }
-    }
-}
-```
+| 에러 유형 | 사용자 메시지 |
+|----------|-------------|
+| empty | "필수 항목입니다." |
+| tooLong | "N자 이내로 입력해주세요." |
+| invalidCharacters | "사용할 수 없는 문자가 포함되어 있습니다." |
+| invalidNumber | "올바른 숫자를 입력해주세요." |
+| mustBePositive | "0보다 큰 값을 입력해주세요." |
+| outOfRange | "입력 가능한 범위를 초과했습니다." |
+| futureDate | "미래 날짜는 선택할 수 없습니다." |
+| saveFailed | "저장에 실패했습니다. 다시 시도해주세요." |
+| fetchFailed | "데이터를 불러오는데 실패했습니다." |
+| deleteFailed | "삭제에 실패했습니다." |
+| notFound | "매매 일지를 찾을 수 없습니다." |
 
-### 6.2 에러 처리 시나리오
+### 6.3 에러 처리 시나리오
 
 | 상황 | 에러 타입 | 처리 방법 |
 |------|----------|----------|
@@ -643,51 +475,42 @@ User                View                 ViewModel            Repository        
 
 ### 8.1 ViewModel 상태
 
-```swift
-@MainActor
-class TradingJournalViewModel: ObservableObject {
-    // 목록 상태
-    @Published var journals: [TradingJournalEntity] = []
-    @Published var isLoading: Bool = false
-    @Published var error: TradingJournalError?
+#### 목록 상태
+- `journals`: 매매 일지 목록
+- `isLoading`: 로딩 중 여부
+- `error`: 에러 정보
 
-    // 필터 상태
-    @Published var dateFilter: DateFilter = .all
-    @Published var typeFilter: TradeTypeFilter = .all
-    @Published var stockFilter: String? = nil
+#### 필터 상태
+- `dateFilter`: 날짜 필터 (전체/이번달/지난달/사용자지정)
+- `typeFilter`: 매매 유형 필터 (전체/매수/매도)
+- `stockFilter`: 종목 필터 (전체/특정 종목)
 
-    // 페이지네이션 상태
-    @Published var currentPage: Int = 0
-    @Published var hasMore: Bool = true
-    private let pageSize: Int = 20
+#### 페이지네이션 상태
+- `currentPage`: 현재 페이지 번호
+- `hasMore`: 추가 데이터 존재 여부
+- `pageSize`: 페이지당 항목 수 (20개)
 
-    // 통계 상태
-    @Published var stats: TradingStats?
-    @Published var isCalculatingStats: Bool = false
-}
-```
+#### 통계 상태
+- `stats`: 통계 데이터
+- `isCalculatingStats`: 통계 계산 중 여부
 
 ### 8.2 View 상태
 
-```swift
-struct AddTradingJournalView: View {
-    // 입력 상태
-    @State private var tradeType: TradeType = .buy
-    @State private var tradeDate: Date = Date()
-    @State private var stockName: String = ""
-    @State private var quantity: String = ""
-    @State private var price: String = ""
-    @State private var reason: String = ""
+#### 입력 상태
+- `tradeType`: 매매 유형 (매수/매도)
+- `tradeDate`: 매매 날짜
+- `stockName`: 종목명
+- `quantity`: 수량
+- `price`: 단가
+- `reason`: 매매 이유
 
-    // UI 상태
-    @State private var validationError: String?
-    @FocusState private var focusedField: Field?
-    @Environment(\.dismiss) private var dismiss
+#### UI 상태
+- `validationError`: 검증 에러 메시지
+- `focusedField`: 현재 포커스된 입력 필드
+- `dismiss`: 화면 닫기 액션
 
-    // 편집 모드
-    var editingJournal: TradingJournalEntity?
-}
-```
+#### 편집 모드
+- `editingJournal`: 수정할 매매 일지 (nil이면 작성 모드)
 
 ## 9. 성능 최적화
 
