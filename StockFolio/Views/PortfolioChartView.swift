@@ -14,20 +14,28 @@ struct PortfolioChartView: View {
     @ObservedObject var viewModel: PortfolioViewModel
     @State private var selectedItem: String?
 
+    /// 비중 기준 내림차순 정렬된 종목 목록
+    private var sortedHoldings: [StockHoldingEntity] {
+        viewModel.holdings.sorted { viewModel.percentage(for: $0) > viewModel.percentage(for: $1) }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("포트폴리오 구성")
                 .font(.headline)
                 .padding(.horizontal)
 
-            if let selected = selectedItem {
-                selectedItemInfo(selected)
+            ZStack {
+                chartContent
                     .padding(.horizontal)
-                    .transition(.scale.combined(with: .opacity))
-            }
 
-            chartContent
-                .padding(.horizontal)
+                // 툴팁 (클릭 이벤트를 차단하지 않도록 설정)
+                if let selected = selectedItem {
+                    tooltipView(for: selected)
+                        .allowsHitTesting(false)
+                        .transition(.scale.combined(with: .opacity))
+                }
+            }
         }
         .animation(.easeInOut(duration: 0.3), value: selectedItem)
     }
@@ -38,7 +46,7 @@ struct PortfolioChartView: View {
             // 차트 영역 (화면 너비 기준 정사각형에 가깝게)
             Chart {
                 // 투자된 종목들
-                ForEach(viewModel.holdings) { holding in
+                ForEach(sortedHoldings) { holding in
                     SectorMark(
                         angle: .value("금액", holding.purchaseAmount),
                         innerRadius: .ratio(0.5),
@@ -46,6 +54,7 @@ struct PortfolioChartView: View {
                     )
                     .foregroundStyle(by: .value("종목", holding.stockName))
                     .cornerRadius(4)
+                    .opacity(selectedItem == nil || selectedItem == holding.stockName ? 1.0 : 0.5)
                     .annotation(position: .overlay) {
                         if viewModel.percentage(for: holding) >= 10 {
                             let stockColor = StockColor(rawValue: holding.colorName) ?? .blue
@@ -67,6 +76,7 @@ struct PortfolioChartView: View {
                     )
                     .foregroundStyle(by: .value("종목", "현금"))
                     .cornerRadius(4)
+                    .opacity(selectedItem == nil || selectedItem == "현금" ? 1.0 : 0.5)
                     .annotation(position: .overlay) {
                         if viewModel.cashPercentage >= 10 {
                             Text(String(format: "%.0f%%", viewModel.cashPercentage))
@@ -78,10 +88,11 @@ struct PortfolioChartView: View {
                 }
             }
             .chartLegend(.hidden) // 기본 범례 숨김 (커스텀 범례 사용)
-            .chartForegroundStyleScale(domain: chartColorDomain, range: chartColorRange)
+            .chartForegroundStyleScale(domain: chartColorDomain, range: chartColorRangeWithGradient)
             .chartAngleSelection(value: $selectedItem)
             .aspectRatio(1, contentMode: .fit) // 정사각형 비율 유지
             .frame(maxHeight: 250) // 최대 높이 제한
+            .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
             .accessibilityElement(children: .combine)
             .accessibilityLabel(accessibilityDescription)
 
@@ -98,7 +109,7 @@ struct PortfolioChartView: View {
         ]
 
         return LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(viewModel.holdings) { holding in
+            ForEach(sortedHoldings) { holding in
                 legendItem(
                     name: holding.stockName,
                     color: holding.color,
@@ -135,71 +146,104 @@ struct PortfolioChartView: View {
         }
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
-        .background(Color(.tertiarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .background(
+            RoundedRectangle(cornerRadius: 6)
+                .fill(selectedItem == name ? color.opacity(0.2) : Color(.tertiarySystemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .strokeBorder(selectedItem == name ? color : Color.clear, lineWidth: 2)
+        )
+        .contentShape(RoundedRectangle(cornerRadius: 6))
+        .onTapGesture {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                if selectedItem == name {
+                    selectedItem = nil
+                } else {
+                    selectedItem = name
+                }
+            }
+        }
     }
 
-    // MARK: - Selected Item Info
+    // MARK: - Tooltip
     @ViewBuilder
-    private func selectedItemInfo(_ itemName: String) -> some View {
+    private func tooltipView(for itemName: String) -> some View {
         if itemName == "현금" {
-            cashInfoCard
-        } else if let holding = viewModel.holdings.first(where: { $0.stockName == itemName }) {
-            stockInfoCard(holding)
+            tooltipContent(
+                name: "현금",
+                amount: viewModel.remainingCash,
+                percentage: viewModel.cashPercentage,
+                color: .gray
+            )
+        } else if let holding = sortedHoldings.first(where: { $0.stockName == itemName }) {
+            tooltipContent(
+                name: holding.stockName,
+                amount: holding.purchaseAmount,
+                percentage: viewModel.percentage(for: holding),
+                color: holding.color
+            )
         }
     }
 
-    private var cashInfoCard: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("현금")
+    private func tooltipContent(name: String, amount: Double, percentage: Double, color: Color) -> some View {
+        VStack(spacing: 8) {
+            // 종목명
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 8, height: 8)
+
+                Text(name)
                     .font(.subheadline)
                     .fontWeight(.semibold)
-                Text(viewModel.remainingCash.currencyFormatted)
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.primary)
             }
 
-            Spacer()
+            Divider()
 
-            Text(String(format: "%.1f%%", viewModel.cashPercentage))
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundStyle(.gray)
-        }
-        .padding()
-        .background(Color.gray.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
-    }
+            // 금액 정보
+            VStack(spacing: 4) {
+                HStack {
+                    Text("투자금액")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(amount.currencyFormatted)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .monospacedDigit()
+                }
 
-    private func stockInfoCard(_ holding: StockHoldingEntity) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(holding.stockName)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                Text(holding.purchaseAmount.currencyFormatted)
-                    .font(.title3)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.primary)
+                HStack {
+                    Text("비중")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Text(String(format: "%.1f%%", percentage))
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundStyle(color)
+                        .monospacedDigit()
+                }
             }
-
-            Spacer()
-
-            Text(String(format: "%.1f%%", viewModel.percentage(for: holding)))
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundStyle(.blue)
         }
-        .padding()
-        .background(Color.blue.opacity(0.1))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(.ultraThinMaterial)
+                .shadow(color: .black.opacity(0.2), radius: 8, x: 0, y: 4)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(color.opacity(0.3), lineWidth: 1.5)
+        )
+        .frame(width: 200)
+        .fixedSize()
     }
 
     // MARK: - Chart Colors
     private var chartColorDomain: [String] {
-        var domain = viewModel.holdings.map { $0.stockName }
+        var domain = sortedHoldings.map { $0.stockName }
         if viewModel.remainingCash > 0 {
             domain.append("현금")
         }
@@ -207,10 +251,40 @@ struct PortfolioChartView: View {
     }
 
     private var chartColorRange: [Color] {
-        var range = viewModel.holdings.map { $0.color }
+        var range = sortedHoldings.map { $0.color }
 
         if viewModel.remainingCash > 0 {
             range.append(.gray)
+        }
+
+        return range
+    }
+
+    /// 그라디언트 효과를 적용한 차트 색상 범위
+    private var chartColorRangeWithGradient: [AnyShapeStyle] {
+        var range: [AnyShapeStyle] = sortedHoldings.map { holding in
+            AnyShapeStyle(
+                LinearGradient(
+                    colors: [
+                        holding.color,
+                        holding.color.opacity(0.7)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+        }
+
+        if viewModel.remainingCash > 0 {
+            range.append(
+                AnyShapeStyle(
+                    LinearGradient(
+                        colors: [.gray, .gray.opacity(0.7)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            )
         }
 
         return range
@@ -220,7 +294,7 @@ struct PortfolioChartView: View {
     private var accessibilityDescription: String {
         var description = "포트폴리오 구성 차트. "
 
-        for holding in viewModel.holdings {
+        for holding in sortedHoldings {
             let percentage = viewModel.percentage(for: holding)
             description += "\(holding.stockName) \(String(format: "%.1f", percentage))%, "
         }

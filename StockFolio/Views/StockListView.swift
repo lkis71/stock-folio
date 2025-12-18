@@ -101,7 +101,7 @@ struct StockListView: View {
                     StockRowView(
                         holding: holding,
                         percentage: viewModel.percentage(for: holding),
-                        color: stockColor(at: index)
+                        color: holding.color
                     )
                     .contentShape(Rectangle())
                     .onTapGesture {
@@ -166,15 +166,6 @@ struct StockListView: View {
         .accessibilityLabel("\(viewModel.holdings.count - defaultVisibleCount)개 종목 더 보기")
     }
 
-    // MARK: - Color Helper
-    /// 차트와 동일한 색상 팔레트 사용 (화면 설계서 기반)
-    private func stockColor(at index: Int) -> Color {
-        let baseColors: [Color] = [
-            .blue, .green, .orange, .purple, .pink,
-            .cyan, .indigo, .mint, .teal, .yellow
-        ]
-        return baseColors[index % baseColors.count]
-    }
 }
 
 // MARK: - Stock Row View

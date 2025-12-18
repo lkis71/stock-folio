@@ -115,8 +115,13 @@ struct AddStockView: View {
                 }
                 .padding(.top)
             }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                // 빈 영역 탭 시 키보드와 버튼 숨김
+                focusedField = nil
+            }
             .safeAreaInset(edge: .bottom) {
-                // 버튼 (항상 하단에 고정, Safe Area 존중)
+                // 버튼 (입력 중일 때만 표시)
                 VStack(spacing: 12) {
                     Button {
                         saveStock()
@@ -132,23 +137,13 @@ struct AddStockView: View {
                     }
                     .disabled(!isValidInput)
 
-                    // 삭제 버튼 제거됨 - 종목 리스트에서 스와이프로 삭제
-
                     Button {
-                        dismiss()
+                        focusedField = nil
                     } label: {
-                        Text("취소")
+                        Text("완료")
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                    }
-
-                    // 편집 모드에서 삭제 힌트 표시 (화면 설계서 기반)
-                    if editingStock != nil {
-                        Text("삭제는 리스트에서 스와이프")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                            .padding(.top, 4)
                     }
                 }
                 .padding(.horizontal)
@@ -162,6 +157,8 @@ struct AddStockView: View {
                         Color(.systemBackground)
                     }
                 )
+                .offset(y: focusedField != nil ? 0 : 200)
+                .opacity(focusedField != nil ? 1 : 0)
             }
             .navigationTitle(editingStock == nil ? "종목 추가" : "종목 편집")
             .navigationBarTitleDisplayMode(.inline)
@@ -175,6 +172,7 @@ struct AddStockView: View {
                     }
                 }
             }
+            .animation(.interactiveSpring(), value: focusedField)
             .onAppear {
                 if let stock = editingStock {
                     stockName = stock.stockName
