@@ -135,7 +135,99 @@ Index: stockName (오름차순)
 
 ## 4. 화면 구성
 
-### 4.1 화면 흐름
+### 4.1 앱 구성도
+
+```mermaid
+graph TB
+    subgraph "UI Layer"
+        A[Trading Journal List View<br/>매매일지 목록]
+        B[Add Trading Journal View<br/>매매일지 작성]
+        C[Filter Sheet View<br/>필터링 화면]
+    end
+
+    subgraph "ViewModel Layer"
+        D[TradingJournalViewModel]
+    end
+
+    subgraph "Repository Layer"
+        E[CoreDataTradingJournalRepository]
+    end
+
+    subgraph "Data Layer"
+        F[Core Data Manager<br/>PersistenceController]
+        G[TradingJournal Entity]
+    end
+
+    A --> B
+    A --> C
+
+    A --> D
+    B --> D
+    C --> D
+
+    D --> E
+    E --> F
+    F --> G
+```
+
+### 4.2 데이터 흐름도
+
+#### 매매일지 CRUD 흐름
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant V as TradingJournalListView
+    participant VM as TradingJournalViewModel
+    participant R as TradingJournalRepository
+    participant CD as Core Data
+
+    U->>V: 매매일지 탭 선택
+    V->>VM: 초기화
+    VM->>R: 저장된 매매일지 조회
+    R->>CD: fetch 요청
+    CD-->>R: 매매일지 리스트
+    R-->>VM: 매매일지 리스트
+    VM-->>V: UI 업데이트
+    V->>U: 매매일지 목록 표시
+
+    U->>V: 매매일지 추가 버튼 클릭
+    V->>V: AddTradingJournalView 표시
+    U->>V: 종목명, 거래유형, 금액 등 입력
+    V->>VM: 매매일지 추가 요청
+    VM->>R: 데이터 저장 요청
+    R->>CD: save
+    CD-->>R: 저장 완료
+    R-->>VM: 저장 완료
+    VM-->>V: UI 업데이트
+    V->>U: 업데이트된 매매일지 목록 표시
+```
+
+#### 필터링 흐름
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant V as TradingJournalListView
+    participant F as FilterSheetView
+    participant VM as TradingJournalViewModel
+    participant R as TradingJournalRepository
+    participant CD as Core Data
+
+    U->>V: 필터 버튼 클릭
+    V->>F: FilterSheetView 표시
+    U->>F: 필터 조건 설정 (종목명, 거래유형, 기간)
+    U->>F: 적용 버튼 클릭
+    F->>VM: 필터 조건 전달
+    VM->>R: 필터 조건으로 조회 요청
+    R->>CD: NSPredicate로 fetch
+    CD-->>R: 필터링된 결과
+    R-->>VM: 필터링된 매매일지 리스트
+    VM-->>V: UI 업데이트
+    V->>U: 필터링된 목록 표시
+```
+
+### 4.3 화면 흐름
 
 ```
 메인 대시보드
@@ -148,7 +240,7 @@ Index: stockName (오름차순)
     └─→ 통계 보기
 ```
 
-### 4.2 네비게이션
+### 4.4 네비게이션
 - **탭 바**: 포트폴리오 / 매매 일지
 - **일지 목록**: 필터 버튼, + 버튼 (우측 상단)
 - **일지 작성/수정**: 모달 형태
@@ -193,7 +285,25 @@ Index: stockName (오름차순)
 - **완성도**: 매매 이유 작성률 80% 이상
 - **만족도**: 통계 화면 조회율 50% 이상
 
-## 8. 제약사항
+## 8. 폴더 구조 (매매일지 관련)
+
+```
+StockFolio/
+├── Models/
+│   └── TradingJournalEntity.swift       # Core Data Entity
+├── Views/
+│   ├── TradingJournalListView.swift     # 매매일지 목록
+│   ├── AddTradingJournalView.swift      # 매매일지 작성
+│   └── FilterSheetView.swift            # 필터링 화면
+├── ViewModels/
+│   └── TradingJournalViewModel.swift
+├── Protocols/
+│   └── TradingJournalRepositoryProtocol.swift
+└── Services/
+    └── CoreDataTradingJournalRepository.swift
+```
+
+## 9. 제약사항
 
 - 오프라인 전용 (서버 동기화 없음)
 - 이미지 첨부 불가 (Phase 1)
