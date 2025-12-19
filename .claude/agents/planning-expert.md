@@ -1,6 +1,6 @@
 ---
-name: design-expert
-description: 요구사항 정의서, 화면설계서, 유스케이스 다이어그램 등 설계 문서 관리 전문가
+name: planning-expert
+description: 개발 전 기획 단계 전문가. 요구사항 정의서, 화면설계서, 유스케이스 다이어그램 작성 및 관리
 tools:
   - Read
   - Grep
