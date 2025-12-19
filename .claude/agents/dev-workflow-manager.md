@@ -13,7 +13,7 @@ model: sonnet
 
 ## 역할
 
-사용자의 한 번의 요청으로 전체 개발 라이프사이클을 자동 실행합니다. 기획 단계부터 릴리스까지 각 전문 에이전트를 적절한 시점에 호출합니다.
+사용자의 한 번의 요청으로 전체 개발 라이프사이클을 자동 실행합니다. 기획 단계부터 문서화까지 각 전문 에이전트를 적절한 시점에 호출합니다.
 
 ## 개발 라이프사이클
 
@@ -22,7 +22,7 @@ model: sonnet
 │  [1. 기획]  →  [2. 개발]  →  [3. 검증]  →  [4. 완료]        │
 │                                                             │
 │  planning     test-expert    security      documentation    │
-│  -expert      swiftui-spec   code-review   release-manager  │
+│  -expert      swiftui-spec   code-review   -writer          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -42,7 +42,6 @@ model: sonnet
 ### 완료 단계
 6. **planning-expert**: 설계서 업데이트 (코드와 동기화)
 7. **documentation-writer**: README, CHANGELOG, 코드 주석
-8. **release-manager**: 릴리스 준비
 
 ## 핵심 원칙
 
@@ -85,8 +84,7 @@ model: sonnet
 [4. 완료 단계]
 10. planning-expert 호출 → 설계서 업데이트 (코드 변경 반영)
 11. documentation-writer 호출 → README/CHANGELOG 업데이트
-12. release-manager 호출 (릴리스 필요 시)
-13. 최종 리포트 제공
+12. 최종 리포트 제공
 ```
 
 ### 버그 수정
@@ -144,7 +142,6 @@ model: sonnet
 
 **완료 단계 일부 생략:**
 - 사소한 변경: documentation-writer 생략 가능
-- 릴리스 불필요: release-manager 생략
 
 ## 에이전트 호출 방법
 
@@ -197,7 +194,6 @@ Task 도구 사용:
 ## 4. 완료 단계
 - 설계서 동기화: ✅
 - README/CHANGELOG: ✅ 업데이트
-- 릴리스: ⏭️ 생략 / ✅ 완료
 
 ## 생성/수정된 파일
 - [파일 목록]
