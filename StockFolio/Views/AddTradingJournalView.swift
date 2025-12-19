@@ -146,6 +146,7 @@ struct AddTradingJournalView: View {
                     }
                 }
                 .padding(.top)
+                .padding(.bottom, 140)
             }
             .contentShape(Rectangle())
             .onTapGesture {
@@ -153,6 +154,7 @@ struct AddTradingJournalView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 12) {
+                    // 저장 버튼: 항상 표시
                     Button {
                         saveJournal()
                     } label: {
@@ -161,34 +163,31 @@ struct AddTradingJournalView: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
-                            .background(Color.accentColor)
+                            .background(isValidInput ? Color.accentColor : Color.gray)
                             .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .opacity(isValidInput ? 1.0 : 0.5)
                     }
                     .disabled(!isValidInput)
 
-                    Button {
-                        focusedField = nil
-                    } label: {
-                        Text("완료")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
+                    // 완료 버튼: 포커스 시에만 표시
+                    if focusedField != nil {
+                        Button {
+                            focusedField = nil
+                        } label: {
+                            Text("완료")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                        }
                     }
                 }
                 .padding(.horizontal)
                 .padding(.top, 16)
                 .padding(.bottom, 8)
                 .background(
-                    VStack(spacing: 0) {
-                        Rectangle()
-                            .fill(Color(.separator))
-                            .frame(height: 0.5)
-                        Color(.systemBackground)
-                    }
+                    Color(.systemBackground)
+                        .ignoresSafeArea()
+                        .shadow(color: Color.black.opacity(0.1), radius: 8, y: -2)
                 )
-                .offset(y: focusedField != nil ? 0 : 200)
-                .opacity(focusedField != nil ? 1 : 0)
             }
             .navigationTitle(editingJournal == nil ? "매매 일지 작성" : "매매 일지 수정")
             .navigationBarTitleDisplayMode(.inline)

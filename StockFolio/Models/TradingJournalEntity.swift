@@ -12,6 +12,13 @@ enum TradeType: String, Codable, CaseIterable {
     }
 }
 
+enum FilterType: String, Codable, CaseIterable {
+    case all = "전체"
+    case daily = "일별"
+    case monthly = "월별"
+    case yearly = "년도별"
+}
+
 struct TradingJournalEntity: Identifiable {
     let id: UUID
     var tradeType: TradeType

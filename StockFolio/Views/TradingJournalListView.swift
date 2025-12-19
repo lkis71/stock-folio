@@ -3,6 +3,8 @@ import SwiftUI
 struct TradingJournalListView: View {
     @StateObject private var viewModel = TradingJournalViewModel()
     @State private var showingAddJournal = false
+    @State private var selectedJournal: TradingJournalEntity?
+    @State private var showingFilterSheet = false
 
     var body: some View {
         NavigationView {
@@ -13,8 +15,14 @@ struct TradingJournalListView: View {
                     journalListView
                 }
             }
-            .navigationTitle("매매 일지")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button {
+                        showingFilterSheet = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal.decrease.circle")
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         showingAddJournal = true
@@ -25,6 +33,12 @@ struct TradingJournalListView: View {
             }
             .sheet(isPresented: $showingAddJournal) {
                 AddTradingJournalView(viewModel: viewModel)
+            }
+            .sheet(item: $selectedJournal) { journal in
+                AddTradingJournalView(viewModel: viewModel, editingJournal: journal)
+            }
+            .sheet(isPresented: $showingFilterSheet) {
+                FilterSheetView(viewModel: viewModel)
             }
         }
     }
@@ -54,9 +68,19 @@ struct TradingJournalListView: View {
             Section(header: Text("매매 기록")) {
                 ForEach(viewModel.journals) { journal in
                     TradingJournalCardView(journal: journal)
-                }
-                .onDelete { offsets in
-                    viewModel.deleteJournals(at: offsets)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedJournal = journal
+                        }
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                if let index = viewModel.journals.firstIndex(where: { $0.id == journal.id }) {
+                                    viewModel.deleteJournals(at: IndexSet(integer: index))
+                                }
+                            } label: {
+                                Label("삭제", systemImage: "trash")
+                            }
+                        }
                 }
             }
         }
@@ -94,12 +118,7 @@ struct TradingJournalStatsView: View {
                     value: formattedPrice(viewModel.totalRealizedProfit),
                     color: viewModel.totalRealizedProfit >= 0 ? .green : .red
                 )
-
-                StatCardView(
-                    title: "승률",
-                    value: String(format: "%.1f%%", viewModel.winRate),
-                    color: .orange
-                )
+                .frame(maxWidth: .infinity)
             }
         }
         .padding(.vertical, 8)

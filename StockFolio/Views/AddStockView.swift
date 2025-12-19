@@ -114,6 +114,7 @@ struct AddStockView: View {
                     }
                 }
                 .padding(.top)
+                .padding(.bottom, 140)
             }
             .contentShape(Rectangle())
             .onTapGesture {
@@ -121,8 +122,8 @@ struct AddStockView: View {
                 focusedField = nil
             }
             .safeAreaInset(edge: .bottom) {
-                // 버튼 (입력 중일 때만 표시)
                 VStack(spacing: 12) {
+                    // 저장 버튼 (항상 표시)
                     Button {
                         saveStock()
                     } label: {
@@ -137,28 +138,26 @@ struct AddStockView: View {
                     }
                     .disabled(!isValidInput)
 
-                    Button {
-                        focusedField = nil
-                    } label: {
-                        Text("완료")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
+                    // 완료 버튼 (입력 중일 때만 표시)
+                    if focusedField != nil {
+                        Button {
+                            focusedField = nil
+                        } label: {
+                            Text("완료")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                        }
                     }
                 }
                 .padding(.horizontal)
                 .padding(.top, 16)
                 .padding(.bottom, 8)
                 .background(
-                    VStack(spacing: 0) {
-                        Rectangle()
-                            .fill(Color(.separator))
-                            .frame(height: 0.5)
-                        Color(.systemBackground)
-                    }
+                    Color(.systemBackground)
+                        .ignoresSafeArea()
+                        .shadow(color: Color.black.opacity(0.1), radius: 8, y: -2)
                 )
-                .offset(y: focusedField != nil ? 0 : 200)
-                .opacity(focusedField != nil ? 1 : 0)
             }
             .navigationTitle(editingStock == nil ? "종목 추가" : "종목 편집")
             .navigationBarTitleDisplayMode(.inline)

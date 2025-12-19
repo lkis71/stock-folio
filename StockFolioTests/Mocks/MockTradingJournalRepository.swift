@@ -11,6 +11,9 @@ final class MockTradingJournalRepository: TradingJournalRepositoryProtocol {
     var deleteCallCount = 0
     var fetchAllCallCount = 0
     var fetchCallCount = 0
+    var fetchByDateCallCount = 0
+    var fetchByMonthCallCount = 0
+    var fetchByYearCallCount = 0
 
     func fetchAll() -> [TradingJournalEntity] {
         fetchAllCallCount += 1
@@ -53,5 +56,36 @@ final class MockTradingJournalRepository: TradingJournalRepositoryProtocol {
             throw NSError(domain: "MockRepository", code: -1, userInfo: [NSLocalizedDescriptionKey: "Journal not found"])
         }
         journals.remove(at: index)
+    }
+
+    func fetchByDate(_ date: Date) -> [TradingJournalEntity] {
+        fetchByDateCallCount += 1
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+
+        return journals.filter { journal in
+            journal.tradeDate >= startOfDay && journal.tradeDate < endOfDay
+        }.sorted { $0.tradeDate > $1.tradeDate }
+    }
+
+    func fetchByMonth(year: Int, month: Int) -> [TradingJournalEntity] {
+        fetchByMonthCallCount += 1
+        let calendar = Calendar.current
+
+        return journals.filter { journal in
+            let components = calendar.dateComponents([.year, .month], from: journal.tradeDate)
+            return components.year == year && components.month == month
+        }.sorted { $0.tradeDate > $1.tradeDate }
+    }
+
+    func fetchByYear(_ year: Int) -> [TradingJournalEntity] {
+        fetchByYearCallCount += 1
+        let calendar = Calendar.current
+
+        return journals.filter { journal in
+            let components = calendar.dateComponents([.year], from: journal.tradeDate)
+            return components.year == year
+        }.sorted { $0.tradeDate > $1.tradeDate }
     }
 }

@@ -14,6 +14,7 @@ StockFolio는 개인 투자자를 위한 간단하고 직관적인 포트폴리�
 
 ## 주요 기능
 
+### 포트폴리오 관리
 - **시드머니 설정**: 총 투자 가능 금액 설정
 - **종목 관리**: 종목명과 매수 금액을 수동으로 입력/수정/삭제
 - **색상 선택**: 종목별 차트 색상 개별 선택 (10가지 색상 팔레트)
@@ -23,8 +24,26 @@ StockFolio는 개인 투자자를 위한 간단하고 직관적인 포트폴리�
   - 그라디언트 효과로 입체감 표현
   - 비중 기준 자동 정렬
   - 차트/범례 클릭 시 상세 정보 툴팁 표시
+
+### 매매 일지
+- **매매 기록 관리**: 매수/매도 내역 작성, 수정, 삭제
+  - 종목명, 수량, 단가, 매매일, 매매 이유 기록
+  - 탭 제스처로 빠른 수정
+  - 스와이프로 삭제
+- **통계 대시보드**:
+  - 총 매매 건수
+  - 매수/매도 건수
+  - 실현 손익 합계
+- **필터링 기능**:
+  - 전체 기록 조회
+  - 일별 조회 (특정 날짜)
+  - 월별 조회 (특정 년월)
+  - 년도별 조회 (특정 년도)
+
+### UX/UI
 - **직관적인 UX**:
-  - 입력 포커스 시에만 버튼 표시
+  - 저장 버튼 항상 표시 (즉시 저장 가능)
+  - 완료 버튼은 입력 중에만 표시
   - 빈 영역 터치로 키보드 숨김
   - 부드러운 애니메이션 효과
 - **반응형 UI**: 모든 iPhone 화면 크기에 최적화
@@ -46,31 +65,38 @@ StockFolio는 개인 투자자를 위한 간단하고 직관적인 포트폴리�
 ```
 StockFolio/
 ├── App/
-│   ├── StockFolioApp.swift      # 앱 진입점
-│   └── ContentView.swift        # 루트 뷰
+│   ├── StockFolioApp.swift           # 앱 진입점
+│   └── ContentView.swift             # 루트 뷰
 ├── Models/
-│   ├── StockHoldingEntity.swift # Core Data Entity
-│   └── Portfolio.swift          # 포트폴리오 모델
+│   ├── StockHoldingEntity.swift      # 종목 Core Data Entity
+│   ├── Portfolio.swift               # 포트폴리오 모델
+│   └── TradingJournalEntity.swift    # 매매일지 Core Data Entity
 ├── Views/
-│   ├── MainDashboardView.swift  # 메인 대시보드
-│   ├── PortfolioChartView.swift # 파이 차트 뷰
-│   ├── StockListView.swift      # 종목 리스트
-│   ├── AddStockView.swift       # 종목 추가/수정
-│   └── SeedMoneySettingsView.swift # 시드머니 설정
+│   ├── MainDashboardView.swift       # 메인 대시보드
+│   ├── PortfolioChartView.swift      # 파이 차트 뷰
+│   ├── StockListView.swift           # 종목 리스트
+│   ├── AddStockView.swift            # 종목 추가/수정
+│   ├── SeedMoneySettingsView.swift   # 시드머니 설정
+│   ├── TradingJournalListView.swift  # 매매일지 리스트 및 통계
+│   ├── AddTradingJournalView.swift   # 매매일지 작성/수정
+│   └── FilterSheetView.swift         # 매매일지 필터 시트
 ├── ViewModels/
-│   └── PortfolioViewModel.swift # 비즈니스 로직
+│   ├── PortfolioViewModel.swift      # 포트폴리오 비즈니스 로직
+│   └── TradingJournalViewModel.swift # 매매일지 비즈니스 로직
 ├── Services/
-│   ├── PersistenceController.swift   # Core Data 관리
-│   ├── CoreDataStockRepository.swift # 종목 CRUD
-│   ├── SeedMoneyStorage.swift        # UserDefaults 저장
-│   ├── StockInputValidator.swift     # 입력 검증
-│   └── CurrencyFormatter.swift       # 통화 포맷팅
+│   ├── PersistenceController.swift         # Core Data 관리
+│   ├── CoreDataStockRepository.swift       # 종목 CRUD
+│   ├── CoreDataTradingJournalRepository.swift # 매매일지 CRUD
+│   ├── SeedMoneyStorage.swift              # UserDefaults 저장
+│   ├── StockInputValidator.swift           # 입력 검증
+│   └── CurrencyFormatter.swift             # 통화 포맷팅
 ├── Protocols/
-│   ├── StockRepositoryProtocol.swift
+│   ├── StockRepositoryProtocol.swift        # 종목 Repository 인터페이스
+│   ├── TradingJournalRepositoryProtocol.swift # 매매일지 Repository 인터페이스
 │   ├── InputValidatorProtocol.swift
 │   └── CurrencyFormatterProtocol.swift
 └── Utils/
-    └── Logger.swift             # 로깅 유틸리티
+    └── Logger.swift                  # 로깅 유틸리티
 ```
 
 ## 설치 및 실행
@@ -147,8 +173,8 @@ xcodebuild test \
 
 ## 향후 계획
 
-- [ ] 매수일 기록 기능
-- [ ] 종목별 메모 기능
+- [ ] 매매 일지 차트 시각화 (수익률 추이)
+- [ ] 종목별 매매 내역 연동
 - [ ] 카테고리 분류 (국내주식, 해외주식, 채권 등)
 - [ ] CSV 내보내기/가져오기
 - [ ] iOS 위젯 지원

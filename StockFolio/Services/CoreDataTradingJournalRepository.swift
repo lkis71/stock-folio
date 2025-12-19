@@ -86,4 +86,68 @@ final class CoreDataTradingJournalRepository: TradingJournalRepositoryProtocol {
         viewContext.delete(managedObject)
         try viewContext.save()
     }
+
+    func fetchByDate(_ date: Date) -> [TradingJournalEntity] {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
+            return []
+        }
+
+        let request = NSFetchRequest<TradingJournalMO>(entityName: "TradingJournal")
+        request.predicate = NSPredicate(format: "tradeDate >= %@ AND tradeDate < %@", startOfDay as NSDate, endOfDay as NSDate)
+        request.sortDescriptors = [NSSortDescriptor(key: "tradeDate", ascending: false)]
+
+        do {
+            let results = try viewContext.fetch(request)
+            return results.map { TradingJournalEntity(from: $0) }
+        } catch {
+            Logger.error("Fetch by date error: \(error.localizedDescription)")
+            return []
+        }
+    }
+
+    func fetchByMonth(year: Int, month: Int) -> [TradingJournalEntity] {
+        let calendar = Calendar.current
+        guard let startDate = calendar.date(from: DateComponents(year: year, month: month, day: 1)),
+              let endDate = calendar.date(byAdding: DateComponents(month: 1, day: -1), to: startDate) else {
+            return []
+        }
+
+        guard let endOfMonth = calendar.date(byAdding: .day, value: 1, to: endDate) else {
+            return []
+        }
+
+        let request = NSFetchRequest<TradingJournalMO>(entityName: "TradingJournal")
+        request.predicate = NSPredicate(format: "tradeDate >= %@ AND tradeDate < %@", startDate as NSDate, endOfMonth as NSDate)
+        request.sortDescriptors = [NSSortDescriptor(key: "tradeDate", ascending: false)]
+
+        do {
+            let results = try viewContext.fetch(request)
+            return results.map { TradingJournalEntity(from: $0) }
+        } catch {
+            Logger.error("Fetch by month error: \(error.localizedDescription)")
+            return []
+        }
+    }
+
+    func fetchByYear(_ year: Int) -> [TradingJournalEntity] {
+        let calendar = Calendar.current
+        guard let startDate = calendar.date(from: DateComponents(year: year, month: 1, day: 1)),
+              let endDate = calendar.date(from: DateComponents(year: year + 1, month: 1, day: 1)) else {
+            return []
+        }
+
+        let request = NSFetchRequest<TradingJournalMO>(entityName: "TradingJournal")
+        request.predicate = NSPredicate(format: "tradeDate >= %@ AND tradeDate < %@", startDate as NSDate, endDate as NSDate)
+        request.sortDescriptors = [NSSortDescriptor(key: "tradeDate", ascending: false)]
+
+        do {
+            let results = try viewContext.fetch(request)
+            return results.map { TradingJournalEntity(from: $0) }
+        } catch {
+            Logger.error("Fetch by year error: \(error.localizedDescription)")
+            return []
+        }
+    }
 }

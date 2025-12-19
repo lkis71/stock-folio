@@ -4,6 +4,10 @@ import SwiftUI
 final class TradingJournalViewModel: ObservableObject {
 
     @Published private(set) var journals: [TradingJournalEntity] = []
+    @Published var filterType: FilterType = .all
+    @Published var selectedDate: Date = Date()
+    @Published var selectedMonth: Date = Date()
+    @Published var selectedYear: Int = Calendar.current.component(.year, from: Date())
 
     private let repository: TradingJournalRepositoryProtocol
     private let pageSize = 20
@@ -117,5 +121,24 @@ final class TradingJournalViewModel: ObservableObject {
 
     func refresh() {
         fetchJournals()
+    }
+
+    func applyFilter() {
+        switch filterType {
+        case .all:
+            journals = repository.fetchAll()
+        case .daily:
+            journals = repository.fetchByDate(selectedDate)
+        case .monthly:
+            let calendar = Calendar.current
+            let components = calendar.dateComponents([.year, .month], from: selectedMonth)
+            guard let year = components.year, let month = components.month else {
+                journals = []
+                return
+            }
+            journals = repository.fetchByMonth(year: year, month: month)
+        case .yearly:
+            journals = repository.fetchByYear(selectedYear)
+        }
     }
 }
