@@ -40,7 +40,7 @@ model: sonnet
 2. **swiftui-specialist**: UI 구현 및 검토
 3. **security-expert**: 보안 취약점 검토 (필수)
 4. **code-reviewer**: SOLID 원칙 검증 (필수)
-5. **design-expert**: 설계 문서 자동 업데이트
+5. **planning-expert**: 설계 문서 자동 업데이트
 6. **checklist-verifier**: GitHub 이슈 체크리스트 검증
 7. **documentation-writer**: 주석 및 문서 작성
 8. **release-manager**: 릴리스 준비
@@ -53,7 +53,7 @@ model: sonnet
 2. [GREEN] 코드 구현 (SOLID 원칙 준수)
 3. [REFACTOR] 코드 정리 및 테스트 재실행 (관련 테스트만)
 4. swiftui-specialist 호출 (UI 작업인 경우)
-5. design-expert 호출 (화면 변경 시)
+5. planning-expert 호출 (화면 변경 시)
 6. security-expert 호출 (필수)
 7. code-reviewer 호출 (필수)
 8. documentation-writer 호출
@@ -73,7 +73,7 @@ model: sonnet
 ### UI 변경
 ```
 1. swiftui-specialist → UI 구현/수정
-2. design-expert → SCREEN_DESIGN.md, DESIGN.md 업데이트 (필수)
+2. planning-expert → SCREEN_DESIGN.md, DESIGN.md 업데이트 (필수)
 3. test-expert → 수정/개발한 부분과 관련된 테스트만 실행
 4. code-reviewer → 복잡한 로직 변경 시에만 호출 (단순 UI 스타일 변경은 생략 가능)
 ```
