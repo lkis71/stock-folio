@@ -20,22 +20,36 @@
 
 ```mermaid
 graph TB
-    subgraph "UI Layer"
+    subgraph "UI Layer - Portfolio"
         A[Main View<br/>포트폴리오 대시보드]
         B[Chart View<br/>보유 비중 차트]
         C[Add Stock View<br/>종목 추가 화면]
         D[Stock List View<br/>종목 목록]
     end
 
+    subgraph "UI Layer - Trading Journal"
+        H[Trading Journal List View<br/>매매일지 목록]
+        I[Add Trading Journal View<br/>매매일지 작성]
+        J[Filter Sheet View<br/>필터링 화면]
+    end
+
     subgraph "ViewModel Layer"
         E[PortfolioViewModel]
+        K[TradingJournalViewModel]
     end
 
     subgraph "Data Layer"
-        F[Core Data Manager]
+        F[Core Data Manager<br/>PersistenceController]
         G[StockHolding Entity]
+        L[TradingJournal Entity]
     end
 
+    subgraph "Repository Layer"
+        M[CoreDataStockRepository]
+        N[CoreDataTradingJournalRepository]
+    end
+
+    %% Portfolio UI connections
     A --> B
     A --> D
     A --> C
@@ -45,23 +59,43 @@ graph TB
     C --> E
     D --> E
 
-    E --> F
+    %% Trading Journal UI connections
+    H --> I
+    H --> J
+
+    H --> K
+    I --> K
+    J --> K
+
+    %% ViewModel to Repository
+    E --> M
+    K --> N
+
+    %% Repository to Core Data
+    M --> F
+    N --> F
     F --> G
+    F --> L
 ```
 
 ## 4. 데이터 흐름도
+
+### 4.1 포트폴리오 데이터 흐름
 
 ```mermaid
 sequenceDiagram
     participant U as User
     participant V as Main View
     participant VM as PortfolioViewModel
+    participant R as StockRepository
     participant CD as Core Data
 
     U->>V: 앱 실행
     V->>VM: 초기화
-    VM->>CD: 저장된 종목 조회
-    CD-->>VM: 종목 리스트
+    VM->>R: 저장된 종목 조회
+    R->>CD: fetch 요청
+    CD-->>R: 종목 리스트
+    R-->>VM: 종목 리스트
     VM-->>V: UI 업데이트
     V->>U: 차트 + 종목 리스트 표시
 
@@ -69,10 +103,67 @@ sequenceDiagram
     V->>V: 입력 폼 표시
     U->>V: 종목명, 매수금액 입력
     V->>VM: 종목 추가 요청
-    VM->>CD: 데이터 저장
-    CD-->>VM: 저장 완료
+    VM->>R: 데이터 저장 요청
+    R->>CD: save
+    CD-->>R: 저장 완료
+    R-->>VM: 저장 완료
     VM-->>V: UI 업데이트 (새로운 차트)
     V->>U: 업데이트된 포트폴리오 표시
+```
+
+### 4.2 매매일지 데이터 흐름
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant V as TradingJournalListView
+    participant VM as TradingJournalViewModel
+    participant R as TradingJournalRepository
+    participant CD as Core Data
+
+    U->>V: 매매일지 탭 선택
+    V->>VM: 초기화
+    VM->>R: 저장된 매매일지 조회
+    R->>CD: fetch 요청
+    CD-->>R: 매매일지 리스트
+    R-->>VM: 매매일지 리스트
+    VM-->>V: UI 업데이트
+    V->>U: 매매일지 목록 표시
+
+    U->>V: 매매일지 추가 버튼 클릭
+    V->>V: AddTradingJournalView 표시
+    U->>V: 종목명, 거래유형, 금액 등 입력
+    V->>VM: 매매일지 추가 요청
+    VM->>R: 데이터 저장 요청
+    R->>CD: save
+    CD-->>R: 저장 완료
+    R-->>VM: 저장 완료
+    VM-->>V: UI 업데이트
+    V->>U: 업데이트된 매매일지 목록 표시
+```
+
+### 4.3 매매일지 필터링 흐름
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant V as TradingJournalListView
+    participant F as FilterSheetView
+    participant VM as TradingJournalViewModel
+    participant R as TradingJournalRepository
+    participant CD as Core Data
+
+    U->>V: 필터 버튼 클릭
+    V->>F: FilterSheetView 표시
+    U->>F: 필터 조건 설정 (종목명, 거래유형, 기간)
+    U->>F: 적용 버튼 클릭
+    F->>VM: 필터 조건 전달
+    VM->>R: 필터 조건으로 조회 요청
+    R->>CD: NSPredicate로 fetch
+    CD-->>R: 필터링된 결과
+    R-->>VM: 필터링된 매매일지 리스트
+    VM-->>V: UI 업데이트
+    V->>U: 필터링된 목록 표시
 ```
 
 ## 5. 화면 구성
@@ -190,22 +281,29 @@ StockFolio/
 │   ├── StockFolioApp.swift
 │   └── ContentView.swift
 ├── Models/
-│   ├── StockHoldingEntity.swift    # Core Data Entity
+│   ├── StockHoldingEntity.swift         # 포트폴리오 Core Data Entity
+│   ├── TradingJournalEntity.swift       # 매매일지 Core Data Entity
 │   └── Portfolio.swift
 ├── Views/
-│   ├── MainDashboardView.swift
-│   ├── PortfolioChartView.swift
-│   ├── StockListView.swift
-│   ├── AddStockView.swift
-│   └── SeedMoneySettingsView.swift
+│   ├── MainDashboardView.swift          # 포트폴리오 메인
+│   ├── PortfolioChartView.swift         # 보유 비중 차트
+│   ├── StockListView.swift              # 종목 목록
+│   ├── AddStockView.swift               # 종목 추가
+│   ├── SeedMoneySettingsView.swift      # 시드머니 설정
+│   ├── TradingJournalListView.swift     # 매매일지 목록
+│   ├── AddTradingJournalView.swift      # 매매일지 작성
+│   └── FilterSheetView.swift            # 매매일지 필터
 ├── ViewModels/
-│   └── PortfolioViewModel.swift
+│   ├── PortfolioViewModel.swift         # 포트폴리오 뷰모델
+│   └── TradingJournalViewModel.swift    # 매매일지 뷰모델
 ├── Protocols/
 │   ├── CurrencyFormatterProtocol.swift
 │   ├── InputValidatorProtocol.swift
-│   └── StockRepositoryProtocol.swift
+│   ├── StockRepositoryProtocol.swift
+│   └── TradingJournalRepositoryProtocol.swift
 ├── Services/
 │   ├── CoreDataStockRepository.swift
+│   ├── CoreDataTradingJournalRepository.swift
 │   ├── CurrencyFormatter.swift
 │   ├── PersistenceController.swift
 │   ├── SeedMoneyStorage.swift
