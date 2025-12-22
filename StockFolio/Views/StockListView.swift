@@ -26,7 +26,7 @@ struct StockListView: View {
     // MARK: - Section Header
     private var sectionHeader: some View {
         HStack {
-            if viewModel.totalCount > 6 {
+            if viewModel.totalCount > 10 {
                 Text("보유 종목 (\(viewModel.holdings.count)/\(viewModel.totalCount))")
                     .font(.subheadline)
                     .fontWeight(.semibold)
@@ -91,12 +91,6 @@ struct StockListView: View {
                     .listRowSeparator(.hidden)
                     .accessibilityElement(children: .combine)
                     .accessibilityHint("탭하여 편집, 스와이프하여 삭제")
-                    .onAppear {
-                        // 마지막 항목이 나타나면 더 로드
-                        if holding.id == sortedHoldings.last?.element.id && viewModel.hasMore {
-                            viewModel.fetchMore()
-                        }
-                    }
                 }
 
                 // 로딩 인디케이터

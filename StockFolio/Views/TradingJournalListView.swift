@@ -90,12 +90,6 @@ struct TradingJournalListView: View {
                                 Label("삭제", systemImage: "trash")
                             }
                         }
-                        .onAppear {
-                            // 마지막 항목이 나타나면 더 로드
-                            if journal.id == viewModel.journals.last?.id && viewModel.hasMore {
-                                viewModel.fetchMore()
-                            }
-                        }
                 }
 
                 // 로딩 인디케이터

@@ -18,7 +18,7 @@ final class PortfolioViewModel: ObservableObject {
 
     // MARK: - Pagination
     private var currentOffset = 0
-    private let pageSize = 6
+    private let pageSize = 10
 
     // MARK: - Computed Properties (Repository 집계 쿼리 사용)
     var totalCount: Int {
