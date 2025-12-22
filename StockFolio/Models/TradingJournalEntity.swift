@@ -26,6 +26,7 @@ struct TradingJournalEntity: Identifiable {
     var stockName: String
     var quantity: Int
     var price: Double
+    var realizedProfit: Double
     var reason: String
     var createdAt: Date
     var updatedAt: Date
@@ -41,6 +42,7 @@ struct TradingJournalEntity: Identifiable {
         stockName: String,
         quantity: Int,
         price: Double,
+        realizedProfit: Double = 0,
         reason: String = "",
         createdAt: Date = Date(),
         updatedAt: Date = Date()
@@ -51,6 +53,7 @@ struct TradingJournalEntity: Identifiable {
         self.stockName = stockName
         self.quantity = quantity
         self.price = price
+        self.realizedProfit = realizedProfit
         self.reason = reason
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -65,6 +68,7 @@ extension TradingJournalEntity {
         self.stockName = managedObject.stockName ?? ""
         self.quantity = Int(managedObject.quantity)
         self.price = managedObject.price
+        self.realizedProfit = managedObject.realizedProfit
         self.reason = managedObject.reason ?? ""
         self.createdAt = managedObject.createdAt ?? Date()
         self.updatedAt = managedObject.updatedAt ?? Date()

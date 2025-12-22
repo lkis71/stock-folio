@@ -265,8 +265,8 @@ final class TradingJournalViewModelTests: XCTestCase {
     func test_totalRealizedProfit_shouldSumAllSellAmounts() {
         // Given
         let journal1 = TradingJournalEntity(tradeType: .buy, tradeDate: Date(), stockName: "A", quantity: 10, price: 70000)
-        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 5, price: 120000)
-        let journal3 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "C", quantity: 10, price: 50000)
+        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 5, price: 120000, realizedProfit: 600000)
+        let journal3 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "C", quantity: 10, price: 50000, realizedProfit: 500000)
         mockRepository.journals = [journal1, journal2, journal3]
         sut.fetchJournals()
 
@@ -274,16 +274,16 @@ final class TradingJournalViewModelTests: XCTestCase {
         let profit = sut.totalRealizedProfit
 
         // Then
-        // 5 * 120000 + 10 * 50000 = 600000 + 500000 = 1100000
+        // 600000 + 500000 = 1100000
         XCTAssertEqual(profit, 1_100_000, accuracy: 0.01)
     }
 
     func test_totalRealizedProfit_withMixedTrades_shouldOnlyCountSells() {
         // Given
         let journal1 = TradingJournalEntity(tradeType: .buy, tradeDate: Date(), stockName: "A", quantity: 100, price: 1000)
-        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 10, price: 2000)
+        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 10, price: 2000, realizedProfit: 20000)
         let journal3 = TradingJournalEntity(tradeType: .buy, tradeDate: Date(), stockName: "C", quantity: 50, price: 3000)
-        let journal4 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "D", quantity: 5, price: 4000)
+        let journal4 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "D", quantity: 5, price: 4000, realizedProfit: 20000)
         mockRepository.journals = [journal1, journal2, journal3, journal4]
         sut.fetchJournals()
 
@@ -291,7 +291,7 @@ final class TradingJournalViewModelTests: XCTestCase {
         let profit = sut.totalRealizedProfit
 
         // Then
-        // 10 * 2000 + 5 * 4000 = 20000 + 20000 = 40000
+        // 20000 + 20000 = 40000
         XCTAssertEqual(profit, 40_000, accuracy: 0.01)
     }
 
@@ -313,8 +313,8 @@ final class TradingJournalViewModelTests: XCTestCase {
 
     func test_winRate_withAllPositiveSells_shouldReturn100() {
         // Given
-        let journal1 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "A", quantity: 10, price: 70000)
-        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 5, price: 120000)
+        let journal1 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "A", quantity: 10, price: 70000, realizedProfit: 100000)
+        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 5, price: 120000, realizedProfit: 50000)
         mockRepository.journals = [journal1, journal2]
         sut.fetchJournals()
 
@@ -327,10 +327,10 @@ final class TradingJournalViewModelTests: XCTestCase {
 
     func test_winRate_shouldCalculateCorrectPercentage() {
         // Given
-        // Win: positive totalAmount (quantity * price > 0)
-        let journal1 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "A", quantity: 10, price: 70000) // Win
-        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 5, price: 120000) // Win
-        let journal3 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "C", quantity: 0, price: 50000) // Loss (0 amount)
+        // Win: positive realizedProfit
+        let journal1 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "A", quantity: 10, price: 70000, realizedProfit: 100000) // Win
+        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 5, price: 120000, realizedProfit: 50000) // Win
+        let journal3 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "C", quantity: 10, price: 50000, realizedProfit: -30000) // Loss
         let journal4 = TradingJournalEntity(tradeType: .buy, tradeDate: Date(), stockName: "D", quantity: 10, price: 30000) // Ignored (buy)
         mockRepository.journals = [journal1, journal2, journal3, journal4]
         sut.fetchJournals()
@@ -340,17 +340,17 @@ final class TradingJournalViewModelTests: XCTestCase {
 
         // Then
         // Total sells: 3 (A, B, C)
-        // Wins: 2 (A, B have positive amounts)
+        // Wins: 2 (A, B have positive realizedProfit)
         // Win rate: (2/3) * 100 = 66.67%
         XCTAssertEqual(winRate, 66.67, accuracy: 0.01)
     }
 
     func test_winRate_withMixedResults_shouldCalculateCorrectly() {
         // Given
-        let journal1 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "A", quantity: 10, price: 70000) // Win
-        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 0, price: 120000) // Loss
-        let journal3 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "C", quantity: 5, price: 50000) // Win
-        let journal4 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "D", quantity: 0, price: 30000) // Loss
+        let journal1 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "A", quantity: 10, price: 70000, realizedProfit: 100000) // Win
+        let journal2 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "B", quantity: 5, price: 120000, realizedProfit: -50000) // Loss
+        let journal3 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "C", quantity: 5, price: 50000, realizedProfit: 30000) // Win
+        let journal4 = TradingJournalEntity(tradeType: .sell, tradeDate: Date(), stockName: "D", quantity: 10, price: 30000, realizedProfit: -20000) // Loss
         mockRepository.journals = [journal1, journal2, journal3, journal4]
         sut.fetchJournals()
 

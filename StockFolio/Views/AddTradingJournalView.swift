@@ -9,184 +9,195 @@ struct AddTradingJournalView: View {
     @State private var stockName: String = ""
     @State private var quantityText: String = ""
     @State private var priceText: String = ""
+    @State private var realizedProfitText: String = ""
+    @State private var isProfit: Bool = true
     @State private var reason: String = ""
     @State private var validationError: String?
+    @State private var datePickerId = UUID()
     @FocusState private var focusedField: Field?
 
     var editingJournal: TradingJournalEntity?
 
     enum Field {
-        case stockName, quantity, price, reason
+        case stockName, quantity, price, realizedProfit, reason
     }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("매매 유형")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-
-                        Picker("매매 유형", selection: $tradeType) {
-                            ForEach(TradeType.allCases, id: \.self) { type in
-                                Text(type.rawValue).tag(type)
+                VStack(spacing: 16) {
+                    // 매매 유형 + 매매일 (한 줄)
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("매매 유형")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Picker("매매 유형", selection: $tradeType) {
+                                ForEach(TradeType.allCases, id: \.self) { type in
+                                    Text(type.rawValue).tag(type)
+                                }
                             }
+                            .pickerStyle(.segmented)
                         }
-                        .pickerStyle(.segmented)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("매매일")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            DatePicker("", selection: $tradeDate, in: ...Date(), displayedComponents: .date)
+                                .datePickerStyle(.compact)
+                                .labelsHidden()
+                                .id(datePickerId)
+                                .onChange(of: tradeDate) { _, _ in
+                                    focusedField = nil
+                                    datePickerId = UUID()
+                                }
+                        }
                     }
                     .padding(.horizontal)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("매매일")
-                            .font(.subheadline)
+                    // 종목 입력 (직접 입력 + 포트폴리오 선택)
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("종목")
+                            .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        DatePicker(
-                            "",
-                            selection: $tradeDate,
-                            in: ...Date(),
-                            displayedComponents: .date
-                        )
-                        .datePickerStyle(.compact)
-                        .labelsHidden()
-                    }
-                    .padding(.horizontal)
+                        HStack(spacing: 8) {
+                            TextField("종목명 입력", text: $stockName)
+                                .font(.subheadline)
+                                .padding(12)
+                                .background(Color(.secondarySystemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .focused($focusedField, equals: .stockName)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("종목명")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-
-                        if viewModel.portfolioStocks.isEmpty {
-                            // 빈 포트폴리오 처리
-                            VStack(alignment: .leading, spacing: 12) {
+                            if !viewModel.portfolioStocks.isEmpty {
                                 Menu {
-                                    Text("등록된 종목 없음")
-                                } label: {
-                                    HStack {
-                                        Text("종목 선택")
-                                            .foregroundColor(.secondary)
-                                        Spacer()
-                                        Image(systemName: "chevron.down")
-                                            .foregroundColor(.secondary)
-                                    }
-                                    .font(.title3)
-                                    .padding()
-                                    .background(Color(.secondarySystemBackground))
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                }
-                                .disabled(true)
-
-                                HStack(spacing: 8) {
-                                    Image(systemName: "info.circle")
-                                        .foregroundColor(.blue)
-                                    Text("포트폴리오에 종목을 먼저 등록하세요")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                            }
-                        } else {
-                            // 정상 동작: Menu로 종목 선택
-                            Menu {
-                                ForEach(viewModel.portfolioStocks, id: \.self) { stock in
-                                    Button {
-                                        stockName = stock
-                                    } label: {
-                                        HStack {
-                                            Text(stock)
-                                            if stockName == stock {
-                                                Spacer()
-                                                Image(systemName: "checkmark")
+                                    ForEach(viewModel.portfolioStocks, id: \.self) { stock in
+                                        Button {
+                                            stockName = stock
+                                            focusedField = nil
+                                        } label: {
+                                            HStack {
+                                                Text(stock)
+                                                if stockName == stock {
+                                                    Image(systemName: "checkmark")
+                                                }
                                             }
                                         }
                                     }
+                                } label: {
+                                    Image(systemName: "list.bullet")
+                                        .font(.subheadline)
+                                        .foregroundColor(.accentColor)
+                                        .frame(width: 44, height: 44)
+                                        .background(Color(.secondarySystemBackground))
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
                                 }
-                            } label: {
-                                HStack {
-                                    Text(stockName.isEmpty ? "종목 선택" : stockName)
-                                        .foregroundColor(stockName.isEmpty ? .secondary : .primary)
-                                    Spacer()
-                                    Image(systemName: "chevron.down")
-                                        .foregroundColor(.secondary)
-                                }
-                                .font(.title3)
-                                .padding()
-                                .background(Color(.secondarySystemBackground))
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
                             }
-                            .accessibilityLabel(stockName.isEmpty ? "종목 선택" : "선택된 종목: \(stockName)")
-                            .accessibilityHint("탭하여 포트폴리오 종목 선택")
                         }
                     }
                     .padding(.horizontal)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("수량")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                    // 수량 + 단가 (한 줄)
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("수량")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            TextField("0", text: $quantityText)
+                                .keyboardType(.numberPad)
+                                .font(.subheadline)
+                                .padding(12)
+                                .background(Color(.secondarySystemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .focused($focusedField, equals: .quantity)
+                                .onChange(of: quantityText) { _, newValue in
+                                    formatQuantityInput(newValue)
+                                }
+                        }
 
-                        TextField("0", text: $quantityText)
-                            .keyboardType(.numberPad)
-                            .font(.title3)
-                            .padding()
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .focused($focusedField, equals: .quantity)
-                            .onChange(of: quantityText) { _, newValue in
-                                formatQuantityInput(newValue)
-                            }
-                            .textContentType(.none)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("단가")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            TextField("0", text: $priceText)
+                                .keyboardType(.numberPad)
+                                .font(.subheadline)
+                                .padding(12)
+                                .background(Color(.secondarySystemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .focused($focusedField, equals: .price)
+                                .onChange(of: priceText) { _, newValue in
+                                    formatPriceInput(newValue)
+                                }
+                        }
                     }
                     .padding(.horizontal)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("단가")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-
-                        TextField("₩ 0", text: $priceText)
-                            .keyboardType(.numberPad)
-                            .font(.title3)
-                            .padding()
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .focused($focusedField, equals: .price)
-                            .onChange(of: priceText) { _, newValue in
-                                formatPriceInput(newValue)
-                            }
-                            .textContentType(.none)
-                    }
-                    .padding(.horizontal)
-
-                    VStack(alignment: .leading, spacing: 8) {
+                    // 총액
+                    HStack {
                         Text("총액")
-                            .font(.subheadline)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
-
+                        Spacer()
                         Text(formattedTotalAmount)
-                            .font(.title2)
-                            .fontWeight(.bold)
+                            .font(.headline)
                             .foregroundColor(tradeType == .buy ? .green : .red)
-                            .padding()
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .padding(.horizontal)
 
-                    VStack(alignment: .leading, spacing: 8) {
+                    // 매도 시에만 실현손익 입력 표시
+                    if tradeType == .sell {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("실현손익")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            HStack(spacing: 8) {
+                                Picker("", selection: $isProfit) {
+                                    Text("수익").tag(true)
+                                    Text("손실").tag(false)
+                                }
+                                .pickerStyle(.segmented)
+                                .frame(width: 100)
+
+                                TextField("0", text: $realizedProfitText)
+                                    .keyboardType(.numberPad)
+                                    .font(.subheadline)
+                                    .padding(12)
+                                    .background(Color(.secondarySystemBackground))
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    .focused($focusedField, equals: .realizedProfit)
+                                    .onChange(of: realizedProfitText) { _, newValue in
+                                        formatRealizedProfitInput(newValue)
+                                    }
+
+                                Text(formattedProfitRate)
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 4)
+                                    .background((calculatedRealizedProfit >= 0 ? Color.green : Color.red).opacity(0.15))
+                                    .foregroundColor(calculatedRealizedProfit >= 0 ? .green : .red)
+                                    .cornerRadius(4)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+
+                    // 매매 이유
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("매매 이유 (선택)")
-                            .font(.subheadline)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        TextEditor(text: $reason)
-                            .frame(height: 100)
-                            .padding(8)
+                        TextField("간단한 메모", text: $reason, axis: .vertical)
+                            .lineLimit(2...4)
+                            .font(.subheadline)
+                            .padding(12)
                             .background(Color(.secondarySystemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                             .focused($focusedField, equals: .reason)
-                            .scrollContentBackground(.hidden)
                     }
                     .padding(.horizontal)
 
@@ -197,38 +208,37 @@ struct AddTradingJournalView: View {
                             .padding(.horizontal)
                     }
                 }
-                .padding(.top)
-                .padding(.bottom, 140)
+                .padding(.top, 12)
+                .padding(.bottom, 100)
             }
             .contentShape(Rectangle())
             .onTapGesture {
                 focusedField = nil
             }
             .safeAreaInset(edge: .bottom) {
-                VStack(spacing: 12) {
-                    // 저장 버튼: 항상 표시
+                VStack(spacing: 8) {
                     Button {
                         saveJournal()
                     } label: {
                         Text("저장")
-                            .font(.headline)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 50)
+                            .frame(height: 44)
                             .background(isValidInput ? Color.accentColor : Color.gray)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                     .disabled(!isValidInput)
 
-                    // 완료 버튼: 포커스 시에만 표시
                     if focusedField != nil {
                         Button {
                             focusedField = nil
                         } label: {
                             Text("완료")
-                                .font(.headline)
+                                .font(.subheadline)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 50)
+                                .frame(height: 36)
                         }
                     }
                 }
@@ -261,6 +271,11 @@ struct AddTradingJournalView: View {
                     quantityText = "\(journal.quantity)"
                     priceText = journal.price.formattedWithoutSymbol
                     reason = journal.reason
+                    // 실현손익 로드 (매도인 경우)
+                    if journal.tradeType == .sell {
+                        isProfit = journal.realizedProfit >= 0
+                        realizedProfitText = abs(journal.realizedProfit).formattedWithoutSymbol
+                    }
                 }
             }
         }
@@ -298,9 +313,40 @@ struct AddTradingJournalView: View {
         }
     }
 
+    private func formatRealizedProfitInput(_ value: String) {
+        let filtered = value.filter { $0.isNumber }
+        if let number = Double(filtered) {
+            realizedProfitText = number.formattedWithoutSymbol
+        } else if filtered.isEmpty {
+            realizedProfitText = ""
+        }
+    }
+
+    private var calculatedRealizedProfit: Double {
+        let amount = Double(realizedProfitText.replacingOccurrences(of: ",", with: "")) ?? 0
+        return isProfit ? amount : -amount
+    }
+
+    private var calculatedProfitRate: Double {
+        let quantity = Int(quantityText) ?? 0
+        let price = Double(priceText.replacingOccurrences(of: ",", with: "")) ?? 0
+        let sellAmount = Double(quantity) * price
+        let profit = calculatedRealizedProfit
+        let investedAmount = sellAmount - profit
+        guard investedAmount > 0 else { return 0 }
+        return (profit / investedAmount) * 100
+    }
+
+    private var formattedProfitRate: String {
+        let rate = calculatedProfitRate
+        let sign = rate >= 0 ? "+" : ""
+        return sign + String(format: "%.1f", rate) + "%"
+    }
+
     private func saveJournal() {
         let quantity = Int(quantityText) ?? 0
         let price = Double(priceText.replacingOccurrences(of: ",", with: "")) ?? 0
+        let realizedProfit = tradeType == .sell ? calculatedRealizedProfit : 0
 
         if let journal = editingJournal {
             viewModel.updateJournal(
@@ -310,6 +356,7 @@ struct AddTradingJournalView: View {
                 stockName: stockName.trimmingCharacters(in: .whitespaces),
                 quantity: quantity,
                 price: price,
+                realizedProfit: realizedProfit,
                 reason: reason.trimmingCharacters(in: .whitespacesAndNewlines)
             )
         } else {
@@ -319,6 +366,7 @@ struct AddTradingJournalView: View {
                 stockName: stockName.trimmingCharacters(in: .whitespaces),
                 quantity: quantity,
                 price: price,
+                realizedProfit: realizedProfit,
                 reason: reason.trimmingCharacters(in: .whitespacesAndNewlines)
             )
         }

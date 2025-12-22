@@ -5,10 +5,12 @@ final class TradingJournalViewModel: ObservableObject {
 
     @Published private(set) var journals: [TradingJournalEntity] = []
     @Published private(set) var portfolioStocks: [String] = []
+    @Published private(set) var allStockNames: [String] = []
     @Published var filterType: FilterType = .all
     @Published var selectedDate: Date = Date()
     @Published var selectedMonth: Date = Date()
     @Published var selectedYear: Int = Calendar.current.component(.year, from: Date())
+    @Published var selectedStockName: String = ""
 
     private let repository: TradingJournalRepositoryProtocol
     private let stockRepository: StockRepositoryProtocol
@@ -29,15 +31,24 @@ final class TradingJournalViewModel: ObservableObject {
     var totalRealizedProfit: Double {
         let sellJournals = journals.filter { $0.tradeType == .sell }
         return sellJournals.reduce(0) { total, journal in
-            total + journal.totalAmount
+            total + journal.realizedProfit
         }
+    }
+
+    var totalProfitRate: Double {
+        let sellJournals = journals.filter { $0.tradeType == .sell }
+        let totalSellAmount = sellJournals.reduce(0) { $0 + $1.totalAmount }
+        let totalProfit = totalRealizedProfit
+        let totalInvested = totalSellAmount - totalProfit
+        guard totalInvested > 0 else { return 0 }
+        return (totalProfit / totalInvested) * 100
     }
 
     var winRate: Double {
         let sellJournals = journals.filter { $0.tradeType == .sell }
         guard !sellJournals.isEmpty else { return 0 }
 
-        let winCount = sellJournals.filter { $0.totalAmount > 0 }.count
+        let winCount = sellJournals.filter { $0.realizedProfit > 0 }.count
         return (Double(winCount) / Double(sellJournals.count)) * 100
     }
 
@@ -53,6 +64,12 @@ final class TradingJournalViewModel: ObservableObject {
 
     func fetchJournals() {
         journals = repository.fetchAll()
+        updateAllStockNames(from: journals)
+    }
+
+    private func updateAllStockNames(from journalList: [TradingJournalEntity]) {
+        let names = journalList.map { $0.stockName }
+        allStockNames = Array(Set(names)).sorted()
     }
 
     func fetchPortfolioStocks() {
@@ -74,6 +91,7 @@ final class TradingJournalViewModel: ObservableObject {
         stockName: String,
         quantity: Int,
         price: Double,
+        realizedProfit: Double = 0,
         reason: String
     ) {
         let journal = TradingJournalEntity(
@@ -82,6 +100,7 @@ final class TradingJournalViewModel: ObservableObject {
             stockName: stockName,
             quantity: quantity,
             price: price,
+            realizedProfit: realizedProfit,
             reason: reason
         )
 
@@ -100,6 +119,7 @@ final class TradingJournalViewModel: ObservableObject {
         stockName: String,
         quantity: Int,
         price: Double,
+        realizedProfit: Double = 0,
         reason: String
     ) {
         var updatedJournal = journal
@@ -108,6 +128,7 @@ final class TradingJournalViewModel: ObservableObject {
         updatedJournal.stockName = stockName
         updatedJournal.quantity = quantity
         updatedJournal.price = price
+        updatedJournal.realizedProfit = realizedProfit
         updatedJournal.reason = reason
         updatedJournal.updatedAt = Date()
 
@@ -140,11 +161,13 @@ final class TradingJournalViewModel: ObservableObject {
     }
 
     func applyFilter() {
+        var result: [TradingJournalEntity]
+
         switch filterType {
         case .all:
-            journals = repository.fetchAll()
+            result = repository.fetchAll()
         case .daily:
-            journals = repository.fetchByDate(selectedDate)
+            result = repository.fetchByDate(selectedDate)
         case .monthly:
             let calendar = Calendar.current
             let components = calendar.dateComponents([.year, .month], from: selectedMonth)
@@ -152,9 +175,21 @@ final class TradingJournalViewModel: ObservableObject {
                 journals = []
                 return
             }
-            journals = repository.fetchByMonth(year: year, month: month)
+            result = repository.fetchByMonth(year: year, month: month)
         case .yearly:
-            journals = repository.fetchByYear(selectedYear)
+            result = repository.fetchByYear(selectedYear)
         }
+
+        // 종목 필터 적용
+        if !selectedStockName.isEmpty {
+            result = result.filter { $0.stockName == selectedStockName }
+        }
+
+        journals = result
+    }
+
+    func clearStockFilter() {
+        selectedStockName = ""
+        applyFilter()
     }
 }

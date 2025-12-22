@@ -47,6 +47,7 @@ final class CoreDataTradingJournalRepository: TradingJournalRepositoryProtocol {
         managedObject.stockName = journal.stockName
         managedObject.quantity = Int32(journal.quantity)
         managedObject.price = journal.price
+        managedObject.realizedProfit = journal.realizedProfit
         managedObject.reason = journal.reason
         managedObject.createdAt = journal.createdAt
         managedObject.updatedAt = journal.updatedAt
@@ -68,6 +69,7 @@ final class CoreDataTradingJournalRepository: TradingJournalRepositoryProtocol {
         managedObject.stockName = journal.stockName
         managedObject.quantity = Int32(journal.quantity)
         managedObject.price = journal.price
+        managedObject.realizedProfit = journal.realizedProfit
         managedObject.reason = journal.reason
         managedObject.updatedAt = Date()
 
