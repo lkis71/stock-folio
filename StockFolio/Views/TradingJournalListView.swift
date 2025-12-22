@@ -15,6 +15,9 @@ struct TradingJournalListView: View {
                     journalListView
                 }
             }
+            .onAppear {
+                print("📊 [TradingJournalListView] journals.count: \(viewModel.journals.count), totalCount: \(viewModel.totalTradeCount), hasMore: \(viewModel.hasMore)")
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {

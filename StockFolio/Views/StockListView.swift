@@ -18,6 +18,9 @@ struct StockListView: View {
                 stockListContent
             }
         }
+        .onAppear {
+            print("📊 [StockListView] holdings.count: \(viewModel.holdings.count), totalCount: \(viewModel.totalCount), hasMore: \(viewModel.hasMore)")
+        }
     }
 
     // MARK: - Section Header
