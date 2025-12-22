@@ -122,6 +122,26 @@ struct StockListView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                 }
+
+                // 접기 버튼
+                if !viewModel.hasMore && viewModel.holdings.count > 10 {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.collapseToInitial()
+                        }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("↑ 접기")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                            Spacer()
+                        }
+                    }
+                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
             }
             .listStyle(.plain)
             .scrollDisabled(true)

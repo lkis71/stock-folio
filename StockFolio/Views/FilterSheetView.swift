@@ -11,7 +11,7 @@ struct FilterSheetView: View {
     @State private var tempSelectedStockName: String
     @State private var isStockSectionExpanded: Bool = false
 
-    private let defaultStockVisibleCount = 5
+    private let defaultStockVisibleCount = 10
 
     init(viewModel: TradingJournalViewModel) {
         self.viewModel = viewModel

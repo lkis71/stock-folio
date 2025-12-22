@@ -111,6 +111,16 @@ final class PortfolioViewModel: ObservableObject {
         isLoading = false
     }
 
+    func collapseToInitial() {
+        guard holdings.count > pageSize else { return }
+
+        holdings = Array(holdings.prefix(pageSize))
+        currentOffset = pageSize
+        hasMore = totalCount > pageSize
+
+        Logger.info("[Portfolio] collapseToInitial - Collapsed to \(pageSize) items")
+    }
+
     // MARK: - Stock CRUD Operations
 
     func addStock(name: String, amount: Double, colorName: String = StockColor.random.rawValue) {

@@ -142,6 +142,16 @@ final class TradingJournalViewModel: ObservableObject {
         isLoading = false
     }
 
+    func collapseToInitial() {
+        guard journals.count > pageSize else { return }
+
+        journals = Array(journals.prefix(pageSize))
+        currentOffset = pageSize
+        hasMore = totalTradeCount > pageSize
+
+        Logger.info("[TradingJournal] collapseToInitial - Collapsed to \(pageSize) items")
+    }
+
     private func updateAllStockNames() {
         // 전체 종목 목록은 필터와 무관하게 가져오기
         let allJournals = repository.fetchAll()

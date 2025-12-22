@@ -115,6 +115,23 @@ struct TradingJournalListView: View {
                         }
                     }
                 }
+
+                // 접기 버튼
+                if !viewModel.hasMore && viewModel.journals.count > 10 {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.collapseToInitial()
+                        }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("↑ 접기")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
+                    }
+                }
             }
         }
     }
