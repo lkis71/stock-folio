@@ -8,19 +8,29 @@ final class PortfolioViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published private(set) var holdings: [StockHoldingEntity] = []
     @Published private(set) var seedMoney: Double = 0
+    @Published private(set) var isLoading: Bool = false
+    @Published private(set) var hasMore: Bool = false
 
     // MARK: - Dependencies (DIP - 프로토콜에 의존)
     private let repository: StockRepositoryProtocol
     private let seedMoneyStorage: SeedMoneyStorageProtocol
     private let validator: InputValidatorProtocol
 
+    // MARK: - Pagination
+    private var currentOffset = 0
+    private let pageSize = 6
+
     // MARK: - Computed Properties (Portfolio 계산 위임)
     private var portfolio: Portfolio {
         Portfolio(holdings: holdings, seedMoney: seedMoney)
     }
 
+    var totalCount: Int {
+        repository.fetchTotalCount()
+    }
+
     var totalInvestedAmount: Double {
-        portfolio.totalInvestedAmount
+        repository.fetchTotalInvestedAmount()
     }
 
     var remainingCash: Double {
@@ -63,10 +73,39 @@ final class PortfolioViewModel: ObservableObject {
         seedMoney = amount
     }
 
-    // MARK: - Stock CRUD Operations
-    func fetchHoldings() {
-        holdings = repository.fetchAll()
+    // MARK: - Data Loading
+    private func loadInitialData() {
+        currentOffset = 0
+        holdings = []
+
+        let pagination = PaginationRequest(limit: pageSize, offset: currentOffset)
+        let result = repository.fetch(pagination: pagination)
+
+        holdings = result.items
+        hasMore = result.hasMore
+        currentOffset = result.items.count
     }
+
+    func fetchHoldings() {
+        loadInitialData()
+    }
+
+    func fetchMore() {
+        guard !isLoading && hasMore else { return }
+
+        isLoading = true
+
+        let pagination = PaginationRequest(limit: pageSize, offset: currentOffset)
+        let result = repository.fetch(pagination: pagination)
+
+        holdings.append(contentsOf: result.items)
+        hasMore = result.hasMore
+        currentOffset += result.items.count
+
+        isLoading = false
+    }
+
+    // MARK: - Stock CRUD Operations
 
     func addStock(name: String, amount: Double, colorName: String = StockColor.random.rawValue) {
         // 입력 검증

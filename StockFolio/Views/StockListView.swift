@@ -5,9 +5,6 @@ import SwiftUI
 struct StockListView: View {
     @ObservedObject var viewModel: PortfolioViewModel
     @State private var selectedStock: StockHoldingEntity?
-    @State private var displayCount = 6
-
-    private let pageSize = 6
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -21,19 +18,13 @@ struct StockListView: View {
                 stockListContent
             }
         }
-        .onChange(of: viewModel.holdings.count) { _, newCount in
-            // holdings가 바뀌면 displayCount 조정
-            if newCount < displayCount {
-                displayCount = max(pageSize, newCount)
-            }
-        }
     }
 
     // MARK: - Section Header
     private var sectionHeader: some View {
         HStack {
-            if viewModel.holdings.count > pageSize {
-                Text("보유 종목 (\(displayCount)/\(viewModel.holdings.count))")
+            if viewModel.totalCount > 6 {
+                Text("보유 종목 (\(viewModel.holdings.count)/\(viewModel.totalCount))")
                     .font(.subheadline)
                     .fontWeight(.semibold)
             } else {
@@ -47,22 +38,9 @@ struct StockListView: View {
     }
 
     /// 비중 기준 내림차순 정렬된 종목 목록
-    private var sortedHoldings: [StockHoldingEntity] {
-        viewModel.holdings.sorted { viewModel.percentage(for: $0) > viewModel.percentage(for: $1) }
-    }
-
-    /// 표시할 종목 목록 (비중 기준 내림차순 정렬)
-    private var displayedHoldings: [(offset: Int, element: StockHoldingEntity)] {
-        let holdings = Array(sortedHoldings.enumerated())
-        return Array(holdings.prefix(displayCount))
-    }
-
-    private var hasMoreItems: Bool {
-        displayCount < viewModel.holdings.count
-    }
-
-    private func loadMore() {
-        displayCount = min(displayCount + pageSize, viewModel.holdings.count)
+    private var sortedHoldings: [(offset: Int, element: StockHoldingEntity)] {
+        let sorted = viewModel.holdings.sorted { viewModel.percentage(for: $0) > viewModel.percentage(for: $1) }
+        return Array(sorted.enumerated())
     }
 
     // MARK: - Empty State
@@ -85,7 +63,7 @@ struct StockListView: View {
         VStack(spacing: 0) {
             // List를 사용하여 swipeActions 활성화
             List {
-                ForEach(displayedHoldings, id: \.element.id) { index, holding in
+                ForEach(sortedHoldings, id: \.element.id) { index, holding in
                     StockRowView(
                         holding: holding,
                         percentage: viewModel.percentage(for: holding),
@@ -112,24 +90,32 @@ struct StockListView: View {
                     .accessibilityHint("탭하여 편집, 스와이프하여 삭제")
                     .onAppear {
                         // 마지막 항목이 나타나면 더 로드
-                        if holding.id == displayedHoldings.last?.element.id && hasMoreItems {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                loadMore()
-                            }
+                        if holding.id == sortedHoldings.last?.element.id && viewModel.hasMore {
+                            viewModel.fetchMore()
                         }
                     }
                 }
 
+                // 로딩 인디케이터
+                if viewModel.isLoading {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
+                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+
                 // 더보기 버튼
-                if hasMoreItems {
+                if viewModel.hasMore && !viewModel.isLoading {
                     Button {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            loadMore()
-                        }
+                        viewModel.fetchMore()
                     } label: {
                         HStack {
                             Spacer()
-                            Text("↓ \(viewModel.holdings.count - displayCount)개 더보기")
+                            Text("↓ 더보기")
                                 .font(.caption)
                                 .foregroundStyle(.tertiary)
                             Spacer()
@@ -144,7 +130,6 @@ struct StockListView: View {
             .scrollDisabled(true)
             .frame(height: calculateListHeight())
             .animation(.easeInOut(duration: 0.3), value: viewModel.holdings)
-            .animation(.easeInOut(duration: 0.3), value: displayCount)
         }
         .sheet(item: $selectedStock) { stock in
             AddStockView(viewModel: viewModel, editingStock: stock)
@@ -154,8 +139,9 @@ struct StockListView: View {
     /// List 높이 계산 (각 행 약 52pt + 상하 패딩 + 더보기 버튼)
     private func calculateListHeight() -> CGFloat {
         let rowHeight: CGFloat = 60
-        let buttonHeight: CGFloat = hasMoreItems ? 44 : 0
-        return CGFloat(min(displayCount, viewModel.holdings.count)) * rowHeight + buttonHeight
+        let loadingHeight: CGFloat = viewModel.isLoading ? 44 : 0
+        let buttonHeight: CGFloat = (viewModel.hasMore && !viewModel.isLoading) ? 44 : 0
+        return CGFloat(viewModel.holdings.count) * rowHeight + loadingHeight + buttonHeight
     }
 
 }

@@ -5,9 +5,6 @@ struct TradingJournalListView: View {
     @State private var showingAddJournal = false
     @State private var selectedJournal: TradingJournalEntity?
     @State private var showingFilterSheet = false
-    @State private var displayCount = 10
-
-    private let pageSize = 10
 
     var body: some View {
         NavigationView {
@@ -49,23 +46,7 @@ struct TradingJournalListView: View {
             .sheet(isPresented: $showingFilterSheet) {
                 FilterSheetView(viewModel: viewModel)
             }
-            .onChange(of: viewModel.journals.count) { _, _ in
-                // 필터 변경 등으로 journals가 바뀌면 displayCount 초기화
-                displayCount = pageSize
-            }
         }
-    }
-
-    private var displayedJournals: [TradingJournalEntity] {
-        Array(viewModel.journals.prefix(displayCount))
-    }
-
-    private var hasMoreItems: Bool {
-        displayCount < viewModel.journals.count
-    }
-
-    private func loadMore() {
-        displayCount = min(displayCount + pageSize, viewModel.journals.count)
     }
 
     private var emptyStateView: some View {
@@ -91,7 +72,7 @@ struct TradingJournalListView: View {
             }
 
             Section(header: sectionHeader) {
-                ForEach(displayedJournals) { journal in
+                ForEach(viewModel.journals) { journal in
                     TradingJournalCardView(journal: journal)
                         .contentShape(Rectangle())
                         .onTapGesture {
@@ -108,24 +89,29 @@ struct TradingJournalListView: View {
                         }
                         .onAppear {
                             // 마지막 항목이 나타나면 더 로드
-                            if journal.id == displayedJournals.last?.id && hasMoreItems {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    loadMore()
-                                }
+                            if journal.id == viewModel.journals.last?.id && viewModel.hasMore {
+                                viewModel.fetchMore()
                             }
                         }
                 }
 
+                // 로딩 인디케이터
+                if viewModel.isLoading {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
+                }
+
                 // 더보기 버튼 (수동 로드 옵션)
-                if hasMoreItems {
+                if viewModel.hasMore && !viewModel.isLoading {
                     Button {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            loadMore()
-                        }
+                        viewModel.fetchMore()
                     } label: {
                         HStack {
                             Spacer()
-                            Text("↓ \(viewModel.journals.count - displayCount)개 더보기")
+                            Text("↓ 더보기")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                             Spacer()
@@ -138,8 +124,8 @@ struct TradingJournalListView: View {
 
     private var sectionHeader: some View {
         HStack {
-            if viewModel.journals.count > pageSize {
-                Text("매매 기록 (\(displayedJournals.count)/\(viewModel.journals.count))")
+            if viewModel.totalTradeCount > 20 {
+                Text("매매 기록 (\(viewModel.journals.count)/\(viewModel.totalTradeCount))")
             } else {
                 Text("매매 기록")
             }
