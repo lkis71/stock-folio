@@ -18,7 +18,7 @@ final class TradingJournalViewModel: ObservableObject {
 
     private let repository: TradingJournalRepositoryProtocol
     private let stockRepository: StockRepositoryProtocol
-    private let pageSize = 20
+    private let pageSize = 10
     private var currentOffset = 0
 
     // Computed properties - 통계 위임
@@ -98,6 +98,8 @@ final class TradingJournalViewModel: ObservableObject {
         let pagination = PaginationRequest(limit: pageSize, offset: currentOffset)
         let result = repository.fetch(pagination: pagination, filter: currentFilter)
 
+        Logger.info("[TradingJournal] loadInitialData - Requested: \(pageSize), Loaded: \(result.items.count), Total: \(result.totalCount), HasMore: \(result.hasMore)")
+
         journals = result.items
         hasMore = result.hasMore
         currentOffset = result.items.count
@@ -121,12 +123,17 @@ final class TradingJournalViewModel: ObservableObject {
     }
 
     func fetchMore() {
-        guard !isLoading && hasMore else { return }
+        guard !isLoading && hasMore else {
+            Logger.info("[TradingJournal] fetchMore - Skipped (isLoading: \(isLoading), hasMore: \(hasMore))")
+            return
+        }
 
         isLoading = true
 
         let pagination = PaginationRequest(limit: pageSize, offset: currentOffset)
         let result = repository.fetch(pagination: pagination, filter: currentFilter)
+
+        Logger.info("[TradingJournal] fetchMore - Requested: \(pageSize), Offset: \(currentOffset), Loaded: \(result.items.count), HasMore: \(result.hasMore)")
 
         journals.append(contentsOf: result.items)
         hasMore = result.hasMore

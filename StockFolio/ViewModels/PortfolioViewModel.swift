@@ -80,6 +80,8 @@ final class PortfolioViewModel: ObservableObject {
         let pagination = PaginationRequest(limit: pageSize, offset: currentOffset)
         let result = repository.fetch(pagination: pagination)
 
+        Logger.info("[Portfolio] loadInitialData - Requested: \(pageSize), Loaded: \(result.items.count), Total: \(result.totalCount), HasMore: \(result.hasMore)")
+
         holdings = result.items
         hasMore = result.hasMore
         currentOffset = result.items.count
@@ -90,12 +92,17 @@ final class PortfolioViewModel: ObservableObject {
     }
 
     func fetchMore() {
-        guard !isLoading && hasMore else { return }
+        guard !isLoading && hasMore else {
+            Logger.info("[Portfolio] fetchMore - Skipped (isLoading: \(isLoading), hasMore: \(hasMore))")
+            return
+        }
 
         isLoading = true
 
         let pagination = PaginationRequest(limit: pageSize, offset: currentOffset)
         let result = repository.fetch(pagination: pagination)
+
+        Logger.info("[Portfolio] fetchMore - Requested: \(pageSize), Offset: \(currentOffset), Loaded: \(result.items.count), HasMore: \(result.hasMore)")
 
         holdings.append(contentsOf: result.items)
         hasMore = result.hasMore
