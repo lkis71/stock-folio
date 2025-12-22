@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -25,6 +25,7 @@
 		6B60830F2F2BE42731212A21 /* StockRepositoryProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 019E03798673FBAC33BC3774 /* StockRepositoryProtocol.swift */; };
 		6B9CF098CFE58264BD7B191B /* StockInputValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3360FE42EB5F827C16CE8C2 /* StockInputValidator.swift */; };
 		6E37CB233CA095CA4D971871 /* MockStockRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B6B86B194DFC0C93E7F79FB /* MockStockRepository.swift */; };
+		6E38FB46803CB5636681A7DC /* TradingJournalPortfolioStockSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BFC28E1424DED079B1F03E8 /* TradingJournalPortfolioStockSelectionTests.swift */; };
 		71A77030AC537EA566FE1C08 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5BBAC83E41A374982311886 /* Logger.swift */; };
 		74C60D10E9E3F06EE69053E8 /* Portfolio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B0E054F5B4F42F8B4045A61 /* Portfolio.swift */; };
 		769F48CBBD3358750D71823A /* CoreDataStockRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = B158C559CBD0A56DE691AF1C /* CoreDataStockRepository.swift */; };
@@ -76,7 +77,7 @@
 		0B4AA7DF51BB58F775BD88B2 /* SeedMoneyStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedMoneyStorage.swift; sourceTree = "<group>"; };
 		0FC16F1BF608633BF640E449 /* PortfolioChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioChartView.swift; sourceTree = "<group>"; };
 		1366FBF80D4223BCC0E84B37 /* CurrencyFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatter.swift; sourceTree = "<group>"; };
-		15CA99EA741812D574BECF28 /* StockFolio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StockFolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		15CA99EA741812D574BECF28 /* StockFolio.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = StockFolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19A422537B5C2F498E8B9618 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		1CB853656FBAB45896A2396D /* StockFolioUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockFolioUITests.swift; sourceTree = "<group>"; };
 		1F1911ABB96CB7C0C4B564F1 /* TradingJournalFilteringTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingJournalFilteringTests.swift; sourceTree = "<group>"; };
@@ -97,6 +98,7 @@
 		72CF46F4B36059BC4A020B4F /* AddStockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStockView.swift; sourceTree = "<group>"; };
 		73D5370E7FF55371C708C25C /* PortfolioViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortfolioViewModelTests.swift; sourceTree = "<group>"; };
 		7B471012F1D5882BF911AB32 /* StockFolioTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = StockFolioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		7BFC28E1424DED079B1F03E8 /* TradingJournalPortfolioStockSelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TradingJournalPortfolioStockSelectionTests.swift; sourceTree = "<group>"; };
 		8CBE976689C431B385673077 /* CurrencyFormatterProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrencyFormatterProtocol.swift; sourceTree = "<group>"; };
 		9040DE3E955216131C593DC6 /* CoreDataTradingJournalRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataTradingJournalRepository.swift; sourceTree = "<group>"; };
 		9B6B86B194DFC0C93E7F79FB /* MockStockRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStockRepository.swift; sourceTree = "<group>"; };
@@ -256,6 +258,7 @@
 				73D5370E7FF55371C708C25C /* PortfolioViewModelTests.swift */,
 				F00BAC289F2858D0C5EF5858 /* TradingJournalEntityTests.swift */,
 				1F1911ABB96CB7C0C4B564F1 /* TradingJournalFilteringTests.swift */,
+				7BFC28E1424DED079B1F03E8 /* TradingJournalPortfolioStockSelectionTests.swift */,
 				7072E454C21083A4299606E2 /* TradingJournalViewModelTests.swift */,
 			);
 			path = StockFolioTests;
@@ -350,6 +353,7 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					3B1B049B8FA8184AABFECCCE = {
+						DevelopmentTeam = "";
 						ProvisioningStyle = Automatic;
 					};
 					BCC61ADDFEA8855A035668CF = {
@@ -373,6 +377,7 @@
 			);
 			mainGroup = 151A0376B03AC1C549FC3655;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -453,6 +458,7 @@
 				81278FC16D39B02504C03B7D /* PortfolioViewModelTests.swift in Sources */,
 				A7B70D32E95E0AB08D862467 /* TradingJournalEntityTests.swift in Sources */,
 				B35E28749F0E2AA8126B9386 /* TradingJournalFilteringTests.swift in Sources */,
+				6E38FB46803CB5636681A7DC /* TradingJournalPortfolioStockSelectionTests.swift in Sources */,
 				3C535657D6DDECC49AFB5192 /* TradingJournalViewModelTests.swift in Sources */,
 				55C4589558ECC2D053EC6059 /* ViewModelIntegrationTests.swift in Sources */,
 			);
@@ -479,7 +485,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = T2FH95PSY3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stock Portfolio";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -683,7 +688,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = T2FH95PSY3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "Stock Portfolio";
 				LD_RUNPATH_SEARCH_PATHS = (

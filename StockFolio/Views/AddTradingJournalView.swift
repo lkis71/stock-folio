@@ -58,14 +58,66 @@ struct AddTradingJournalView: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
 
-                        TextField("예: 삼성전자", text: $stockName)
-                            .font(.title3)
-                            .padding()
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .focused($focusedField, equals: .stockName)
-                            .textContentType(.none)
-                            .autocorrectionDisabled()
+                        if viewModel.portfolioStocks.isEmpty {
+                            // 빈 포트폴리오 처리
+                            VStack(alignment: .leading, spacing: 12) {
+                                Menu {
+                                    Text("등록된 종목 없음")
+                                } label: {
+                                    HStack {
+                                        Text("종목 선택")
+                                            .foregroundColor(.secondary)
+                                        Spacer()
+                                        Image(systemName: "chevron.down")
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .font(.title3)
+                                    .padding()
+                                    .background(Color(.secondarySystemBackground))
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+                                .disabled(true)
+
+                                HStack(spacing: 8) {
+                                    Image(systemName: "info.circle")
+                                        .foregroundColor(.blue)
+                                    Text("포트폴리오에 종목을 먼저 등록하세요")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        } else {
+                            // 정상 동작: Menu로 종목 선택
+                            Menu {
+                                ForEach(viewModel.portfolioStocks, id: \.self) { stock in
+                                    Button {
+                                        stockName = stock
+                                    } label: {
+                                        HStack {
+                                            Text(stock)
+                                            if stockName == stock {
+                                                Spacer()
+                                                Image(systemName: "checkmark")
+                                            }
+                                        }
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Text(stockName.isEmpty ? "종목 선택" : stockName)
+                                        .foregroundColor(stockName.isEmpty ? .secondary : .primary)
+                                    Spacer()
+                                    Image(systemName: "chevron.down")
+                                        .foregroundColor(.secondary)
+                                }
+                                .font(.title3)
+                                .padding()
+                                .background(Color(.secondarySystemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                            .accessibilityLabel(stockName.isEmpty ? "종목 선택" : "선택된 종목: \(stockName)")
+                            .accessibilityHint("탭하여 포트폴리오 종목 선택")
+                        }
                     }
                     .padding(.horizontal)
 

@@ -4,12 +4,14 @@ import SwiftUI
 final class TradingJournalViewModel: ObservableObject {
 
     @Published private(set) var journals: [TradingJournalEntity] = []
+    @Published private(set) var portfolioStocks: [String] = []
     @Published var filterType: FilterType = .all
     @Published var selectedDate: Date = Date()
     @Published var selectedMonth: Date = Date()
     @Published var selectedYear: Int = Calendar.current.component(.year, from: Date())
 
     private let repository: TradingJournalRepositoryProtocol
+    private let stockRepository: StockRepositoryProtocol
     private let pageSize = 20
 
     var totalTradeCount: Int {
@@ -39,13 +41,26 @@ final class TradingJournalViewModel: ObservableObject {
         return (Double(winCount) / Double(sellJournals.count)) * 100
     }
 
-    init(repository: TradingJournalRepositoryProtocol = CoreDataTradingJournalRepository()) {
+    init(
+        repository: TradingJournalRepositoryProtocol = CoreDataTradingJournalRepository(),
+        stockRepository: StockRepositoryProtocol = CoreDataStockRepository()
+    ) {
         self.repository = repository
+        self.stockRepository = stockRepository
         fetchJournals()
+        fetchPortfolioStocks()
     }
 
     func fetchJournals() {
         journals = repository.fetchAll()
+    }
+
+    func fetchPortfolioStocks() {
+        let holdings = stockRepository.fetchAll()
+        let stockNames = holdings
+            .map { $0.stockName }
+            .filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+        portfolioStocks = Array(Set(stockNames)).sorted()
     }
 
     func fetchMore(offset: Int) {
@@ -121,6 +136,7 @@ final class TradingJournalViewModel: ObservableObject {
 
     func refresh() {
         fetchJournals()
+        fetchPortfolioStocks()
     }
 
     func applyFilter() {
