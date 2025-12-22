@@ -7,6 +7,13 @@ protocol StockRepositoryProtocol {
     func save(_ stock: StockHoldingEntity) throws
     func update(_ stock: StockHoldingEntity) throws
     func delete(_ stock: StockHoldingEntity) throws
+
+    // Pagination
+    func fetch(pagination: PaginationRequest) -> PaginationResult<StockHoldingEntity>
+
+    // Statistics
+    func fetchTotalCount() -> Int
+    func fetchTotalInvestedAmount() -> Double
 }
 
 /// 시드머니 저장소 프로토콜 (SRP - 단일 책임 원칙)

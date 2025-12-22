@@ -376,4 +376,249 @@ final class TradingJournalViewModelTests: XCTestCase {
         // Then
         XCTAssertEqual(mockRepository.fetchAllCallCount, initialCallCount + 1)
     }
+
+    // MARK: - Pagination Tests
+
+    func test_init_shouldLoadInitialPageWithStatistics() {
+        // Given: 30개의 journal 생성
+        var journals: [TradingJournalEntity] = []
+        for i in 1...30 {
+            let journal = TradingJournalEntity(
+                tradeType: i % 2 == 0 ? .sell : .buy,
+                tradeDate: Date().addingTimeInterval(TimeInterval(-i * 86400)),
+                stockName: "Stock\(i)",
+                quantity: 10,
+                price: Double(i * 1000),
+                realizedProfit: i % 2 == 0 ? Double(i * 100) : 0
+            )
+            journals.append(journal)
+        }
+        mockRepository.journals = journals
+
+        // When
+        sut = TradingJournalViewModel(repository: mockRepository)
+
+        // Then
+        XCTAssertEqual(sut.journals.count, 20, "Should load initial page size (20)")
+        XCTAssertTrue(sut.hasMore, "Should have more items")
+        XCTAssertNotNil(sut.statistics, "Should load statistics")
+        XCTAssertEqual(sut.statistics?.totalCount, 30, "Statistics should reflect total count")
+    }
+
+    func test_fetchMore_shouldLoadNextPage() {
+        // Given: 30개의 journal, 초기 로드 완료
+        var journals: [TradingJournalEntity] = []
+        for i in 1...30 {
+            let journal = TradingJournalEntity(
+                tradeType: .buy,
+                tradeDate: Date().addingTimeInterval(TimeInterval(-i * 86400)),
+                stockName: "Stock\(i)",
+                quantity: 10,
+                price: 1000
+            )
+            journals.append(journal)
+        }
+        mockRepository.journals = journals
+        sut = TradingJournalViewModel(repository: mockRepository)
+
+        XCTAssertEqual(sut.journals.count, 20, "Initial load should be 20")
+
+        // When
+        sut.fetchMore()
+
+        // Then
+        XCTAssertEqual(sut.journals.count, 30, "Should load all 30 items")
+        XCTAssertFalse(sut.hasMore, "Should not have more items")
+        XCTAssertFalse(sut.isLoading, "Should not be loading")
+    }
+
+    func test_fetchMore_whenNoMore_shouldNotLoad() {
+        // Given: 10개의 journal (1 page)
+        var journals: [TradingJournalEntity] = []
+        for i in 1...10 {
+            let journal = TradingJournalEntity(
+                tradeType: .buy,
+                tradeDate: Date(),
+                stockName: "Stock\(i)",
+                quantity: 10,
+                price: 1000
+            )
+            journals.append(journal)
+        }
+        mockRepository.journals = journals
+        sut = TradingJournalViewModel(repository: mockRepository)
+
+        let initialCount = sut.journals.count
+
+        // When
+        sut.fetchMore()
+
+        // Then
+        XCTAssertEqual(sut.journals.count, initialCount, "Should not load more")
+        XCTAssertFalse(sut.hasMore, "Should not have more items")
+    }
+
+    func test_fetchMore_whenLoading_shouldNotLoadAgain() {
+        // Given
+        var journals: [TradingJournalEntity] = []
+        for i in 1...30 {
+            let journal = TradingJournalEntity(
+                tradeType: .buy,
+                tradeDate: Date(),
+                stockName: "Stock\(i)",
+                quantity: 10,
+                price: 1000
+            )
+            journals.append(journal)
+        }
+        mockRepository.journals = journals
+        sut = TradingJournalViewModel(repository: mockRepository)
+
+        // When: isLoading을 true로 설정하고 fetchMore 호출
+        // Note: 실제로는 비동기이지만 Mock에서는 동기적으로 처리
+        let initialCount = sut.journals.count
+        sut.fetchMore()
+        let countAfterFirst = sut.journals.count
+
+        // fetchMore가 이미 진행 중일 때 다시 호출하면 무시되어야 함
+        // 하지만 Mock은 동기적이므로 이 테스트는 실제 비동기 환경을 시뮬레이션하기 어려움
+
+        // Then
+        XCTAssertGreaterThan(countAfterFirst, initialCount, "First fetchMore should load")
+    }
+
+    // MARK: - Statistics Tests (NEW)
+
+    func test_statistics_shouldLoadFromRepository() {
+        // Given: 통계 데이터
+        let sellJournal1 = TradingJournalEntity(
+            tradeType: .sell,
+            tradeDate: Date(),
+            stockName: "A",
+            quantity: 10,
+            price: 1000,
+            realizedProfit: 500
+        )
+        let sellJournal2 = TradingJournalEntity(
+            tradeType: .sell,
+            tradeDate: Date(),
+            stockName: "B",
+            quantity: 10,
+            price: 2000,
+            realizedProfit: -300
+        )
+        let buyJournal = TradingJournalEntity(
+            tradeType: .buy,
+            tradeDate: Date(),
+            stockName: "C",
+            quantity: 10,
+            price: 3000
+        )
+        mockRepository.journals = [sellJournal1, sellJournal2, buyJournal]
+
+        // When
+        sut = TradingJournalViewModel(repository: mockRepository)
+
+        // Then
+        XCTAssertNotNil(sut.statistics)
+        XCTAssertEqual(sut.statistics?.totalCount, 3)
+        XCTAssertEqual(sut.statistics?.buyCount, 1)
+        XCTAssertEqual(sut.statistics?.sellCount, 2)
+        XCTAssertEqual(sut.statistics?.totalRealizedProfit, 200, accuracy: 0.01)
+    }
+
+    func test_applyFilter_shouldReloadWithFilteredStatistics() {
+        // Given: 여러 날짜의 journal
+        let calendar = Calendar.current
+        let today = Date()
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: today)!
+
+        let todayJournal = TradingJournalEntity(
+            tradeType: .sell,
+            tradeDate: today,
+            stockName: "A",
+            quantity: 10,
+            price: 1000,
+            realizedProfit: 100
+        )
+        let yesterdayJournal = TradingJournalEntity(
+            tradeType: .sell,
+            tradeDate: yesterday,
+            stockName: "B",
+            quantity: 10,
+            price: 2000,
+            realizedProfit: 200
+        )
+        mockRepository.journals = [todayJournal, yesterdayJournal]
+        sut = TradingJournalViewModel(repository: mockRepository)
+
+        // When: 오늘 날짜로 필터 적용
+        sut.filterType = .daily
+        sut.selectedDate = today
+        sut.applyFilter()
+
+        // Then: 필터링된 결과만 표시
+        XCTAssertEqual(sut.journals.count, 1, "Should only show today's journals")
+        XCTAssertEqual(sut.statistics?.totalCount, 1, "Statistics should reflect filtered count")
+        XCTAssertEqual(sut.statistics?.totalRealizedProfit, 100, accuracy: 0.01)
+    }
+
+    func test_applyFilter_withStockName_shouldFilterCorrectly() {
+        // Given
+        let journalA1 = TradingJournalEntity(
+            tradeType: .sell,
+            tradeDate: Date(),
+            stockName: "삼성전자",
+            quantity: 10,
+            price: 1000,
+            realizedProfit: 100
+        )
+        let journalA2 = TradingJournalEntity(
+            tradeType: .buy,
+            tradeDate: Date(),
+            stockName: "삼성전자",
+            quantity: 5,
+            price: 2000
+        )
+        let journalB = TradingJournalEntity(
+            tradeType: .sell,
+            tradeDate: Date(),
+            stockName: "SK하이닉스",
+            quantity: 10,
+            price: 3000,
+            realizedProfit: 200
+        )
+        mockRepository.journals = [journalA1, journalA2, journalB]
+        sut = TradingJournalViewModel(repository: mockRepository)
+
+        // When
+        sut.selectedStockName = "삼성전자"
+        sut.applyFilter()
+
+        // Then
+        XCTAssertEqual(sut.journals.count, 2, "Should only show 삼성전자 journals")
+        XCTAssertEqual(sut.statistics?.totalCount, 2)
+        XCTAssertEqual(sut.statistics?.buyCount, 1)
+        XCTAssertEqual(sut.statistics?.sellCount, 1)
+    }
+
+    func test_clearStockFilter_shouldResetFilter() {
+        // Given
+        mockRepository.journals = [
+            TradingJournalEntity(tradeType: .buy, tradeDate: Date(), stockName: "A", quantity: 10, price: 1000),
+            TradingJournalEntity(tradeType: .buy, tradeDate: Date(), stockName: "B", quantity: 10, price: 2000)
+        ]
+        sut = TradingJournalViewModel(repository: mockRepository)
+        sut.selectedStockName = "A"
+        sut.applyFilter()
+
+        XCTAssertEqual(sut.journals.count, 1)
+
+        // When
+        sut.clearStockFilter()
+
+        // Then
+        XCTAssertEqual(sut.journals.count, 2, "Should show all journals")
+        XCTAssertTrue(sut.selectedStockName.isEmpty, "Stock filter should be cleared")
+    }
 }

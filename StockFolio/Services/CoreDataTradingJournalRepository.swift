@@ -152,4 +152,136 @@ final class CoreDataTradingJournalRepository: TradingJournalRepositoryProtocol {
             return []
         }
     }
+
+    // MARK: - Pagination & Statistics
+
+    func fetch(pagination: PaginationRequest, filter: TradingJournalFilter?) -> PaginationResult<TradingJournalEntity> {
+        // 1. totalCount 조회
+        let totalCount = fetchCount(predicate: filter?.toPredicate())
+
+        // 2. 페이징 데이터 조회
+        let request = NSFetchRequest<TradingJournalMO>(entityName: "TradingJournal")
+        request.predicate = filter?.toPredicate()
+        request.sortDescriptors = [NSSortDescriptor(key: "tradeDate", ascending: false)]
+        request.fetchLimit = pagination.limit
+        request.fetchOffset = pagination.offset
+
+        do {
+            let results = try viewContext.fetch(request)
+            let items = results.map { TradingJournalEntity(from: $0) }
+            let hasMore = pagination.offset + pagination.limit < totalCount
+
+            return PaginationResult(items: items, totalCount: totalCount, hasMore: hasMore)
+        } catch {
+            Logger.error("Fetch with pagination error: \(error.localizedDescription)")
+            return PaginationResult(items: [], totalCount: 0, hasMore: false)
+        }
+    }
+
+    func fetchStatistics(filter: TradingJournalFilter?) -> TradingJournalStatistics {
+        let basePredicate = filter?.toPredicate()
+
+        // 전체 count
+        let totalCount = fetchCount(predicate: basePredicate)
+
+        // 매수 count
+        let buyPredicate = NSPredicate(format: "tradeType == %@", "매수")
+        let buyCount = fetchCount(predicate: combinePredicates([basePredicate, buyPredicate]))
+
+        // 매도 count
+        let sellPredicate = NSPredicate(format: "tradeType == %@", "매도")
+        let sellCount = fetchCount(predicate: combinePredicates([basePredicate, sellPredicate]))
+
+        // 매도의 realizedProfit 합계
+        let totalRealizedProfit = fetchSum(
+            attribute: "realizedProfit",
+            predicate: combinePredicates([basePredicate, sellPredicate])
+        )
+
+        // totalSellAmount 계산 (price * quantity의 합계)
+        let sellJournals = fetchSellJournalsForStatistics(predicate: basePredicate)
+        let totalSellAmount = sellJournals.reduce(0) { $0 + $1.totalAmount }
+
+        return TradingJournalStatistics(
+            totalCount: totalCount,
+            buyCount: buyCount,
+            sellCount: sellCount,
+            totalRealizedProfit: totalRealizedProfit,
+            totalSellAmount: totalSellAmount,
+            winRate: 0 // fetchWinRate에서 별도 계산
+        )
+    }
+
+    func fetchWinRate(filter: TradingJournalFilter?) -> Double {
+        let sellJournals = fetchSellJournalsForStatistics(predicate: filter?.toPredicate())
+        guard !sellJournals.isEmpty else { return 0 }
+
+        let winCount = sellJournals.filter { $0.realizedProfit > 0 }.count
+        return (Double(winCount) / Double(sellJournals.count)) * 100
+    }
+
+    // MARK: - Helper Methods
+
+    private func fetchCount(predicate: NSPredicate?) -> Int {
+        let request = NSFetchRequest<NSNumber>(entityName: "TradingJournal")
+        request.predicate = predicate
+        request.resultType = .countResultType
+
+        do {
+            let result = try viewContext.fetch(request)
+            return result.first?.intValue ?? 0
+        } catch {
+            Logger.error("Count error: \(error.localizedDescription)")
+            return 0
+        }
+    }
+
+    private func fetchSum(attribute: String, predicate: NSPredicate?) -> Double {
+        let request = NSFetchRequest<NSDictionary>(entityName: "TradingJournal")
+        request.predicate = predicate
+
+        let sumExpression = NSExpression(forKeyPath: attribute)
+        let sumDesc = NSExpressionDescription()
+        sumDesc.name = "sum"
+        sumDesc.expression = NSExpression(forFunction: "sum:", arguments: [sumExpression])
+        sumDesc.expressionResultType = .doubleAttributeType
+
+        request.propertiesToFetch = [sumDesc]
+        request.resultType = .dictionaryResultType
+
+        do {
+            let results = try viewContext.fetch(request)
+            return results.first?["sum"] as? Double ?? 0
+        } catch {
+            Logger.error("Sum error: \(error.localizedDescription)")
+            return 0
+        }
+    }
+
+    private func fetchSellJournalsForStatistics(predicate: NSPredicate?) -> [TradingJournalEntity] {
+        let request = NSFetchRequest<TradingJournalMO>(entityName: "TradingJournal")
+        let sellPredicate = NSPredicate(format: "tradeType == %@", "매도")
+
+        request.predicate = combinePredicates([predicate, sellPredicate])
+        request.propertiesToFetch = ["quantity", "price", "realizedProfit"]
+
+        do {
+            let results = try viewContext.fetch(request)
+            return results.map { TradingJournalEntity(from: $0) }
+        } catch {
+            Logger.error("Fetch sell journals error: \(error.localizedDescription)")
+            return []
+        }
+    }
+
+    private func combinePredicates(_ predicates: [NSPredicate?]) -> NSPredicate? {
+        let nonNilPredicates = predicates.compactMap { $0 }
+        guard !nonNilPredicates.isEmpty else { return nil }
+
+        if nonNilPredicates.count == 1 {
+            return nonNilPredicates.first
+        }
+
+        return NSCompoundPredicate(andPredicateWithSubpredicates: nonNilPredicates)
+    }
 }

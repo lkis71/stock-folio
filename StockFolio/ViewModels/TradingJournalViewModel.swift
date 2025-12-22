@@ -4,8 +4,12 @@ import SwiftUI
 final class TradingJournalViewModel: ObservableObject {
 
     @Published private(set) var journals: [TradingJournalEntity] = []
+    @Published private(set) var statistics: TradingJournalStatistics?
     @Published private(set) var portfolioStocks: [String] = []
     @Published private(set) var allStockNames: [String] = []
+    @Published private(set) var isLoading: Bool = false
+    @Published private(set) var hasMore: Bool = false
+
     @Published var filterType: FilterType = .all
     @Published var selectedDate: Date = Date()
     @Published var selectedMonth: Date = Date()
@@ -15,41 +19,62 @@ final class TradingJournalViewModel: ObservableObject {
     private let repository: TradingJournalRepositoryProtocol
     private let stockRepository: StockRepositoryProtocol
     private let pageSize = 20
+    private var currentOffset = 0
 
+    // Computed properties - 통계 위임
     var totalTradeCount: Int {
-        journals.count
+        statistics?.totalCount ?? 0
     }
 
     var buyTradeCount: Int {
-        journals.filter { $0.tradeType == .buy }.count
+        statistics?.buyCount ?? 0
     }
 
     var sellTradeCount: Int {
-        journals.filter { $0.tradeType == .sell }.count
+        statistics?.sellCount ?? 0
     }
 
     var totalRealizedProfit: Double {
-        let sellJournals = journals.filter { $0.tradeType == .sell }
-        return sellJournals.reduce(0) { total, journal in
-            total + journal.realizedProfit
-        }
+        statistics?.totalRealizedProfit ?? 0
     }
 
     var totalProfitRate: Double {
-        let sellJournals = journals.filter { $0.tradeType == .sell }
-        let totalSellAmount = sellJournals.reduce(0) { $0 + $1.totalAmount }
-        let totalProfit = totalRealizedProfit
-        let totalInvested = totalSellAmount - totalProfit
-        guard totalInvested > 0 else { return 0 }
-        return (totalProfit / totalInvested) * 100
+        statistics?.totalProfitRate ?? 0
     }
 
     var winRate: Double {
-        let sellJournals = journals.filter { $0.tradeType == .sell }
-        guard !sellJournals.isEmpty else { return 0 }
+        statistics?.winRate ?? 0
+    }
 
-        let winCount = sellJournals.filter { $0.realizedProfit > 0 }.count
-        return (Double(winCount) / Double(sellJournals.count)) * 100
+    // 현재 필터 생성
+    private var currentFilter: TradingJournalFilter? {
+        let calendar = Calendar.current
+        let year: Int?
+        let month: Int?
+
+        switch filterType {
+        case .daily:
+            year = nil
+            month = nil
+        case .monthly:
+            let components = calendar.dateComponents([.year, .month], from: selectedMonth)
+            year = components.year
+            month = components.month
+        case .yearly:
+            year = selectedYear
+            month = nil
+        case .all:
+            year = nil
+            month = nil
+        }
+
+        return TradingJournalFilter(
+            filterType: filterType,
+            date: filterType == .daily ? selectedDate : nil,
+            year: year,
+            month: month,
+            stockName: selectedStockName.isEmpty ? nil : selectedStockName
+        )
     }
 
     init(
@@ -58,17 +83,64 @@ final class TradingJournalViewModel: ObservableObject {
     ) {
         self.repository = repository
         self.stockRepository = stockRepository
-        fetchJournals()
+        loadInitialData()
         fetchPortfolioStocks()
     }
 
-    func fetchJournals() {
-        journals = repository.fetchAll()
-        updateAllStockNames(from: journals)
+    // MARK: - Data Loading
+
+    private func loadInitialData() {
+        currentOffset = 0
+        journals = []
+
+        // 페이징 데이터 로드
+        let pagination = PaginationRequest(limit: pageSize, offset: currentOffset)
+        let result = repository.fetch(pagination: pagination, filter: currentFilter)
+
+        journals = result.items
+        hasMore = result.hasMore
+        currentOffset = result.items.count
+
+        // 통계 로드 (별도 쿼리)
+        let stats = repository.fetchStatistics(filter: currentFilter)
+        let winRate = repository.fetchWinRate(filter: currentFilter)
+
+        statistics = TradingJournalStatistics(
+            totalCount: stats.totalCount,
+            buyCount: stats.buyCount,
+            sellCount: stats.sellCount,
+            totalRealizedProfit: stats.totalRealizedProfit,
+            totalSellAmount: stats.totalSellAmount,
+            winRate: winRate
+        )
+
+        // allStockNames 업데이트
+        updateAllStockNames()
     }
 
-    private func updateAllStockNames(from journalList: [TradingJournalEntity]) {
-        let names = journalList.map { $0.stockName }
+    func fetchJournals() {
+        loadInitialData()
+    }
+
+    func fetchMore() {
+        guard !isLoading && hasMore else { return }
+
+        isLoading = true
+
+        let pagination = PaginationRequest(limit: pageSize, offset: currentOffset)
+        let result = repository.fetch(pagination: pagination, filter: currentFilter)
+
+        journals.append(contentsOf: result.items)
+        hasMore = result.hasMore
+        currentOffset += result.items.count
+
+        isLoading = false
+    }
+
+    private func updateAllStockNames() {
+        // 전체 종목 목록은 필터와 무관하게 가져오기
+        let allJournals = repository.fetchAll()
+        let names = allJournals.map { $0.stockName }
         allStockNames = Array(Set(names)).sorted()
     }
 
@@ -80,10 +152,7 @@ final class TradingJournalViewModel: ObservableObject {
         portfolioStocks = Array(Set(stockNames)).sorted()
     }
 
-    func fetchMore(offset: Int) {
-        let moreJournals = repository.fetch(limit: pageSize, offset: offset)
-        journals.append(contentsOf: moreJournals)
-    }
+    // MARK: - CRUD Operations
 
     func addJournal(
         tradeType: TradeType,
@@ -106,7 +175,7 @@ final class TradingJournalViewModel: ObservableObject {
 
         do {
             try repository.save(journal)
-            fetchJournals()
+            loadInitialData()
         } catch {
             Logger.error("Save trading journal error: \(error.localizedDescription)")
         }
@@ -134,7 +203,7 @@ final class TradingJournalViewModel: ObservableObject {
 
         do {
             try repository.update(updatedJournal)
-            fetchJournals()
+            loadInitialData()
         } catch {
             Logger.error("Update trading journal error: \(error.localizedDescription)")
         }
@@ -143,7 +212,7 @@ final class TradingJournalViewModel: ObservableObject {
     func deleteJournal(_ journal: TradingJournalEntity) {
         do {
             try repository.delete(journal)
-            fetchJournals()
+            loadInitialData()
         } catch {
             Logger.error("Delete trading journal error: \(error.localizedDescription)")
         }
@@ -156,36 +225,14 @@ final class TradingJournalViewModel: ObservableObject {
     }
 
     func refresh() {
-        fetchJournals()
+        loadInitialData()
         fetchPortfolioStocks()
     }
 
+    // MARK: - Filtering
+
     func applyFilter() {
-        var result: [TradingJournalEntity]
-
-        switch filterType {
-        case .all:
-            result = repository.fetchAll()
-        case .daily:
-            result = repository.fetchByDate(selectedDate)
-        case .monthly:
-            let calendar = Calendar.current
-            let components = calendar.dateComponents([.year, .month], from: selectedMonth)
-            guard let year = components.year, let month = components.month else {
-                journals = []
-                return
-            }
-            result = repository.fetchByMonth(year: year, month: month)
-        case .yearly:
-            result = repository.fetchByYear(selectedYear)
-        }
-
-        // 종목 필터 적용
-        if !selectedStockName.isEmpty {
-            result = result.filter { $0.stockName == selectedStockName }
-        }
-
-        journals = result
+        loadInitialData()
     }
 
     func clearStockFilter() {

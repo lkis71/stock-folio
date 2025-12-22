@@ -38,4 +38,28 @@ final class MockStockRepository: StockRepositoryProtocol {
         deleteCallCount += 1
         stocks.removeAll { $0.id == stock.id }
     }
+
+    // MARK: - Pagination & Statistics
+
+    func fetch(pagination: PaginationRequest) -> PaginationResult<StockHoldingEntity> {
+        let sorted = stocks.sorted { $0.createdAt > $1.createdAt }
+
+        let endIndex = min(pagination.offset + pagination.limit, sorted.count)
+        guard pagination.offset < sorted.count else {
+            return PaginationResult(items: [], totalCount: sorted.count, hasMore: false)
+        }
+
+        let items = Array(sorted[pagination.offset..<endIndex])
+        let hasMore = endIndex < sorted.count
+
+        return PaginationResult(items: items, totalCount: sorted.count, hasMore: hasMore)
+    }
+
+    func fetchTotalCount() -> Int {
+        return stocks.count
+    }
+
+    func fetchTotalInvestedAmount() -> Double {
+        return stocks.reduce(0) { $0 + $1.purchaseAmount }
+    }
 }

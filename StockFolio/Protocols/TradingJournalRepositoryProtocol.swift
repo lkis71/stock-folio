@@ -11,4 +11,11 @@ protocol TradingJournalRepositoryProtocol {
     func fetchByDate(_ date: Date) -> [TradingJournalEntity]
     func fetchByMonth(year: Int, month: Int) -> [TradingJournalEntity]
     func fetchByYear(_ year: Int) -> [TradingJournalEntity]
+
+    // Pagination with filtering
+    func fetch(pagination: PaginationRequest, filter: TradingJournalFilter?) -> PaginationResult<TradingJournalEntity>
+
+    // Statistics
+    func fetchStatistics(filter: TradingJournalFilter?) -> TradingJournalStatistics
+    func fetchWinRate(filter: TradingJournalFilter?) -> Double
 }
