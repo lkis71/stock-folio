@@ -20,11 +20,7 @@ final class PortfolioViewModel: ObservableObject {
     private var currentOffset = 0
     private let pageSize = 6
 
-    // MARK: - Computed Properties (Portfolio 계산 위임)
-    private var portfolio: Portfolio {
-        Portfolio(holdings: holdings, seedMoney: seedMoney)
-    }
-
+    // MARK: - Computed Properties (Repository 집계 쿼리 사용)
     var totalCount: Int {
         repository.fetchTotalCount()
     }
@@ -34,19 +30,22 @@ final class PortfolioViewModel: ObservableObject {
     }
 
     var remainingCash: Double {
-        portfolio.remainingCash
+        max(0, seedMoney - totalInvestedAmount)
     }
 
     var investedPercentage: Double {
-        portfolio.investedPercentage
+        guard seedMoney > 0 else { return 0 }
+        return min(100, (totalInvestedAmount / seedMoney) * 100)
     }
 
     var cashPercentage: Double {
-        portfolio.cashPercentage
+        guard seedMoney > 0 else { return 0 }
+        return max(0, 100 - investedPercentage)
     }
 
     func percentage(for holding: StockHoldingEntity) -> Double {
-        portfolio.percentage(for: holding)
+        guard totalInvestedAmount > 0 else { return 0 }
+        return (holding.purchaseAmount / totalInvestedAmount) * 100
     }
 
     // MARK: - Initialization (의존성 주입)

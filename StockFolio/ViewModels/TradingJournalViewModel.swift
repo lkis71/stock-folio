@@ -84,6 +84,7 @@ final class TradingJournalViewModel: ObservableObject {
         self.repository = repository
         self.stockRepository = stockRepository
         loadInitialData()
+        updateAllStockNames()
         fetchPortfolioStocks()
     }
 
@@ -113,9 +114,6 @@ final class TradingJournalViewModel: ObservableObject {
             totalSellAmount: stats.totalSellAmount,
             winRate: winRate
         )
-
-        // allStockNames 업데이트
-        updateAllStockNames()
     }
 
     func fetchJournals() {
@@ -176,6 +174,7 @@ final class TradingJournalViewModel: ObservableObject {
         do {
             try repository.save(journal)
             loadInitialData()
+            updateAllStockNames()
         } catch {
             Logger.error("Save trading journal error: \(error.localizedDescription)")
         }
@@ -204,6 +203,7 @@ final class TradingJournalViewModel: ObservableObject {
         do {
             try repository.update(updatedJournal)
             loadInitialData()
+            updateAllStockNames()
         } catch {
             Logger.error("Update trading journal error: \(error.localizedDescription)")
         }
@@ -213,6 +213,7 @@ final class TradingJournalViewModel: ObservableObject {
         do {
             try repository.delete(journal)
             loadInitialData()
+            updateAllStockNames()
         } catch {
             Logger.error("Delete trading journal error: \(error.localizedDescription)")
         }
