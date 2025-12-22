@@ -12,78 +12,65 @@ struct SeedMoneySettingsView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    // 입력 섹션
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("총 시드머니")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+            VStack(spacing: 16) {
+                // 입력 섹션
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("총 시드머니")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
 
-                        TextField("₩ 0", text: $seedMoneyText)
-                            .keyboardType(.numberPad)
-                            .font(.title2)
-                            .padding()
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .focused($isTextFieldFocused)
-                            .onChange(of: seedMoneyText) { _, newValue in
-                                formatInput(newValue)
-                            }
-                            .textContentType(.none)
-                            .autocorrectionDisabled()
-                            .accessibilityLabel("시드머니 입력")
-                    }
-                    .padding(.horizontal)
-
-                    // 안내 문구
-                    HStack {
-                        Image(systemName: "lightbulb.fill")
-                            .foregroundStyle(.yellow)
-                        Text("투자 가능한 총 금액을 입력하세요")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-                    .padding(.horizontal)
-                }
-                .padding(.top)
-            }
-            .safeAreaInset(edge: .bottom) {
-                // 버튼 (항상 하단에 고정, Safe Area 존중)
-                VStack(spacing: 12) {
-                    Button {
-                        saveAndDismiss()
-                    } label: {
-                        Text("저장")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(Color.accentColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .opacity(isValidAmount ? 1.0 : 0.5)
-                    }
-                    .disabled(!isValidAmount)
-
-                    Button {
-                        dismiss()
-                    } label: {
-                        Text("취소")
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                    }
+                    TextField("0", text: $seedMoneyText)
+                        .keyboardType(.numberPad)
+                        .font(.title3)
+                        .fontWeight(.semibold)
+                        .padding(12)
+                        .background(Color(.secondarySystemBackground))
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .focused($isTextFieldFocused)
+                        .onChange(of: seedMoneyText) { _, newValue in
+                            formatInput(newValue)
+                        }
+                        .textContentType(.none)
+                        .autocorrectionDisabled()
+                        .accessibilityLabel("시드머니 입력")
                 }
                 .padding(.horizontal)
-                .padding(.top, 16)
+
+                // 안내 문구
+                HStack(spacing: 6) {
+                    Image(systemName: "lightbulb.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.yellow)
+                    Text("투자 가능한 총 금액을 입력하세요")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal)
+
+                Spacer()
+            }
+            .padding(.top, 12)
+            .safeAreaInset(edge: .bottom) {
+                Button {
+                    saveAndDismiss()
+                } label: {
+                    Text("저장")
+                        .font(.subheadline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 44)
+                        .background(isValidAmount ? Color.accentColor : Color.gray)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+                .disabled(!isValidAmount)
+                .padding(.horizontal)
+                .padding(.top, 12)
                 .padding(.bottom, 8)
                 .background(
-                    VStack(spacing: 0) {
-                        Rectangle()
-                            .fill(Color(.separator))
-                            .frame(height: 0.5)
-                        Color(.systemBackground)
-                    }
+                    Color(.systemBackground)
+                        .ignoresSafeArea()
+                        .shadow(color: Color.black.opacity(0.1), radius: 8, y: -2)
                 )
             }
             .navigationTitle("시드머니 설정")

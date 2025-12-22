@@ -100,22 +100,21 @@ struct MainDashboardView: View {
 }
 
 // MARK: - Seed Money Section
-/// 투자 금액/남은 현금 요약 카드 (총 시드머니는 숨김 - 설계서 반영)
+/// 투자 금액/남은 현금 요약 (컴팩트 버전)
 struct SeedMoneySectionView: View {
     @ObservedObject var viewModel: PortfolioViewModel
 
     var body: some View {
-        // 투자/현금 요약 (총 시드머니 레이블/금액은 숨김)
-        HStack(spacing: 16) {
+        HStack(spacing: 12) {
             InvestmentSummaryCard(
-                title: "투자 금액",
+                title: "투자",
                 amount: viewModel.totalInvestedAmount,
                 percentage: viewModel.investedPercentage,
                 color: .blue
             )
 
             InvestmentSummaryCard(
-                title: "남은 현금",
+                title: "현금",
                 amount: viewModel.remainingCash,
                 percentage: viewModel.cashPercentage,
                 color: .green
@@ -133,24 +132,38 @@ struct InvestmentSummaryCard: View {
     let color: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+        HStack(spacing: 0) {
+            // 좌측 색상 인디케이터
+            color
+                .frame(width: 4)
+                .clipShape(RoundedRectangle(cornerRadius: 2))
 
-            Text(amount.currencyFormatted)
-                .font(.title3)
-                .bold()
-                .monospacedDigit()
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    Text(amount.currencyFormatted)
+                        .font(.subheadline)
+                        .fontWeight(.bold)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
 
-            Text(String(format: "%.1f%%", percentage))
-                .font(.headline)
-                .foregroundStyle(color)
+                Spacer()
+
+                Text(String(format: "%.1f%%", percentage))
+                    .font(.caption)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(color)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
+        .frame(maxWidth: .infinity)
         .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(title) \(amount.currencyFormatted), \(String(format: "%.1f", percentage))%")
     }

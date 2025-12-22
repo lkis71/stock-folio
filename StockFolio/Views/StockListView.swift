@@ -5,10 +5,9 @@ import SwiftUI
 struct StockListView: View {
     @ObservedObject var viewModel: PortfolioViewModel
     @State private var selectedStock: StockHoldingEntity?
-    @State private var isExpanded = false
+    @State private var displayCount = 6
 
-    /// 기본 표시 개수 (설계서: 최대 6개)
-    private let defaultVisibleCount = 6
+    private let pageSize = 6
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -22,44 +21,29 @@ struct StockListView: View {
                 stockListContent
             }
         }
+        .onChange(of: viewModel.holdings.count) { _, newCount in
+            // holdings가 바뀌면 displayCount 조정
+            if newCount < displayCount {
+                displayCount = max(pageSize, newCount)
+            }
+        }
     }
 
     // MARK: - Section Header
     private var sectionHeader: some View {
         HStack {
-            if viewModel.holdings.count > defaultVisibleCount {
-                Text("보유 종목 (\(displayedCount)/\(viewModel.holdings.count))")
-                    .font(.headline)
+            if viewModel.holdings.count > pageSize {
+                Text("보유 종목 (\(displayCount)/\(viewModel.holdings.count))")
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
             } else {
                 Text("보유 종목")
-                    .font(.headline)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
             }
 
             Spacer()
-
-            // 확장/축소 버튼 (6개 초과 시)
-            if viewModel.holdings.count > defaultVisibleCount {
-                Button {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        isExpanded.toggle()
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text(isExpanded ? "접기" : "더보기")
-                            .font(.subheadline)
-                        Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                            .font(.caption)
-                    }
-                    .foregroundStyle(.secondary)
-                }
-                .accessibilityLabel(isExpanded ? "목록 접기" : "더 많은 종목 보기")
-            }
         }
-    }
-
-    /// 현재 표시되는 종목 수
-    private var displayedCount: Int {
-        isExpanded ? viewModel.holdings.count : min(defaultVisibleCount, viewModel.holdings.count)
     }
 
     /// 비중 기준 내림차순 정렬된 종목 목록
@@ -70,11 +54,15 @@ struct StockListView: View {
     /// 표시할 종목 목록 (비중 기준 내림차순 정렬)
     private var displayedHoldings: [(offset: Int, element: StockHoldingEntity)] {
         let holdings = Array(sortedHoldings.enumerated())
-        if isExpanded {
-            return holdings
-        } else {
-            return Array(holdings.prefix(defaultVisibleCount))
-        }
+        return Array(holdings.prefix(displayCount))
+    }
+
+    private var hasMoreItems: Bool {
+        displayCount < viewModel.holdings.count
+    }
+
+    private func loadMore() {
+        displayCount = min(displayCount + pageSize, viewModel.holdings.count)
     }
 
     // MARK: - Empty State
@@ -122,48 +110,52 @@ struct StockListView: View {
                     .listRowSeparator(.hidden)
                     .accessibilityElement(children: .combine)
                     .accessibilityHint("탭하여 편집, 스와이프하여 삭제")
+                    .onAppear {
+                        // 마지막 항목이 나타나면 더 로드
+                        if holding.id == displayedHoldings.last?.element.id && hasMoreItems {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                loadMore()
+                            }
+                        }
+                    }
+                }
+
+                // 더보기 버튼
+                if hasMoreItems {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            loadMore()
+                        }
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("↓ \(viewModel.holdings.count - displayCount)개 더보기")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                            Spacer()
+                        }
+                    }
+                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
             }
             .listStyle(.plain)
             .scrollDisabled(true)
             .frame(height: calculateListHeight())
             .animation(.easeInOut(duration: 0.3), value: viewModel.holdings)
-            .animation(.easeInOut(duration: 0.3), value: isExpanded)
-
-            // 더보기 힌트 (접힌 상태에서 6개 초과 시)
-            if !isExpanded && viewModel.holdings.count > defaultVisibleCount {
-                moreItemsHint
-                    .padding(.horizontal)
-            }
+            .animation(.easeInOut(duration: 0.3), value: displayCount)
         }
         .sheet(item: $selectedStock) { stock in
             AddStockView(viewModel: viewModel, editingStock: stock)
         }
     }
 
-    /// List 높이 계산 (각 행 약 72pt + 상하 패딩 8pt)
+    /// List 높이 계산 (각 행 약 52pt + 상하 패딩 + 더보기 버튼)
     private func calculateListHeight() -> CGFloat {
-        let rowHeight: CGFloat = 80
-        return CGFloat(displayedCount) * rowHeight
-    }
-
-    // MARK: - More Items Hint
-    private var moreItemsHint: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.3)) {
-                isExpanded = true
-            }
-        } label: {
-            HStack {
-                Spacer()
-                Text("↓ \(viewModel.holdings.count - defaultVisibleCount)개 더보기")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                Spacer()
-            }
-            .padding(.vertical, 12)
-        }
-        .accessibilityLabel("\(viewModel.holdings.count - defaultVisibleCount)개 종목 더 보기")
+        let rowHeight: CGFloat = 60
+        let buttonHeight: CGFloat = hasMoreItems ? 44 : 0
+        return CGFloat(min(displayCount, viewModel.holdings.count)) * rowHeight + buttonHeight
     }
 
 }
@@ -177,21 +169,21 @@ struct StockRowView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // 좌측 색상 인디케이터 (화면 설계서: 5pt 너비)
+            // 좌측 색상 인디케이터
             color
-                .frame(width: 5)
+                .frame(width: 4)
                 .clipShape(RoundedRectangle(cornerRadius: 2))
 
             HStack {
                 // 종목 정보
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(holding.stockName)
-                        .font(.body)
+                        .font(.subheadline)
                         .fontWeight(.medium)
                         .lineLimit(1)
 
                     Text(holding.purchaseAmount.currencyFormatted)
-                        .font(.subheadline)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                         .monospacedDigit()
                 }
@@ -200,14 +192,16 @@ struct StockRowView: View {
 
                 // 비중
                 Text(String(format: "%.1f%%", percentage))
-                    .font(.headline)
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
                     .foregroundStyle(color)
                     .monospacedDigit()
             }
-            .padding()
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
         }
         .background(Color(.secondarySystemBackground))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 }
 

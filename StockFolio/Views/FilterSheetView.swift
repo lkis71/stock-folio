@@ -8,6 +8,10 @@ struct FilterSheetView: View {
     @State private var tempSelectedDate: Date
     @State private var tempSelectedMonth: Date
     @State private var tempSelectedYear: Int
+    @State private var tempSelectedStockName: String
+    @State private var isStockSectionExpanded: Bool = false
+
+    private let defaultStockVisibleCount = 5
 
     init(viewModel: TradingJournalViewModel) {
         self.viewModel = viewModel
@@ -15,11 +19,21 @@ struct FilterSheetView: View {
         _tempSelectedDate = State(initialValue: viewModel.selectedDate)
         _tempSelectedMonth = State(initialValue: viewModel.selectedMonth)
         _tempSelectedYear = State(initialValue: viewModel.selectedYear)
+        _tempSelectedStockName = State(initialValue: viewModel.selectedStockName)
+    }
+
+    private var displayedStocks: [String] {
+        if isStockSectionExpanded {
+            return viewModel.allStockNames
+        } else {
+            return Array(viewModel.allStockNames.prefix(defaultStockVisibleCount))
+        }
     }
 
     var body: some View {
         NavigationStack {
             List {
+                // 기간 필터 (먼저 배치)
                 Section {
                     ForEach(FilterType.allCases, id: \.self) { filterType in
                         Button {
@@ -27,19 +41,22 @@ struct FilterSheetView: View {
                         } label: {
                             HStack {
                                 Text(filterType.rawValue)
+                                    .font(.subheadline)
                                     .foregroundColor(.primary)
                                 Spacer()
                                 if tempFilterType == filterType {
                                     Image(systemName: "checkmark")
+                                        .font(.subheadline)
                                         .foregroundColor(.accentColor)
                                 }
                             }
                         }
                     }
                 } header: {
-                    Text("필터 종류")
+                    Text("기간")
                 }
 
+                // 기간 상세 선택
                 if tempFilterType == .daily {
                     Section {
                         DatePicker(
@@ -49,8 +66,6 @@ struct FilterSheetView: View {
                         )
                         .datePickerStyle(.graphical)
                         .labelsHidden()
-                    } header: {
-                        Text("날짜 선택")
                     }
                 }
 
@@ -64,8 +79,7 @@ struct FilterSheetView: View {
                         .datePickerStyle(.wheel)
                         .labelsHidden()
                         .environment(\.locale, Locale(identifier: "ko_KR"))
-                    } header: {
-                        Text("월 선택")
+                        .frame(height: 120)
                     }
                 }
 
@@ -77,26 +91,100 @@ struct FilterSheetView: View {
                             }
                         }
                         .pickerStyle(.wheel)
-                    } header: {
-                        Text("연도 선택")
+                        .frame(height: 120)
+                    }
+                }
+
+                // 종목 필터 (아래에 배치)
+                Section {
+                    if viewModel.allStockNames.isEmpty {
+                        Text("매매 기록이 없습니다")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else {
+                        // 전체 종목
+                        Button {
+                            tempSelectedStockName = ""
+                        } label: {
+                            HStack {
+                                Text("전체")
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                if tempSelectedStockName.isEmpty {
+                                    Image(systemName: "checkmark")
+                                        .font(.subheadline)
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
+                        }
+
+                        // 종목 목록
+                        ForEach(displayedStocks, id: \.self) { stockName in
+                            Button {
+                                tempSelectedStockName = stockName
+                            } label: {
+                                HStack {
+                                    Text(stockName)
+                                        .font(.subheadline)
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    if tempSelectedStockName == stockName {
+                                        Image(systemName: "checkmark")
+                                            .font(.subheadline)
+                                            .foregroundColor(.accentColor)
+                                    }
+                                }
+                            }
+                        }
+
+                        // 더보기/접기 버튼
+                        if viewModel.allStockNames.count > defaultStockVisibleCount {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    isStockSectionExpanded.toggle()
+                                }
+                            } label: {
+                                HStack {
+                                    Spacer()
+                                    Text(isStockSectionExpanded ? "접기" : "↓ \(viewModel.allStockNames.count - defaultStockVisibleCount)개 더보기")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
+                } header: {
+                    HStack {
+                        Text("종목")
+                        if !tempSelectedStockName.isEmpty {
+                            Text("(\(tempSelectedStockName))")
+                                .foregroundColor(.accentColor)
+                        }
                     }
                 }
             }
-            .navigationTitle("필터 선택")
+            .listStyle(.insetGrouped)
+            .navigationTitle("필터")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("취소") {
                         dismiss()
                     }
+                    .font(.subheadline)
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("적용") {
                         applyFilter()
                     }
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
                 }
             }
         }
+        .presentationDetents([.medium, .large])
     }
 
     private var yearRange: [Int] {
@@ -109,6 +197,7 @@ struct FilterSheetView: View {
         viewModel.selectedDate = tempSelectedDate
         viewModel.selectedMonth = tempSelectedMonth
         viewModel.selectedYear = tempSelectedYear
+        viewModel.selectedStockName = tempSelectedStockName
         viewModel.applyFilter()
         dismiss()
     }

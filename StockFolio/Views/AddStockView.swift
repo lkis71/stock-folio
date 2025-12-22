@@ -22,90 +22,78 @@ struct AddStockView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 24) {
-                    // 종목명 입력
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("종목명")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                VStack(spacing: 16) {
+                    // 종목명 + 매수금액 (한 줄)
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("종목명")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            TextField("삼성전자", text: $stockName)
+                                .font(.subheadline)
+                                .padding(12)
+                                .background(Color(.secondarySystemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .focused($focusedField, equals: .name)
+                                .onChange(of: stockName) { _, newValue in
+                                    validateName(newValue)
+                                }
+                                .textContentType(.none)
+                                .autocorrectionDisabled()
+                        }
 
-                        TextField("예: 삼성전자", text: $stockName)
-                            .font(.title3)
-                            .padding()
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .focused($focusedField, equals: .name)
-                            .onChange(of: stockName) { _, newValue in
-                                validateName(newValue)
-                            }
-                            .textContentType(.none)
-                            .autocorrectionDisabled()
-                            .accessibilityLabel("종목명 입력")
-                    }
-                    .padding(.horizontal)
-
-                    // 매수 금액 입력
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("매수 금액")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-
-                        TextField("₩ 0", text: $amountText)
-                            .keyboardType(.numberPad)
-                            .font(.title3)
-                            .padding()
-                            .background(Color(.secondarySystemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .focused($focusedField, equals: .amount)
-                            .onChange(of: amountText) { _, newValue in
-                                formatAmountInput(newValue)
-                            }
-                            .textContentType(.none)
-                            .autocorrectionDisabled()
-                            .accessibilityLabel("매수 금액 입력")
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("매수 금액")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            TextField("0", text: $amountText)
+                                .keyboardType(.numberPad)
+                                .font(.subheadline)
+                                .padding(12)
+                                .background(Color(.secondarySystemBackground))
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .focused($focusedField, equals: .amount)
+                                .onChange(of: amountText) { _, newValue in
+                                    formatAmountInput(newValue)
+                                }
+                        }
                     }
                     .padding(.horizontal)
 
                     // 색상 선택
-                    VStack(alignment: .leading, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("차트 색상")
-                            .font(.subheadline)
+                            .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 5), spacing: 12) {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 5), spacing: 8) {
                             ForEach(StockColor.allCases, id: \.self) { color in
                                 Button {
                                     selectedColor = color
                                 } label: {
                                     Circle()
                                         .fill(color.color)
-                                        .frame(width: 40, height: 40)
+                                        .frame(width: 32, height: 32)
                                         .overlay(
                                             Circle()
-                                                .stroke(Color.primary, lineWidth: selectedColor == color ? 3 : 0)
+                                                .stroke(Color.primary, lineWidth: selectedColor == color ? 2 : 0)
                                         )
                                         .overlay(
                                             Image(systemName: "checkmark")
-                                                .font(.system(size: 16, weight: .bold))
+                                                .font(.system(size: 12, weight: .bold))
                                                 .foregroundStyle(color.isLightColor ? .black : .white)
                                                 .opacity(selectedColor == color ? 1 : 0)
-                                                .shadow(color: color.isLightColor ? .white.opacity(0.8) : .black.opacity(0.3), radius: 2)
                                         )
                                 }
-                                .accessibilityLabel(color.displayName)
-                                .accessibilityAddTraits(selectedColor == color ? .isSelected : [])
-                                .accessibilityHint(selectedColor == color ? "선택됨" : "탭하여 선택")
                             }
                         }
-                        .padding()
+                        .padding(12)
                         .background(Color(.secondarySystemBackground))
                         .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .accessibilityElement(children: .contain)
-                        .accessibilityLabel("차트 색상 선택")
                     }
                     .padding(.horizontal)
 
-                    // 검증 에러 메시지
+                    // 검증 에러
                     if let error = validationError {
                         Text(error)
                             .font(.caption)
@@ -113,45 +101,42 @@ struct AddStockView: View {
                             .padding(.horizontal)
                     }
                 }
-                .padding(.top)
-                .padding(.bottom, 140)
+                .padding(.top, 12)
+                .padding(.bottom, 100)
             }
             .contentShape(Rectangle())
             .onTapGesture {
-                // 빈 영역 탭 시 키보드와 버튼 숨김
                 focusedField = nil
             }
             .safeAreaInset(edge: .bottom) {
-                VStack(spacing: 12) {
-                    // 저장 버튼 (항상 표시)
+                VStack(spacing: 8) {
                     Button {
                         saveStock()
                     } label: {
                         Text("저장")
-                            .font(.headline)
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(Color.accentColor)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .opacity(isValidInput ? 1.0 : 0.5)
+                            .frame(height: 44)
+                            .background(isValidInput ? Color.accentColor : Color.gray)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
                     }
                     .disabled(!isValidInput)
 
-                    // 완료 버튼 (입력 중일 때만 표시)
                     if focusedField != nil {
                         Button {
                             focusedField = nil
                         } label: {
                             Text("완료")
-                                .font(.headline)
+                                .font(.subheadline)
                                 .frame(maxWidth: .infinity)
-                                .frame(height: 50)
+                                .frame(height: 36)
                         }
                     }
                 }
                 .padding(.horizontal)
-                .padding(.top, 16)
+                .padding(.top, 12)
                 .padding(.bottom, 8)
                 .background(
                     Color(.systemBackground)
