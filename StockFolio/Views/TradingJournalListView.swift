@@ -151,7 +151,7 @@ struct TradingJournalStatsView: View {
     @ObservedObject var viewModel: TradingJournalViewModel
 
     private var profitColor: Color {
-        viewModel.totalRealizedProfit >= 0 ? .green : .red
+        viewModel.totalRealizedProfit >= 0 ? .red : .blue
     }
 
     var body: some View {
@@ -296,7 +296,7 @@ struct TradingJournalCardView: View {
     }
 
     private var profitColor: Color {
-        journal.realizedProfit >= 0 ? .green : .red
+        journal.realizedProfit >= 0 ? .red : .blue
     }
 
     private var profitRate: Double {
