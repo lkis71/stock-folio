@@ -58,180 +58,83 @@
 ### 3.1 헤더 영역
 
 #### 3.1.1 월 선택 컨트롤
-```swift
-HStack {
-    Button {
-        // 이전 달
-    } label: {
-        Image(systemName: "chevron.left")
-            .font(.title3)
-    }
 
-    Spacer()
-
-    Text("2025년 1월")
-        .font(.headline)
-        .fontWeight(.semibold)
-
-    Spacer()
-
-    Button {
-        // 다음 달
-    } label: {
-        Image(systemName: "chevron.right")
-            .font(.title3)
-    }
-}
-.padding(.horizontal, 16)
-.padding(.vertical, 12)
-```
+**구성 요소**:
+- 이전 달 버튼 (왼쪽 화살표 아이콘)
+- 월 제목 (중앙, "2025년 1월" 형식)
+- 다음 달 버튼 (오른쪽 화살표 아이콘)
 
 **스타일**:
 - 폰트: `.headline` (16pt)
 - 패딩: 좌우 16pt, 상하 12pt
 - 버튼 탭 영역: 최소 44×44pt
+- 아이콘: `chevron.left`, `chevron.right` (SF Symbols)
 
 #### 3.1.2 뷰 전환 버튼
-```swift
-Button("리스트") {
-    // 리스트 뷰로 전환
-}
-.font(.subheadline)
-.foregroundColor(.accentColor)
-```
+
+**구성 요소**:
+- "리스트" 텍스트 버튼 (헤더 우측 상단)
+
+**스타일**:
+- 폰트: `.subheadline`
+- 색상: `.accentColor`
 
 ### 3.2 월별 통계 카드 (접기 가능)
 
-```swift
-VStack(alignment: .leading, spacing: 6) {
-    HStack {
-        Text("월 통계")
-            .font(.subheadline)
-            .fontWeight(.semibold)
-
-        Spacer()
-
-        Button {
-            withAnimation { isExpanded.toggle() }
-        } label: {
-            Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                .font(.caption)
-        }
-    }
-
-    if isExpanded {
-        HStack(spacing: 16) {
-            StatItem(title: "총 손익", value: "+123,456원", color: .blue)
-            StatItem(title: "거래", value: "15건", color: .secondary)
-            StatItem(title: "승률", value: "73%", color: .green)
-        }
-    }
-}
-.padding(12)
-.background(Color(.secondarySystemBackground))
-.cornerRadius(10)
-.padding(.horizontal, 16)
-```
+**구성 요소**:
+- 헤더 영역
+  - "월 통계" 제목 (좌측)
+  - 접기/펼치기 버튼 (우측, 위/아래 화살표 아이콘)
+- 통계 내용 (펼쳐진 상태)
+  - 총 손익 (금액, 수익/손실 색상)
+  - 거래 건수
+  - 승률 (백분율)
 
 **스타일**:
 - 배경색: `.secondarySystemBackground`
 - 패딩: 내부 12pt, 외부 16pt
-- 코너: 10pt
+- 코너 라디우스: 10pt
 - 폰트: 제목 `.subheadline`, 값 `.caption`
+- 통계 항목 간격: 16pt
 
 ### 3.3 캘린더 그리드
 
 #### 3.3.1 요일 헤더
-```swift
-LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 0) {
-    ForEach(["일", "월", "화", "수", "목", "금", "토"], id: \.self) { day in
-        Text(day)
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-    }
-}
-```
+
+**구성 요소**:
+- 7개 컬럼 그리드: 일, 월, 화, 수, 목, 금, 토
 
 **스타일**:
 - 폰트: `.caption` (11pt)
 - 색상: `.secondary`
 - 패딩: 상하 8pt
+- 정렬: 가운데
+- 간격: 0pt (붙임)
 
 #### 3.3.2 날짜 셀
-```swift
-struct CalendarDayCell: View {
-    let day: Int
-    let summary: DailyTradingSummary?
-    let isToday: Bool
-    let isCurrentMonth: Bool
 
-    var body: some View {
-        VStack(spacing: 2) {
-            // 날짜
-            Text("\(day)")
-                .font(.subheadline)
-                .fontWeight(isToday ? .bold : .regular)
-                .foregroundColor(isCurrentMonth ? .primary : .secondary)
+**구성 요소** (위에서 아래 순서):
+1. 날짜 숫자
+2. 거래 인디케이터 (원형 점, 최대 3개)
+3. 손익 금액
+4. 수익률 (1% 이상인 경우만 표시)
 
-            // 거래 인디케이터
-            if let summary = summary {
-                HStack(spacing: 2) {
-                    ForEach(0..<min(summary.tradeCount, 3), id: \.self) { _ in
-                        Circle()
-                            .fill(summary.totalProfit >= 0 ? Color.blue : Color.red)
-                            .frame(width: 4, height: 4)
-                    }
-                }
-                .padding(.vertical, 2)
-
-                // 손익 금액
-                Text(summary.totalProfit.formatted(.currency(code: "KRW")))
-                    .font(.caption2)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-                    .foregroundColor(summary.totalProfit >= 0 ? .blue : .red)
-
-                // 수익률 (선택)
-                if abs(summary.profitRate) >= 1 {
-                    Text(summary.profitRate.formatted(.percent.precision(.fractionLength(1))))
-                        .font(.caption2)
-                        .foregroundColor(summary.profitRate >= 0 ? .blue : .red)
-                }
-            }
-        }
-        .frame(height: 70) // 고정 높이
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(isToday ? Color.accentColor.opacity(0.1) : Color.clear)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(
-                    summary != nil
-                        ? (summary!.totalProfit >= 0 ? Color.blue : Color.red).opacity(0.3)
-                        : Color.clear,
-                    lineWidth: 2
-                )
-        )
-        .onTapGesture {
-            if summary != nil {
-                // 해당일 매매일지 표시
-            }
-        }
-    }
-}
-```
+**상태별 표시**:
+- 오늘 날짜: 배경색 강조, 날짜 굵게
+- 현재 월: 기본 색상
+- 이전/다음 월: 회색 (`.secondary`)
+- 매매 있음: 테두리 표시 (수익/손실 색상)
+- 매매 없음: 날짜만 표시
 
 **스타일**:
 - 셀 높이: 70pt (고정)
 - 날짜 폰트: `.subheadline` (14pt)
 - 손익 폰트: `.caption2` (11pt)
-- 코너: 8pt
-- 테두리: 수익(파란색)/손실(빨간색) 2pt
-- 오늘: 배경색 `.accentColor` 10% 투명도
+- 코너 라디우스: 8pt
+- 테두리: 수익(파란색)/손실(빨간색) 2pt, 30% 투명도
+- 오늘 배경: `.accentColor` 10% 투명도
+- 셀 내부 간격: 2pt
+- 긴 숫자 처리: `.minimumScaleFactor(0.7)`
 
 #### 3.3.3 거래 인디케이터
 - 원형 점(Circle) 4pt 크기
@@ -241,41 +144,19 @@ struct CalendarDayCell: View {
 
 ### 3.4 해당일 매매일지 시트
 
-```swift
-struct DailyTradesSheet: View {
-    let date: Date
-    let trades: [TradingRecord]
-
-    var body: some View {
-        NavigationView {
-            List(trades) { trade in
-                NavigationLink {
-                    TradingJournalDetailView(record: trade)
-                } label: {
-                    TradingRecordRow(record: trade)
-                        .padding(.vertical, 4)
-                }
-            }
-            .navigationTitle(date.formatted(date: .long, time: .omitted))
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("닫기") {
-                        // 시트 닫기
-                    }
-                }
-            }
-        }
-        .presentationDetents([.medium, .large])
-        .presentationDragIndicator(.visible)
-    }
-}
-```
+**구성 요소**:
+- 네비게이션 바
+  - 제목: 날짜 (예: "2025년 1월 15일")
+  - 닫기 버튼 (우측 상단)
+- 거래 목록 (List)
+  - 기존 `TradingRecordRow` 컴포넌트 재사용
+  - 각 항목 탭 → 상세 화면 네비게이션
 
 **스타일**:
-- 시트 높이: 중간(.medium) 또는 전체(.large)
-- 제목: 날짜 (예: "2025년 1월 15일")
-- 리스트 항목: 기존 `TradingRecordRow` 재사용
+- 시트 높이: 중간(.medium) 또는 전체(.large) 선택 가능
+- 드래그 인디케이터: 표시
+- 제목 스타일: `.inline`
+- 리스트 항목 패딩: 상하 4pt
 
 ## 4. 인터랙션 정의
 
@@ -284,7 +165,7 @@ struct DailyTradesSheet: View {
 #### 4.1.1 스와이프 (선택 사항)
 - 좌측 스와이프: 다음 달 이동
 - 우측 스와이프: 이전 달 이동
-- 애니메이션: `.spring(duration: 0.3)`
+- 애니메이션: 스프링 효과 (0.3초)
 
 #### 4.1.2 탭
 - 날짜 셀 탭: 해당일 매매일지 시트 표시
@@ -293,35 +174,20 @@ struct DailyTradesSheet: View {
 
 ### 4.2 애니메이션
 
-#### 4.2.1 월 전환
-```swift
-withAnimation(.spring(duration: 0.3)) {
-    currentMonth = newMonth
-}
-```
-
-#### 4.2.2 통계 카드 접기/펼치기
-```swift
-withAnimation(.easeInOut(duration: 0.2)) {
-    isExpanded.toggle()
-}
-```
-
-#### 4.2.3 시트 표시
-```swift
-.sheet(isPresented: $showingDailyTrades) {
-    DailyTradesSheet(date: selectedDate, trades: dailyTrades)
-}
-```
+| 액션 | 애니메이션 타입 | 지속 시간 |
+|------|----------------|-----------|
+| **월 전환** | 스프링 (spring) | 0.3초 |
+| **통계 카드 접기/펼치기** | 이즈인아웃 (easeInOut) | 0.2초 |
+| **시트 표시** | 시스템 기본 | - |
 
 ### 4.3 상태 관리
 
-```swift
-@State private var currentMonth: DateComponents
-@State private var selectedDate: Date?
-@State private var showingDailyTrades = false
-@State private var isStatExpanded = true
-```
+| 상태 변수 | 타입 | 용도 |
+|----------|------|------|
+| **currentMonth** | DateComponents | 현재 표시 중인 월 |
+| **selectedDate** | Date? | 선택된 날짜 |
+| **showingDailyTrades** | Bool | 매매일지 시트 표시 여부 |
+| **isStatExpanded** | Bool | 통계 카드 펼침 상태 |
 
 ## 5. 스타일 가이드
 
@@ -382,10 +248,12 @@ withAnimation(.easeInOut(duration: 0.2)) {
 ## 7. 접근성
 
 ### 7.1 VoiceOver
-```swift
-.accessibilityLabel("\(day)일, \(summary?.tradeCount ?? 0)건 거래, \(summary?.totalProfit.formatted() ?? "거래 없음")")
-.accessibilityHint("탭하여 상세 보기")
-```
+
+| 요소 | 읽기 내용 | 힌트 |
+|------|----------|------|
+| **날짜 셀** | "{날짜}일, {거래 건수}건 거래, {손익 금액}" | "탭하여 상세 보기" |
+| **월 이동 버튼** | "이전 달" / "다음 달" | "{월}로 이동" |
+| **통계 카드** | "월 통계, 총 손익 {금액}, 거래 {건수}건, 승률 {백분율}" | "탭하여 접기/펼치기" |
 
 ### 7.2 Dynamic Type
 - 모든 폰트는 Dynamic Type 지원
