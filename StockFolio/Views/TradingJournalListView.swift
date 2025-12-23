@@ -1,54 +1,250 @@
 import SwiftUI
 
 struct TradingJournalListView: View {
-    @StateObject private var viewModel = TradingJournalViewModel()
-    @State private var showingAddJournal = false
+    @ObservedObject var viewModel: TradingJournalViewModel
     @State private var selectedJournal: TradingJournalEntity?
-    @State private var showingFilterSheet = false
 
     var body: some View {
-        NavigationView {
-            Group {
+        VStack(spacing: 0) {
+            // 인라인 기간 필터
+            VStack(spacing: 6) {
+                filterPicker
+
+                // 기간별 상세 선택
+                if viewModel.filterType != .all {
+                    dateSelectionView
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 8)
+            .background(Color(.systemBackground))
+
+            // 데이터 영역 - 고정 높이로 레이아웃 안정화
+            ZStack {
                 if viewModel.journals.isEmpty {
                     emptyStateView
                 } else {
                     journalListView
                 }
             }
-            .onAppear {
-                print("📊 [TradingJournalListView] journals.count: \(viewModel.journals.count), totalCount: \(viewModel.totalTradeCount), hasMore: \(viewModel.hasMore)")
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .onAppear {
+            print("📊 [TradingJournalListView] journals.count: \(viewModel.journals.count), totalCount: \(viewModel.totalTradeCount), hasMore: \(viewModel.hasMore)")
+        }
+        .sheet(item: $selectedJournal) { journal in
+            AddTradingJournalView(viewModel: viewModel, editingJournal: journal)
+        }
+    }
+
+    // MARK: - Filter Picker
+
+    private var filterPicker: some View {
+        Picker("기간", selection: $viewModel.filterType) {
+            ForEach(FilterType.allCases, id: \.self) { type in
+                Text(type.rawValue).tag(type)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        showingFilterSheet = true
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "line.3.horizontal.decrease.circle")
-                            if !viewModel.selectedStockName.isEmpty {
-                                Text(viewModel.selectedStockName)
-                                    .font(.caption)
-                            }
-                        }
+        }
+        .pickerStyle(.segmented)
+        .onChange(of: viewModel.filterType) { oldValue, newValue in
+            print("📅 [Filter] Type changed: \(oldValue.rawValue) → \(newValue.rawValue)")
+            viewModel.applyFilter()
+        }
+    }
+
+    // MARK: - Date Selection View
+
+    @ViewBuilder
+    private var dateSelectionView: some View {
+        switch viewModel.filterType {
+        case .daily:
+            CompactDateButton(selection: $viewModel.selectedDate) { newDate in
+                print("📅 [Filter] Daily date changed: \(newDate)")
+                viewModel.applyFilter()
+            }
+
+        case .monthly:
+            MonthYearPicker(selection: $viewModel.selectedMonth) { newDate in
+                print("📅 [Filter] Monthly date changed: \(newDate)")
+                viewModel.applyFilter()
+            }
+
+        case .yearly:
+            YearPicker(selection: $viewModel.selectedYear, yearRange: yearRange) { newYear in
+                print("📅 [Filter] Yearly changed: \(newYear)")
+                viewModel.applyFilter()
+            }
+
+        case .all:
+            EmptyView()
+        }
+    }
+
+    private var yearRange: [Int] {
+        let currentYear = Calendar.current.component(.year, from: Date())
+        return Array((currentYear - 10)...currentYear).reversed()
+    }
+
+    // MARK: - Compact Date Button (일별)
+
+    struct CompactDateButton: View {
+        @Binding var selection: Date
+        let onChange: (Date) -> Void
+        @State private var showingPicker = false
+
+        private var displayText: String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy년 M월 d일"
+            return formatter.string(from: selection)
+        }
+
+        var body: some View {
+            Button {
+                showingPicker = true
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(displayText)
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+            }
+            .sheet(isPresented: $showingPicker) {
+                NavigationStack {
+                    DatePicker(
+                        "날짜 선택",
+                        selection: $selection,
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(.graphical)
+                    .labelsHidden()
+                    .padding()
+                    .navigationTitle("날짜 선택")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .onChange(of: selection) { _, newValue in
+                        // 날짜 선택 즉시 닫기
+                        showingPicker = false
+                        onChange(newValue)
+                    }
+                    .presentationDetents([.medium])
+                }
+            }
+        }
+    }
+
+    // MARK: - Year Picker (연별)
+
+    struct YearPicker: View {
+        @Binding var selection: Int
+        let yearRange: [Int]
+        let onChange: (Int) -> Void
+
+        var body: some View {
+            Menu {
+                Picker("연도", selection: $selection) {
+                    ForEach(yearRange, id: \.self) { year in
+                        Text(formatYear(year)).tag(year)
                     }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingAddJournal = true
-                    } label: {
-                        Image(systemName: "plus")
+                .onChange(of: selection) { _, newValue in
+                    onChange(newValue)
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(formatYear(selection))
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+            }
+        }
+
+        private func formatYear(_ year: Int) -> String {
+            "\(year)년"
+        }
+    }
+
+    // MARK: - Month Year Picker (월별)
+
+    struct MonthYearPicker: View {
+        @Binding var selection: Date
+        let onChange: (Date) -> Void
+
+        private var displayText: String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy년 M월"
+            return formatter.string(from: selection)
+        }
+
+        var body: some View {
+            Menu {
+                Picker("월 선택", selection: $selection) {
+                    ForEach(monthYearRange, id: \.self) { date in
+                        Text(formatDate(date)).tag(date)
+                    }
+                }
+                .onChange(of: selection) { _, newValue in
+                    onChange(newValue)
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "calendar")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Text(displayText)
+                        .font(.subheadline)
+                        .foregroundColor(.primary)
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 4)
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+            }
+        }
+
+        private var monthYearRange: [Date] {
+            let calendar = Calendar.current
+            let currentDate = Date()
+            var dates: [Date] = []
+
+            // 최근 24개월 (내림차순)
+            for i in 0...23 {
+                if let date = calendar.date(byAdding: .month, value: -i, to: currentDate) {
+                    let components = calendar.dateComponents([.year, .month], from: date)
+                    if let monthDate = calendar.date(from: components) {
+                        dates.append(monthDate)
                     }
                 }
             }
-            .sheet(isPresented: $showingAddJournal) {
-                AddTradingJournalView(viewModel: viewModel)
-            }
-            .sheet(item: $selectedJournal) { journal in
-                AddTradingJournalView(viewModel: viewModel, editingJournal: journal)
-            }
-            .sheet(isPresented: $showingFilterSheet) {
-                FilterSheetView(viewModel: viewModel)
-            }
+
+            return dates
+        }
+
+        private func formatDate(_ date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy년 M월"
+            return formatter.string(from: date)
         }
     }
 
@@ -134,6 +330,7 @@ struct TradingJournalListView: View {
                 }
             }
         }
+        .listStyle(.plain)
     }
 
     private var sectionHeader: some View {
@@ -328,5 +525,7 @@ struct TradingJournalCardView: View {
 }
 
 #Preview {
-    TradingJournalListView()
+    NavigationStack {
+        TradingJournalListView(viewModel: TradingJournalViewModel())
+    }
 }

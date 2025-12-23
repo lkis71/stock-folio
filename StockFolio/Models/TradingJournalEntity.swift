@@ -16,7 +16,7 @@ enum FilterType: String, Codable, CaseIterable {
     case all = "전체"
     case daily = "일별"
     case monthly = "월별"
-    case yearly = "년도별"
+    case yearly = "연별"
 }
 
 struct TradingJournalEntity: Identifiable {

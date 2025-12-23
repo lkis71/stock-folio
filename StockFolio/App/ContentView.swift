@@ -10,7 +10,7 @@ struct ContentView: View {
                     Label("포트폴리오", systemImage: "chart.pie.fill")
                 }
 
-            TradingJournalListView()
+            TradingJournalView()
                 .tabItem {
                     Label("매매 일지", systemImage: "book.fill")
                 }
