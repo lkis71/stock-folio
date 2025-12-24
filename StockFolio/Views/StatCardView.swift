@@ -1,0 +1,103 @@
+import SwiftUI
+
+/// StatCard - 매매일지 스타일의 통계 카드 컴포넌트
+/// SRP: 단일 통계 항목 표시만 담당
+struct StatCard: View {
+    let title: String
+    let value: String
+    let valueColor: Color
+    let additionalInfo: String?
+    let onTap: (() -> Void)?
+
+    init(
+        title: String,
+        value: String,
+        valueColor: Color = .primary,
+        additionalInfo: String? = nil,
+        onTap: (() -> Void)? = nil
+    ) {
+        self.title = title
+        self.value = value
+        self.valueColor = valueColor
+        self.additionalInfo = additionalInfo
+        self.onTap = onTap
+    }
+
+    var body: some View {
+        Button {
+            onTap?()
+        } label: {
+            VStack(alignment: .leading, spacing: 4) {
+                // 제목 (라벨)
+                Text(title)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                // 주요 값
+                Text(value)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(valueColor)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .monospacedDigit()
+
+                // 부가 정보 (옵션)
+                if let info = additionalInfo {
+                    Text(info)
+                        .font(.caption)
+                        .foregroundStyle(valueColor)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(8)
+        }
+        .buttonStyle(.plain)
+        .disabled(onTap == nil)
+    }
+}
+
+/// 포트폴리오 통계 섹션 (1x2 Row)
+/// 간소화 버전: 투자금과 남은 현금만 표시
+struct PortfolioStatisticsSection: View {
+    @ObservedObject var viewModel: PortfolioViewModel
+    let onSeedMoneyTap: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            // 1. 투자 금액 카드
+            StatCard(
+                title: "투자금",
+                value: viewModel.totalInvestedAmount.currencyFormatted,
+                additionalInfo: percentageText(viewModel.investedPercentage)
+            )
+
+            // 2. 남은 현금 카드
+            StatCard(
+                title: "남은 현금",
+                value: viewModel.remainingCash.currencyFormatted,
+                valueColor: .green,
+                additionalInfo: percentageText(viewModel.cashPercentage),
+                onTap: onSeedMoneyTap
+            )
+        }
+        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Helper Methods
+
+    private func percentageText(_ percentage: Double) -> String {
+        String(format: "%.1f%%", percentage)
+    }
+}
+
+#Preview {
+    PortfolioStatisticsSection(
+        viewModel: PortfolioViewModel(),
+        onSeedMoneyTap: {}
+    )
+}
