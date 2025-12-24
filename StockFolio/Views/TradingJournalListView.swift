@@ -345,12 +345,26 @@ struct TradingJournalListView: View {
     }
 
     private var sectionHeader: some View {
-        HStack {
-            if viewModel.totalTradeCount > 20 {
-                Text("매매 기록 (\(viewModel.journals.count)/\(viewModel.totalTradeCount))")
-            } else {
-                Text("매매 기록")
+        HStack(spacing: 4) {
+            Text("매매 기록")
+                .fontWeight(.semibold)
+
+            HStack(spacing: 2) {
+                Text("(")
+                Text("총")
+                Text("\(viewModel.totalTradeCount)")
+                    .foregroundColor(.blue)
+                Text("|")
+                Text("매수")
+                Text("\(viewModel.buyTradeCount)")
+                    .foregroundColor(.green)
+                Text("|")
+                Text("매도")
+                Text("\(viewModel.sellTradeCount)")
+                    .foregroundColor(.red)
+                Text(")")
             }
+            .foregroundColor(.secondary)
         }
     }
 }
@@ -363,28 +377,16 @@ struct TradingJournalStatsView: View {
     }
 
     var body: some View {
-        VStack(spacing: 6) {
-            // 실현 손익 (위)
-            HStack {
-                Text("실현 손익")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text(formattedProfitWithRate)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundColor(profitColor)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.7)
-            }
-
-            // 매매 통계 (아래)
-            HStack(spacing: 0) {
-                StatBadge(label: "총", value: viewModel.totalTradeCount, color: .blue)
-                Spacer()
-                StatBadge(label: "매수", value: viewModel.buyTradeCount, color: .green)
-                Spacer()
-                StatBadge(label: "매도", value: viewModel.sellTradeCount, color: .red)
-            }
+        HStack {
+            Text("실현 손익")
+                .font(.caption)
+                .fontWeight(.semibold)
+            Spacer()
+            Text(formattedProfitWithRate)
+                .font(.system(size: 15, weight: .bold, design: .rounded))
+                .foregroundColor(profitColor)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .padding(.vertical, 2)
     }
@@ -411,23 +413,6 @@ struct TradingJournalStatsView: View {
     }
 }
 
-struct StatBadge: View {
-    let label: String
-    let value: Int
-    let color: Color
-
-    var body: some View {
-        HStack(spacing: 3) {
-            Text(label)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-            Text("\(value)")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(color)
-        }
-    }
-}
 
 struct TradingJournalCardView: View {
     let journal: TradingJournalEntity

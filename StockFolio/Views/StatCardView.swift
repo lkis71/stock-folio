@@ -30,14 +30,14 @@ struct StatCard: View {
             VStack(alignment: .leading, spacing: 2) {
                 // 제목 (라벨)
                 Text(title)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
+                    .font(.caption)
+                    .fontWeight(.semibold)
 
                 // 주요 값
                 Text(value)
-                    .font(.headline)
+                    .font(.title3)
                     .fontWeight(.bold)
-                    .foregroundStyle(valueColor)
+                    .foregroundColor(valueColor)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
                     .monospacedDigit()
@@ -45,8 +45,9 @@ struct StatCard: View {
                 // 부가 정보 (옵션)
                 if let info = additionalInfo {
                     Text(info)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(valueColor)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
@@ -73,6 +74,7 @@ struct PortfolioStatisticsSection: View {
             StatCard(
                 title: "투자금",
                 value: viewModel.totalInvestedAmount.currencyFormatted,
+                valueColor: .blue,
                 additionalInfo: percentageText(viewModel.investedPercentage)
             )
 
