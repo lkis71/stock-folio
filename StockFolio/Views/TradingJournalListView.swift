@@ -16,7 +16,8 @@ struct TradingJournalListView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+            .padding(.top, 0)
+            .padding(.bottom, 8)
             .background(Color(.systemBackground))
 
             // 데이터 영역 - 고정 높이로 레이아웃 안정화

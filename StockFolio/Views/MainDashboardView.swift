@@ -35,8 +35,6 @@ struct MainDashboardView: View {
                         showingAddStock = true
                     } label: {
                         Image(systemName: "plus")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(Color.accentColor)
                     }
                     .accessibilityLabel("종목 추가")
                 }
