@@ -27,7 +27,7 @@ struct StatCard: View {
         Button {
             onTap?()
         } label: {
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: 2) {
                 // 제목 (라벨)
                 Text(title)
                     .font(.caption2)
@@ -35,7 +35,7 @@ struct StatCard: View {
 
                 // 주요 값
                 Text(value)
-                    .font(.title2)
+                    .font(.headline)
                     .fontWeight(.bold)
                     .foregroundStyle(valueColor)
                     .lineLimit(1)
@@ -45,14 +45,14 @@ struct StatCard: View {
                 // 부가 정보 (옵션)
                 if let info = additionalInfo {
                     Text(info)
-                        .font(.caption)
-                        .foregroundStyle(valueColor)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
+            .padding(10)
             .background(Color(.secondarySystemBackground))
             .cornerRadius(8)
         }
