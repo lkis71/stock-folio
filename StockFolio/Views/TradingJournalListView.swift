@@ -244,13 +244,23 @@ struct TradingJournalListView: View {
     }
 
     private var journalListView: some View {
-        List {
-            Section {
+        ScrollView {
+            LazyVStack(spacing: 0, pinnedViews: []) {
+                // 통계 섹션
                 TradingJournalStatsView(viewModel: viewModel)
-            }
-            .listSectionSpacing(0)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
 
-            Section(header: sectionHeader) {
+                // 섹션 헤더
+                HStack {
+                    sectionHeader
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+
                 if viewModel.journals.isEmpty {
                     // 빈 데이터 상태
                     VStack(spacing: 12) {
@@ -275,6 +285,11 @@ struct TradingJournalListView: View {
                             .onTapGesture {
                                 selectedJournal = journal
                             }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 4)
+
+                        Divider()
+                            .padding(.leading, 16)
                     }
 
                     // 로딩 인디케이터
@@ -284,6 +299,7 @@ struct TradingJournalListView: View {
                             ProgressView()
                             Spacer()
                         }
+                        .padding(.vertical, 12)
                     }
 
                     // 더보기 버튼 (수동 로드 옵션)
@@ -299,6 +315,7 @@ struct TradingJournalListView: View {
                                 Spacer()
                             }
                         }
+                        .padding(.vertical, 12)
                     }
 
                     // 접기 버튼
@@ -316,13 +333,15 @@ struct TradingJournalListView: View {
                                 Spacer()
                             }
                         }
+                        .padding(.vertical, 12)
                     }
                 }
+
+                // 하단 여백
+                Spacer()
+                    .frame(height: 20)
             }
         }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .environment(\.defaultMinListHeaderHeight, 0)
     }
 
     private var sectionHeader: some View {
