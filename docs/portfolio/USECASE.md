@@ -2,11 +2,15 @@
 
 ## 문서 정보
 
-**버전:** v1.0
+**버전:** v1.1
 **최종 수정일:** 2024-12-24
 **작성자:** Claude Code
 
 ## 변경 이력
+
+### v1.1 (2024-12-24)
+- Mermaid 다이어그램을 draw.io SVG 이미지로 변환
+- 유스케이스, 시퀀스, 상태 다이어그램 시각화 개선
 
 ### v1.0 (2024-12-24)
 - 초기 작성
@@ -15,70 +19,17 @@
 
 ## 1. 유스케이스 다이어그램
 
-```mermaid
-graph LR
-    subgraph "사용자"
-        A[투자자]
-    end
-
-    subgraph "포트폴리오 관리"
-        B[시드머니 설정]
-        C[종목 추가]
-        D[종목 수정]
-        E[종목 삭제]
-        F[보유 비중 확인]
-        G[차트 확인]
-    end
-
-    A --> B
-    A --> C
-    A --> D
-    A --> E
-    A --> F
-    A --> G
-```
+![유스케이스 다이어그램](./images/usecase-diagram.drawio.svg)
 
 ## 2. 시퀀스 다이어그램
 
 ### 2.1 종목 추가 플로우
 
-```mermaid
-sequenceDiagram
-    participant U as 사용자
-    participant V as PortfolioView
-    participant VM as PortfolioViewModel
-    participant R as StockRepository
-    participant CD as Core Data
-
-    U->>V: + 버튼 탭
-    V->>V: AddStockView 표시
-    U->>V: 종목명, 금액 입력
-    U->>V: 저장 버튼 탭
-    V->>VM: addStock()
-    VM->>R: create()
-    R->>CD: 데이터 저장
-    CD-->>R: 성공
-    R-->>VM: StockHoldingEntity
-    VM-->>V: 종목 리스트 업데이트
-    V-->>U: 목록에 종목 표시
-```
+![종목 추가 시퀀스](./images/sequence-add-stock.drawio.svg)
 
 ### 2.2 시드머니 설정 플로우
 
-```mermaid
-sequenceDiagram
-    participant U as 사용자
-    participant V as PortfolioView
-    participant VM as PortfolioViewModel
-    participant S as SeedMoneyStorage
-
-    U->>V: 시드머니 입력
-    V->>VM: updateSeedMoney()
-    VM->>S: save()
-    S-->>VM: 성공
-    VM-->>V: UI 업데이트
-    V-->>U: 투자 현황 갱신
-```
+![시드머니 설정 시퀀스](./images/sequence-seed-money.drawio.svg)
 
 ## 3. 유스케이스 상세
 
@@ -136,14 +87,4 @@ sequenceDiagram
 
 ### 포트폴리오 상태
 
-```mermaid
-stateDiagram-v2
-    [*] --> 빈상태: 초기 실행
-    빈상태 --> 시드머니설정: 금액 입력
-    시드머니설정 --> 종목추가가능: 시드머니 > 0
-    종목추가가능 --> 종목보유중: 종목 추가
-    종목보유중 --> 종목추가가능: 종목 삭제(1개만 있을 때)
-    종목보유중 --> 종목보유중: 종목 추가/수정/삭제
-    종목추가가능 --> 시드머니설정: 시드머니 수정
-    종목보유중 --> 시드머니설정: 시드머니 수정
-```
+![포트폴리오 상태 다이어그램](./images/state-portfolio.drawio.svg)

@@ -2,11 +2,15 @@
 
 ## 문서 정보
 
-**버전:** v1.0
+**버전:** v1.1
 **최종 수정일:** 2024-12-24
 **작성자:** Claude Code
 
 ## 변경 이력
+
+### v1.1 (2024-12-24)
+- Mermaid 다이어그램을 draw.io SVG 이미지로 변환
+- 앱 아키텍처 및 데이터 흐름도 시각화 개선
 
 ### v1.0 (2024-12-24)
 - 초기 작성
@@ -32,72 +36,11 @@
 
 ## 3. 앱 구성도
 
-```mermaid
-graph TB
-    subgraph "UI Layer"
-        A[Main View<br/>포트폴리오 대시보드]
-        B[Chart View<br/>보유 비중 차트]
-        C[Add Stock View<br/>종목 추가 화면]
-        D[Stock List View<br/>종목 목록]
-    end
-
-    subgraph "ViewModel Layer"
-        E[PortfolioViewModel]
-    end
-
-    subgraph "Repository Layer"
-        M[CoreDataStockRepository]
-    end
-
-    subgraph "Data Layer"
-        F[Core Data Manager<br/>PersistenceController]
-        G[StockHolding Entity]
-    end
-
-    A --> B
-    A --> D
-    A --> C
-
-    A --> E
-    B --> E
-    C --> E
-    D --> E
-
-    E --> M
-    M --> F
-    F --> G
-```
+![앱 아키텍처](./images/architecture-diagram.drawio.svg)
 
 ## 4. 데이터 흐름도
 
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant V as Main View
-    participant VM as PortfolioViewModel
-    participant R as StockRepository
-    participant CD as Core Data
-
-    U->>V: 앱 실행
-    V->>VM: 초기화
-    VM->>R: 저장된 종목 조회
-    R->>CD: fetch 요청
-    CD-->>R: 종목 리스트
-    R-->>VM: 종목 리스트
-    VM-->>V: UI 업데이트
-    V->>U: 차트 + 종목 리스트 표시
-
-    U->>V: 종목 추가 버튼 클릭
-    V->>V: 입력 폼 표시
-    U->>V: 종목명, 매수금액 입력
-    V->>VM: 종목 추가 요청
-    VM->>R: 데이터 저장 요청
-    R->>CD: save
-    CD-->>R: 저장 완료
-    R-->>VM: 저장 완료
-    VM-->>V: UI 업데이트 (새로운 차트)
-    V->>U: 업데이트된 포트폴리오 표시
-```
+![데이터 흐름도](./images/sequence-data-flow.drawio.svg)
 
 ## 5. 화면 구성
 

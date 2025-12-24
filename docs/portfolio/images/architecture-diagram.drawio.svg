@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="600px" height="500px" viewBox="-0.5 -0.5 600 500" content="&lt;mxfile host=&quot;app.diagrams.net&quot;&gt;&lt;diagram name=&quot;Architecture Diagram&quot; id=&quot;arch&quot;&gt;&lt;/diagram&gt;&lt;/mxfile&gt;">
+  <defs>
+    <marker id="arrow4" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333333"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="600" height="500" fill="#FFFFFF"/>
+
+  <!-- UI Layer -->
+  <rect x="30" y="30" width="540" height="130" rx="10" fill="#E3F2FD" stroke="#1976D2" stroke-width="2"/>
+  <text x="50" y="55" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#1976D2">UI Layer</text>
+
+  <rect x="50" y="70" width="110" height="70" rx="8" fill="#FFFFFF" stroke="#1976D2" stroke-width="1.5"/>
+  <text x="105" y="100" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" text-anchor="middle" fill="#1976D2">Main View</text>
+  <text x="105" y="120" font-family="SF Pro Display, -apple-system, sans-serif" font-size="9" text-anchor="middle" fill="#666666">포트폴리오 대시보드</text>
+
+  <rect x="175" y="70" width="100" height="70" rx="8" fill="#FFFFFF" stroke="#1976D2" stroke-width="1.5"/>
+  <text x="225" y="100" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" text-anchor="middle" fill="#1976D2">Chart View</text>
+  <text x="225" y="120" font-family="SF Pro Display, -apple-system, sans-serif" font-size="9" text-anchor="middle" fill="#666666">보유 비중 차트</text>
+
+  <rect x="290" y="70" width="110" height="70" rx="8" fill="#FFFFFF" stroke="#1976D2" stroke-width="1.5"/>
+  <text x="345" y="100" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" text-anchor="middle" fill="#1976D2">Add Stock View</text>
+  <text x="345" y="120" font-family="SF Pro Display, -apple-system, sans-serif" font-size="9" text-anchor="middle" fill="#666666">종목 추가 화면</text>
+
+  <rect x="415" y="70" width="110" height="70" rx="8" fill="#FFFFFF" stroke="#1976D2" stroke-width="1.5"/>
+  <text x="470" y="100" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" text-anchor="middle" fill="#1976D2">Stock List View</text>
+  <text x="470" y="120" font-family="SF Pro Display, -apple-system, sans-serif" font-size="9" text-anchor="middle" fill="#666666">종목 목록</text>
+
+  <!-- ViewModel Layer -->
+  <rect x="170" y="190" width="260" height="70" rx="10" fill="#FFF3E0" stroke="#F57C00" stroke-width="2"/>
+  <text x="190" y="215" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#F57C00">ViewModel Layer</text>
+  <rect x="190" y="225" width="220" height="25" rx="5" fill="#FFFFFF" stroke="#F57C00" stroke-width="1.5"/>
+  <text x="300" y="242" font-family="SF Pro Display, -apple-system, sans-serif" font-size="12" text-anchor="middle" fill="#F57C00">PortfolioViewModel</text>
+
+  <!-- Repository Layer -->
+  <rect x="170" y="290" width="260" height="70" rx="10" fill="#F3E5F5" stroke="#7B1FA2" stroke-width="2"/>
+  <text x="190" y="315" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#7B1FA2">Repository Layer</text>
+  <rect x="190" y="325" width="220" height="25" rx="5" fill="#FFFFFF" stroke="#7B1FA2" stroke-width="1.5"/>
+  <text x="300" y="342" font-family="SF Pro Display, -apple-system, sans-serif" font-size="12" text-anchor="middle" fill="#7B1FA2">CoreDataStockRepository</text>
+
+  <!-- Data Layer -->
+  <rect x="100" y="390" width="400" height="90" rx="10" fill="#E8F5E9" stroke="#388E3C" stroke-width="2"/>
+  <text x="120" y="415" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#388E3C">Data Layer</text>
+
+  <rect x="130" y="430" width="160" height="35" rx="5" fill="#FFFFFF" stroke="#388E3C" stroke-width="1.5"/>
+  <text x="210" y="452" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" text-anchor="middle" fill="#388E3C">Core Data Manager</text>
+  <text x="210" y="465" font-family="SF Pro Display, -apple-system, sans-serif" font-size="9" text-anchor="middle" fill="#666666">PersistenceController</text>
+
+  <rect x="310" y="430" width="160" height="35" rx="5" fill="#FFFFFF" stroke="#388E3C" stroke-width="1.5"/>
+  <text x="390" y="452" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" text-anchor="middle" fill="#388E3C">StockHolding Entity</text>
+
+  <!-- Arrows: UI -> ViewModel -->
+  <line x1="105" y1="140" x2="250" y2="188" stroke="#333333" stroke-width="1.5" marker-end="url(#arrow4)"/>
+  <line x1="225" y1="140" x2="270" y2="188" stroke="#333333" stroke-width="1.5" marker-end="url(#arrow4)"/>
+  <line x1="345" y1="140" x2="320" y2="188" stroke="#333333" stroke-width="1.5" marker-end="url(#arrow4)"/>
+  <line x1="470" y1="140" x2="350" y2="188" stroke="#333333" stroke-width="1.5" marker-end="url(#arrow4)"/>
+
+  <!-- Arrow: ViewModel -> Repository -->
+  <line x1="300" y1="260" x2="300" y2="288" stroke="#333333" stroke-width="1.5" marker-end="url(#arrow4)"/>
+
+  <!-- Arrow: Repository -> Data -->
+  <line x1="300" y1="360" x2="300" y2="388" stroke="#333333" stroke-width="1.5" marker-end="url(#arrow4)"/>
+
+  <!-- Arrow: Data Manager -> Entity -->
+  <line x1="290" y1="447" x2="308" y2="447" stroke="#333333" stroke-width="1.5" marker-end="url(#arrow4)"/>
+
+  <!-- UI Internal Arrows -->
+  <line x1="160" y1="105" x2="173" y2="105" stroke="#666666" stroke-width="1" marker-end="url(#arrow4)"/>
+  <line x1="160" y1="110" x2="275" y2="110" stroke="#666666" stroke-width="1" marker-end="url(#arrow4)"/>
+  <line x1="160" y1="115" x2="400" y2="115" stroke="#666666" stroke-width="1" marker-end="url(#arrow4)"/>
+</svg>
