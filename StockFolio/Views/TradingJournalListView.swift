@@ -248,6 +248,7 @@ struct TradingJournalListView: View {
             Section {
                 TradingJournalStatsView(viewModel: viewModel)
             }
+            .listSectionSpacing(0)
 
             Section(header: sectionHeader) {
                 if viewModel.journals.isEmpty {
@@ -320,6 +321,8 @@ struct TradingJournalListView: View {
             }
         }
         .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .environment(\.defaultMinListHeaderHeight, 0)
     }
 
     private var sectionHeader: some View {
