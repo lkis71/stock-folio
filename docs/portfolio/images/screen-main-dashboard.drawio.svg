@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="320px" height="640px" viewBox="-0.5 -0.5 320 640" content="&lt;mxfile host=&quot;app.diagrams.net&quot;&gt;&lt;diagram name=&quot;Main Dashboard&quot; id=&quot;main-dashboard&quot;&gt;&lt;mxGraphModel dx=&quot;1000&quot; dy=&quot;600&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;320&quot; pageHeight=&quot;640&quot;&gt;&lt;root&gt;&lt;mxCell id=&quot;0&quot;/&gt;&lt;mxCell id=&quot;1&quot; parent=&quot;0&quot;/&gt;&lt;/root&gt;&lt;/mxGraphModel&gt;&lt;/diagram&gt;&lt;/mxfile&gt;">
+  <defs/>
+
+  <!-- Phone Frame -->
+  <rect x="0" y="0" width="320" height="640" rx="20" ry="20" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="2"/>
+
+  <!-- Status Bar -->
+  <rect x="0" y="0" width="320" height="44" rx="20" ry="20" fill="#F8F8F8"/>
+  <text x="160" y="28" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" text-anchor="middle">9:41</text>
+
+  <!-- Navigation Bar -->
+  <rect x="0" y="44" width="320" height="44" fill="#FFFFFF"/>
+  <text x="280" y="72" font-family="SF Pro Display, -apple-system, sans-serif" font-size="20" text-anchor="middle" fill="#007AFF">⚙️</text>
+  <line x1="0" y1="88" x2="320" y2="88" stroke="#E0E0E0" stroke-width="0.5"/>
+
+  <!-- Investment Status Cards -->
+  <g transform="translate(16, 100)">
+    <!-- Left Card: Investment Amount -->
+    <rect x="0" y="0" width="138" height="70" rx="12" ry="12" fill="#F2F2F7"/>
+    <text x="10" y="20" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" fill="#8E8E93">투자 금액</text>
+    <text x="10" y="42" font-family="SF Pro Display, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#000000">₩ 50,000,000</text>
+    <text x="10" y="60" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#007AFF">50%</text>
+
+    <!-- Right Card: Remaining Cash -->
+    <rect x="150" y="0" width="138" height="70" rx="12" ry="12" fill="#F2F2F7"/>
+    <text x="160" y="20" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" fill="#8E8E93">남은 현금</text>
+    <text x="160" y="42" font-family="SF Pro Display, -apple-system, sans-serif" font-size="16" font-weight="700" fill="#000000">₩ 50,000,000</text>
+    <text x="160" y="60" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#34C759">50%</text>
+  </g>
+
+  <!-- Pie Chart -->
+  <g transform="translate(160, 280)">
+    <circle cx="0" cy="0" r="80" fill="none" stroke="#E0E0E0" stroke-width="1"/>
+    <!-- Pie segments -->
+    <path d="M 0 -80 A 80 80 0 0 1 76 24 L 0 0 Z" fill="#007AFF"/>
+    <path d="M 76 24 A 80 80 0 0 1 -49 63 L 0 0 Z" fill="#34C759"/>
+    <path d="M -49 63 A 80 80 0 0 1 -76 -24 L 0 0 Z" fill="#FF9500"/>
+    <path d="M -76 -24 A 80 80 0 0 1 0 -80 L 0 0 Z" fill="#AF52DE"/>
+    <!-- Center label -->
+    <circle cx="0" cy="0" r="40" fill="#FFFFFF"/>
+    <text x="0" y="-5" font-family="SF Pro Display, -apple-system, sans-serif" font-size="10" fill="#8E8E93" text-anchor="middle">삼성전자</text>
+    <text x="0" y="12" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#007AFF" text-anchor="middle">40%</text>
+  </g>
+
+  <!-- Legend (2 columns) -->
+  <g transform="translate(16, 380)">
+    <rect x="0" y="0" width="288" height="50" rx="8" ry="8" fill="#F2F2F7"/>
+    <!-- Row 1 -->
+    <circle cx="15" cy="15" r="5" fill="#007AFF"/>
+    <text x="28" y="19" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" fill="#000000">삼성전자 40%</text>
+    <circle cx="155" cy="15" r="5" fill="#34C759"/>
+    <text x="168" y="19" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" fill="#000000">카카오 20%</text>
+    <!-- Row 2 -->
+    <circle cx="15" cy="35" r="5" fill="#FF9500"/>
+    <text x="28" y="39" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" fill="#000000">SK하이닉스 30%</text>
+    <circle cx="155" cy="35" r="5" fill="#AF52DE"/>
+    <text x="168" y="39" font-family="SF Pro Display, -apple-system, sans-serif" font-size="11" fill="#000000">NAVER 10%</text>
+  </g>
+
+  <!-- Section Header -->
+  <text x="16" y="460" font-family="SF Pro Display, -apple-system, sans-serif" font-size="15" font-weight="600" fill="#000000">보유 종목 (4/4)</text>
+
+  <!-- Stock List -->
+  <g transform="translate(16, 475)">
+    <!-- Stock Item 1 -->
+    <rect x="0" y="0" width="288" height="50" rx="8" ry="8" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="0.5"/>
+    <rect x="0" y="0" width="4" height="50" rx="2" ry="2" fill="#007AFF"/>
+    <text x="16" y="22" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#000000">삼성전자</text>
+    <text x="260" y="22" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" fill="#8E8E93" text-anchor="end">40%</text>
+    <text x="16" y="40" font-family="SF Pro Display, -apple-system, sans-serif" font-size="12" fill="#8E8E93">₩ 4,000,000</text>
+
+    <!-- Stock Item 2 -->
+    <rect x="0" y="58" width="288" height="50" rx="8" ry="8" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="0.5"/>
+    <rect x="0" y="58" width="4" height="50" rx="2" ry="2" fill="#34C759"/>
+    <text x="16" y="80" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" font-weight="600" fill="#000000">SK하이닉스</text>
+    <text x="260" y="80" font-family="SF Pro Display, -apple-system, sans-serif" font-size="14" fill="#8E8E93" text-anchor="end">30%</text>
+    <text x="16" y="98" font-family="SF Pro Display, -apple-system, sans-serif" font-size="12" fill="#8E8E93">₩ 3,000,000</text>
+  </g>
+
+  <!-- Floating Action Button -->
+  <circle cx="280" cy="600" r="28" fill="#007AFF"/>
+  <text x="280" y="608" font-family="SF Pro Display, -apple-system, sans-serif" font-size="28" font-weight="300" fill="#FFFFFF" text-anchor="middle">+</text>
+
+  <!-- Home Indicator -->
+  <rect x="110" y="625" width="100" height="5" rx="2.5" ry="2.5" fill="#000000"/>
+</svg>
