@@ -90,14 +90,40 @@ Core Data (영구 저장소)
 
 ## 설계 문서
 
-모든 설계서는 `docs/` 폴더에 기능별로 구분됩니다:
-- `docs/portfolio/`: 포트폴리오 설계서
-- `docs/trading-journal/`: 매매일지 설계서
-  - `CALENDAR_REQUIREMENTS.md`: 캘린더 요구사항
-  - `CALENDAR_SCREEN_DESIGN.md`: 캘린더 화면설계서
-  - `CALENDAR_USECASE.md`: 캘린더 유스케이스
+**문서 작성 규칙**: 모든 기능은 반드시 아래 3개 문서로 구성
 
-**중요**: 기능 구현 시 설계서를 먼저 확인하고, 코드 변경 후 설계서도 업데이트합니다.
+### 필수 문서 구조
+```
+docs/{메뉴명}/{기능명}/
+├── USECASE.md          # 유스케이스 명세서 (다이어그램 포함)
+├── REQUIREMENTS.md     # 요구사항 정의서 (표 형식)
+└── SCREEN_DESIGN.md    # 화면설계서 (ASCII 다이어그램)
+```
+
+### 현재 구조
+```
+docs/
+├── portfolio/                       # 포트폴리오 메뉴
+│   └── {기능명}/
+│       ├── USECASE.md
+│       ├── REQUIREMENTS.md
+│       └── SCREEN_DESIGN.md
+│
+└── trading-journal/                 # 매매일지 메뉴
+    ├── calendar/                    # 캘린더 기능
+    │   ├── USECASE.md
+    │   ├── REQUIREMENTS.md
+    │   └── SCREEN_DESIGN.md
+    ├── entry/                       # 작성/리스트 기능
+    │   └── (3개 문서)
+    └── stock-selection/             # 종목 선택 기능
+        └── (3개 문서)
+```
+
+**중요**:
+- 기능 추가 시: 반드시 3개 문서 모두 작성
+- 기능 구현 시: 설계서를 먼저 확인
+- 코드 변경 후: 설계서도 함께 업데이트
 
 ## UI 디자인 가이드라인
 
