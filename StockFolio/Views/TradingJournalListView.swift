@@ -20,14 +20,8 @@ struct TradingJournalListView: View {
             .background(Color(.systemBackground))
 
             // 데이터 영역 - 고정 높이로 레이아웃 안정화
-            ZStack {
-                if viewModel.journals.isEmpty {
-                    emptyStateView
-                } else {
-                    journalListView
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            journalListView
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .onAppear {
             print("📊 [TradingJournalListView] journals.count: \(viewModel.journals.count), totalCount: \(viewModel.totalTradeCount), hasMore: \(viewModel.hasMore)")
@@ -248,22 +242,6 @@ struct TradingJournalListView: View {
         }
     }
 
-    private var emptyStateView: some View {
-        VStack(spacing: 20) {
-            Image(systemName: "book.closed")
-                .font(.system(size: 60))
-                .foregroundColor(.gray)
-
-            Text("매매 일지가 없습니다")
-                .font(.title3)
-                .fontWeight(.medium)
-
-            Text("+ 버튼을 눌러 첫 매매 기록을 남겨보세요")
-                .font(.subheadline)
-                .foregroundColor(.secondary)
-        }
-    }
-
     private var journalListView: some View {
         List {
             Section {
@@ -271,60 +249,70 @@ struct TradingJournalListView: View {
             }
 
             Section(header: sectionHeader) {
-                ForEach(viewModel.journals) { journal in
-                    TradingJournalCardView(journal: journal)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedJournal = journal
+                if viewModel.journals.isEmpty {
+                    // 빈 데이터 상태
+                    VStack(spacing: 12) {
+                        Image(systemName: "book.closed")
+                            .font(.system(size: 40))
+                            .foregroundColor(.gray)
+
+                        Text("등록된 매매 기록이 없습니다")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        Text("+ 버튼을 눌러 첫 매매 기록을 남겨보세요")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 40)
+                } else {
+                    ForEach(viewModel.journals) { journal in
+                        TradingJournalCardView(journal: journal)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedJournal = journal
+                            }
+                    }
+
+                    // 로딩 인디케이터
+                    if viewModel.isLoading {
+                        HStack {
+                            Spacer()
+                            ProgressView()
+                            Spacer()
                         }
-                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                            Button(role: .destructive) {
-                                if let index = viewModel.journals.firstIndex(where: { $0.id == journal.id }) {
-                                    viewModel.deleteJournals(at: IndexSet(integer: index))
-                                }
-                            } label: {
-                                Label("삭제", systemImage: "trash")
+                    }
+
+                    // 더보기 버튼 (수동 로드 옵션)
+                    if viewModel.hasMore && !viewModel.isLoading {
+                        Button {
+                            viewModel.fetchMore()
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Text("↓ 더보기")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
                             }
                         }
-                }
-
-                // 로딩 인디케이터
-                if viewModel.isLoading {
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                        Spacer()
                     }
-                }
 
-                // 더보기 버튼 (수동 로드 옵션)
-                if viewModel.hasMore && !viewModel.isLoading {
-                    Button {
-                        viewModel.fetchMore()
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Text("↓ 더보기")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
-                        }
-                    }
-                }
-
-                // 접기 버튼
-                if !viewModel.hasMore && viewModel.journals.count > 10 {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            viewModel.collapseToInitial()
-                        }
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Text("↑ 접기")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Spacer()
+                    // 접기 버튼
+                    if !viewModel.hasMore && viewModel.journals.count > 10 {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                viewModel.collapseToInitial()
+                            }
+                        } label: {
+                            HStack {
+                                Spacer()
+                                Text("↑ 접기")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                            }
                         }
                     }
                 }

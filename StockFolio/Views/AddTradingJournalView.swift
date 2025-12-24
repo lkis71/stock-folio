@@ -14,6 +14,7 @@ struct AddTradingJournalView: View {
     @State private var reason: String = ""
     @State private var validationError: String?
     @State private var datePickerId = UUID()
+    @State private var showingDeleteAlert = false
     @FocusState private var focusedField: Field?
 
     var editingJournal: TradingJournalEntity?
@@ -261,6 +262,25 @@ struct AddTradingJournalView: View {
                         Image(systemName: "xmark")
                     }
                 }
+
+                if editingJournal != nil {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(role: .destructive) {
+                            showingDeleteAlert = true
+                        } label: {
+                            Image(systemName: "trash")
+                                .foregroundColor(.red)
+                        }
+                    }
+                }
+            }
+            .alert("삭제 확인", isPresented: $showingDeleteAlert) {
+                Button("취소", role: .cancel) { }
+                Button("삭제", role: .destructive) {
+                    deleteJournal()
+                }
+            } message: {
+                Text("이 매매 기록을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.")
             }
             .animation(.interactiveSpring(), value: focusedField)
             .onAppear {
@@ -369,6 +389,15 @@ struct AddTradingJournalView: View {
                 realizedProfit: realizedProfit,
                 reason: reason.trimmingCharacters(in: .whitespacesAndNewlines)
             )
+        }
+        dismiss()
+    }
+
+    private func deleteJournal() {
+        guard let journal = editingJournal else { return }
+
+        if let index = viewModel.journals.firstIndex(where: { $0.id == journal.id }) {
+            viewModel.deleteJournals(at: IndexSet(integer: index))
         }
         dismiss()
     }
