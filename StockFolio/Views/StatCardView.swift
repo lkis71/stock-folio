@@ -81,8 +81,7 @@ struct PortfolioStatisticsSection: View {
                 title: "남은 현금",
                 value: viewModel.remainingCash.currencyFormatted,
                 valueColor: .green,
-                additionalInfo: percentageText(viewModel.cashPercentage),
-                onTap: onSeedMoneyTap
+                additionalInfo: percentageText(viewModel.cashPercentage)
             )
         }
         .padding(.horizontal, 16)
