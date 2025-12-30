@@ -107,6 +107,23 @@ struct PortfolioStatisticsSection: View {
     }
 }
 
+// MARK: - Close Button (공통 닫기 버튼)
+
+/// 모든 Sheet/Modal에서 사용하는 통일된 닫기 버튼
+struct CloseButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "xmark.circle.fill")
+                .font(.title2)
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(.secondary)
+        }
+        .accessibilityLabel("닫기")
+    }
+}
+
 #Preview {
     PortfolioStatisticsSection(
         viewModel: PortfolioViewModel(),

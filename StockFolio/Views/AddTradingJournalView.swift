@@ -256,11 +256,7 @@ struct AddTradingJournalView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                    }
+                    CloseButton { dismiss() }
                 }
 
                 if editingJournal != nil {

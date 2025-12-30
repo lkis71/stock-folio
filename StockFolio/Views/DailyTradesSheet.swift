@@ -31,14 +31,8 @@ struct DailyTradesSheet: View {
             .navigationTitle(dateString)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .font(.title2)
-                            .foregroundStyle(.tertiary)
-                    }
+                ToolbarItem(placement: .topBarLeading) {
+                    CloseButton { dismiss() }
                 }
             }
             .sheet(item: $selectedJournal) { journal in
@@ -119,21 +113,35 @@ struct DailyTradesSheet: View {
 
     private var tradeListSection: some View {
         VStack(alignment: .leading, spacing: 8) {
+            // 섹션 헤더
             Text("거래 내역")
                 .font(.caption)
                 .fontWeight(.bold)
                 .foregroundStyle(.primary)
                 .padding(.leading, 4)
 
-            VStack(spacing: 8) {
-                ForEach(summary.trades.sorted(by: { $0.tradeDate > $1.tradeDate })) { trade in
-                    TradingJournalCardView(journal: trade)
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            selectedJournal = trade
+            // 거래 목록 카드
+            VStack(spacing: 0) {
+                ForEach(Array(summary.trades.sorted(by: { $0.tradeDate > $1.tradeDate }).enumerated()), id: \.element.id) { index, trade in
+                    VStack(spacing: 0) {
+                        TradingJournalCardView(journal: trade)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedJournal = trade
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+
+                        // 구분선 (마지막 항목 제외)
+                        if index < summary.trades.count - 1 {
+                            Divider()
+                                .padding(.leading, 12)
                         }
+                    }
                 }
             }
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(12)
         }
     }
 

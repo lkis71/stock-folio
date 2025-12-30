@@ -77,12 +77,7 @@ struct SeedMoneySettingsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .accessibilityLabel("닫기")
-                    }
+                    CloseButton { dismiss() }
                 }
             }
             .onAppear {
