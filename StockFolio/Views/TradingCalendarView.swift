@@ -93,51 +93,38 @@ struct TradingCalendarView: View {
 
     private func monthlyStatsCard(_ stats: MonthlyStatistics) -> some View {
         VStack(spacing: 8) {
-            // 헤더: 제목 + 접기 버튼
-            HStack {
-                Text("월 통계")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+            // 헤더
+            Text("월 통계")
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                Spacer()
+            // 통계 내용
+            HStack(spacing: 16) {
+                StatItem(
+                    title: "총 손익",
+                    value: formattedProfit(stats.totalProfit),
+                    valueColor: stats.totalProfit >= 0 ? .red : .blue
+                )
 
-                Button {
-                    viewModel.toggleStatExpanded()
-                } label: {
-                    Image(systemName: viewModel.isStatExpanded ? "chevron.up" : "chevron.down")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
+                Divider()
+                    .frame(height: 30)
 
-            // 통계 내용 - 접기 가능
-            if viewModel.isStatExpanded {
-                HStack(spacing: 16) {
-                    StatItem(
-                        title: "총 손익",
-                        value: formattedProfit(stats.totalProfit),
-                        valueColor: stats.totalProfit >= 0 ? .red : .blue
-                    )
+                StatItem(
+                    title: "거래",
+                    value: "\(stats.totalTradeCount)건",
+                    valueColor: .primary
+                )
 
-                    Divider()
-                        .frame(height: 30)
+                Divider()
+                    .frame(height: 30)
 
-                    StatItem(
-                        title: "거래",
-                        value: "\(stats.totalTradeCount)건",
-                        valueColor: .primary
-                    )
-
-                    Divider()
-                        .frame(height: 30)
-
-                    StatItem(
-                        title: "수익률",
-                        value: String(format: "%.1f%%", stats.winRate),
-                        valueColor: stats.winRate >= 0 ? .red : .blue
-                    )
-                }
-                .transition(.opacity)
+                StatItem(
+                    title: "수익률",
+                    value: String(format: "%+.1f%%", stats.profitRate),
+                    valueColor: stats.profitRate >= 0 ? .red : .blue
+                )
             }
         }
         .padding(12)

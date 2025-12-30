@@ -9,28 +9,25 @@ struct DailyTradesSheet: View {
 
     private var dateString: String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy년 M월 d일"
+        formatter.dateFormat = "M월 d일 (E)"
+        formatter.locale = Locale(identifier: "ko_KR")
         return formatter.string(from: summary.date)
     }
 
     var body: some View {
         NavigationView {
-            List {
-                Section {
-                    // 일일 요약
-                    dailySummaryView
-                }
+            ScrollView {
+                VStack(spacing: 16) {
+                    // 일일 요약 카드
+                    dailySummaryCard
 
-                Section(header: Text("거래 내역 (\(summary.tradeCount)건)")) {
-                    ForEach(summary.trades.sorted(by: { $0.tradeDate > $1.tradeDate })) { trade in
-                        TradingJournalCardView(journal: trade)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                selectedJournal = trade
-                            }
-                    }
+                    // 거래 내역
+                    tradeListSection
                 }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
             }
+            .background(Color(.systemGroupedBackground))
             .navigationTitle(dateString)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -39,7 +36,8 @@ struct DailyTradesSheet: View {
                         dismiss()
                     } label: {
                         Image(systemName: "xmark.circle.fill")
-                            .foregroundColor(.secondary)
+                            .font(.title2)
+                            .foregroundStyle(.tertiary)
                     }
                 }
             }
@@ -47,62 +45,96 @@ struct DailyTradesSheet: View {
                 AddTradingJournalView(viewModel: viewModel, editingJournal: journal)
             }
         }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 
-    // MARK: - Daily Summary View
+    // MARK: - Daily Summary Card
 
-    private var dailySummaryView: some View {
-        VStack(spacing: 8) {
-            // 손익
-            HStack {
-                Text("일일 손익")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+    private var dailySummaryCard: some View {
+        VStack(spacing: 12) {
+            // 상단: 손익 + 수익률
+            HStack(spacing: 16) {
+                // 일일 손익
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("일일 손익")
+                        .font(.caption)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
 
-                Spacer()
+                    Text(formattedProfit(summary.totalProfit))
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(summary.hasProfit ? .red : .blue)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
 
-                Text(formattedProfit(summary.totalProfit))
-                    .font(.subheadline)
-                    .fontWeight(.bold)
-                    .foregroundColor(summary.hasProfit ? .red : .blue)
-            }
-
-            // 수익률
-            if abs(summary.profitRate) >= 0.1 {
-                HStack {
+                // 수익률
+                VStack(alignment: .leading, spacing: 4) {
                     Text("수익률")
                         .font(.caption)
-                        .foregroundColor(.secondary)
-
-                    Spacer()
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
 
                     Text(formattedRate(summary.profitRate))
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
+                        .font(.title3)
+                        .fontWeight(.bold)
                         .foregroundColor(summary.hasProfit ? .red : .blue)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            // 거래 건수
+            Divider()
+
+            // 하단: 거래 건수
             HStack {
-                Text("거래 건수")
+                Text("거래")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
 
                 Spacer()
 
-                HStack(spacing: 8) {
-                    Text("매수 \(buyCount)건")
+                HStack(spacing: 12) {
+                    Label("\(buyCount)", systemImage: "arrow.down.circle.fill")
                         .font(.caption)
+                        .fontWeight(.semibold)
                         .foregroundColor(.green)
 
-                    Text("매도 \(sellCount)건")
+                    Label("\(sellCount)", systemImage: "arrow.up.circle.fill")
                         .font(.caption)
+                        .fontWeight(.semibold)
                         .foregroundColor(.red)
                 }
             }
         }
-        .padding(.vertical, 4)
+        .padding(12)
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(12)
+    }
+
+    // MARK: - Trade List Section
+
+    private var tradeListSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("거래 내역")
+                .font(.caption)
+                .fontWeight(.bold)
+                .foregroundStyle(.primary)
+                .padding(.leading, 4)
+
+            VStack(spacing: 8) {
+                ForEach(summary.trades.sorted(by: { $0.tradeDate > $1.tradeDate })) { trade in
+                    TradingJournalCardView(journal: trade)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedJournal = trade
+                        }
+                }
+            }
+        }
     }
 
     // MARK: - Helper Properties

@@ -41,7 +41,7 @@ struct MonthlyStatistics: Identifiable {
     let month: Int
     let totalProfit: Double
     let totalTradeCount: Int
-    let winRate: Double
+    let profitRate: Double  // 월 전체 수익률: (총 실현손익 / 총 투자금액) × 100
     let dailySummaries: [DailyTradingSummary]
 
     var monthString: String {
@@ -54,7 +54,7 @@ struct MonthlyStatistics: Identifiable {
         month: Int,
         totalProfit: Double,
         totalTradeCount: Int,
-        winRate: Double,
+        profitRate: Double,
         dailySummaries: [DailyTradingSummary]
     ) {
         self.id = id
@@ -62,7 +62,7 @@ struct MonthlyStatistics: Identifiable {
         self.month = month
         self.totalProfit = totalProfit
         self.totalTradeCount = totalTradeCount
-        self.winRate = winRate
+        self.profitRate = profitRate
         self.dailySummaries = dailySummaries
     }
 }

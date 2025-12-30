@@ -2,6 +2,7 @@ import XCTest
 
 /// StockFolio UI 테스트 (XCUITest)
 /// 사용자 플로우 및 접근성 테스트
+/// v3.0: 포트폴리오는 매매일지 기반으로만 관리 (직접 입력 기능 제거)
 final class StockFolioUITests: XCTestCase {
 
     var app: XCUIApplication!
@@ -37,74 +38,6 @@ final class StockFolioUITests: XCTestCase {
         let settingsButton = app.buttons["설정"]
 
         XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
-    }
-
-    func test_mainDashboard_shouldDisplayAddButton() throws {
-        // Given: 앱이 실행된 상태
-
-        // Then: 종목 추가 버튼이 표시되어야 함
-        let addButton = app.buttons["종목 추가"]
-
-        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
-    }
-
-    // MARK: - Add Stock Flow Tests
-
-    func test_addStockFlow_shouldOpenAddStockSheet() throws {
-        // Given: 메인 화면
-        let addButton = app.buttons["종목 추가"]
-        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
-
-        // When: 추가 버튼 탭
-        addButton.tap()
-
-        // Then: 종목 추가 시트가 표시되어야 함
-        let stockNameField = app.textFields["종목명 입력"]
-        XCTAssertTrue(stockNameField.waitForExistence(timeout: 3))
-    }
-
-    func test_addStockFlow_shouldAddNewStock() throws {
-        // Given: 종목 추가 시트 열기
-        let addButton = app.buttons["종목 추가"]
-        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
-        addButton.tap()
-
-        // When: 종목 정보 입력
-        let stockNameField = app.textFields["종목명 입력"]
-        XCTAssertTrue(stockNameField.waitForExistence(timeout: 3))
-        stockNameField.tap()
-        stockNameField.typeText("테스트종목")
-
-        let amountField = app.textFields["매수 금액 입력"]
-        amountField.tap()
-        amountField.typeText("1000000")
-
-        // 저장 버튼 탭
-        let saveButton = app.buttons["저장"]
-        saveButton.tap()
-
-        // Then: 시트가 닫히고 종목이 리스트에 표시되어야 함
-        let addedStock = app.staticTexts["테스트종목"]
-        XCTAssertTrue(addedStock.waitForExistence(timeout: 3))
-    }
-
-    func test_addStockFlow_shouldShowValidationError_withEmptyName() throws {
-        // Given: 종목 추가 시트 열기
-        let addButton = app.buttons["종목 추가"]
-        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
-        addButton.tap()
-
-        // When: 금액만 입력하고 저장
-        let amountField = app.textFields["매수 금액 입력"]
-        XCTAssertTrue(amountField.waitForExistence(timeout: 3))
-        amountField.tap()
-        amountField.typeText("1000000")
-
-        let saveButton = app.buttons["저장"]
-        saveButton.tap()
-
-        // Then: 에러 메시지가 표시되어야 함 (시트가 닫히지 않음)
-        XCTAssertTrue(amountField.exists)
     }
 
     // MARK: - Settings Flow Tests
@@ -149,38 +82,20 @@ final class StockFolioUITests: XCTestCase {
 
     // MARK: - Stock List Tests
 
-    func test_stockList_shouldShowExpandButton_whenMoreThan6Stocks() throws {
-        // 이 테스트는 6개 이상의 종목이 있을 때만 유효
-        // Given: 6개 이상의 종목이 있는 상태 (테스트 데이터 필요)
+    func test_stockList_shouldShowExpandButton_whenMoreThan10Stocks() throws {
+        // 이 테스트는 10개 이상의 종목이 있을 때만 유효
+        // Given: 10개 이상의 종목이 있는 상태 (테스트 데이터 필요)
 
         // Then: 더보기 버튼이 표시되어야 함
         let moreButton = app.buttons["더 많은 종목 보기"]
 
-        // 종목이 6개 미만이면 버튼이 없을 수 있음
+        // 종목이 10개 미만이면 버튼이 없을 수 있음
         if moreButton.exists {
             XCTAssertTrue(moreButton.isHittable)
         }
     }
 
     // MARK: - UI Layout Tests
-
-    func test_addStockView_buttonAreaShouldBeVisible() throws {
-        // Given: 종목 추가 화면 열기
-        let addButton = app.buttons["종목 추가"]
-        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
-        addButton.tap()
-
-        // Then: 저장 및 취소 버튼이 화면 하단에 표시되어야 함
-        let saveButton = app.buttons["저장"]
-        let cancelButton = app.buttons["취소"]
-
-        XCTAssertTrue(saveButton.waitForExistence(timeout: 3))
-        XCTAssertTrue(cancelButton.exists)
-
-        // 버튼이 화면에서 보이고 터치 가능해야 함
-        XCTAssertTrue(saveButton.isHittable)
-        XCTAssertTrue(cancelButton.isHittable)
-    }
 
     func test_seedMoneySettings_buttonAreaShouldBeVisible() throws {
         // Given: 시드머니 설정 화면 열기
@@ -198,27 +113,6 @@ final class StockFolioUITests: XCTestCase {
         // 버튼이 화면에서 보이고 터치 가능해야 함
         XCTAssertTrue(saveButton.isHittable)
         XCTAssertTrue(cancelButton.isHittable)
-    }
-
-    func test_addStockView_scrollContentShouldNotOverlapButtons() throws {
-        // Given: 종목 추가 화면 열기
-        let addButton = app.buttons["종목 추가"]
-        XCTAssertTrue(addButton.waitForExistence(timeout: 5))
-        addButton.tap()
-
-        // When: 스크롤 가능한 컨텐츠 영역 확인
-        let stockNameField = app.textFields["종목명 입력"]
-        let amountField = app.textFields["매수 금액 입력"]
-        let saveButton = app.buttons["저장"]
-
-        XCTAssertTrue(stockNameField.waitForExistence(timeout: 3))
-        XCTAssertTrue(amountField.exists)
-        XCTAssertTrue(saveButton.exists)
-
-        // Then: 모든 요소가 동시에 화면에 표시되고 접근 가능해야 함
-        XCTAssertTrue(stockNameField.isHittable)
-        XCTAssertTrue(amountField.isHittable)
-        XCTAssertTrue(saveButton.isHittable)
     }
 
     func test_seedMoneySettings_contentShouldNotOverlapButtons() throws {
@@ -241,19 +135,14 @@ final class StockFolioUITests: XCTestCase {
 
     // MARK: - Accessibility Tests
 
-    func test_accessibility_allButtonsShouldHaveLabels() throws {
+    func test_accessibility_settingsButtonShouldHaveLabel() throws {
         // Given: 앱이 실행된 상태
 
-        // Then: 모든 주요 버튼에 접근성 레이블이 있어야 함
+        // Then: 설정 버튼에 접근성 레이블이 있어야 함
         let settingsButton = app.buttons["설정"]
-        let addButton = app.buttons["종목 추가"]
 
         XCTAssertTrue(settingsButton.waitForExistence(timeout: 5))
-        XCTAssertTrue(addButton.exists)
-
-        // 버튼이 접근 가능한지 확인
         XCTAssertTrue(settingsButton.isHittable)
-        XCTAssertTrue(addButton.isHittable)
     }
 
     func test_accessibility_investmentCardsShouldBeCombined() throws {

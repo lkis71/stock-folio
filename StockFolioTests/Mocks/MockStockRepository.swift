@@ -62,4 +62,31 @@ final class MockStockRepository: StockRepositoryProtocol {
     func fetchTotalInvestedAmount() -> Double {
         return stocks.reduce(0) { $0 + $1.purchaseAmount }
     }
+
+    // MARK: - 매매일지 연동용 메서드
+
+    func fetchByStockName(_ stockName: String) -> StockHoldingEntity? {
+        return stocks.first { $0.stockName == stockName }
+    }
+
+    func upsert(_ stock: StockHoldingEntity) throws {
+        if shouldThrowError {
+            throw NSError(domain: "MockError", code: -1)
+        }
+        if let index = stocks.firstIndex(where: { $0.stockName == stock.stockName }) {
+            stocks[index] = stock
+            updateCallCount += 1
+        } else {
+            stocks.append(stock)
+            saveCallCount += 1
+        }
+    }
+
+    func deleteByStockName(_ stockName: String) throws {
+        if shouldThrowError {
+            throw NSError(domain: "MockError", code: -1)
+        }
+        deleteCallCount += 1
+        stocks.removeAll { $0.stockName == stockName }
+    }
 }

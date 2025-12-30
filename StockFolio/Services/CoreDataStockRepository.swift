@@ -17,25 +17,45 @@ final class CoreDataStockRepository: StockRepositoryProtocol {
         do {
             let results = try viewContext.fetch(request)
             return results.compactMap { managedObject in
-                guard let id = managedObject.value(forKey: "id") as? UUID,
-                      let stockName = managedObject.value(forKey: "stockName") as? String,
-                      let purchaseAmount = managedObject.value(forKey: "purchaseAmount") as? Double,
-                      let createdAt = managedObject.value(forKey: "createdAt") as? Date else {
-                    return nil
-                }
-                let colorName = managedObject.value(forKey: "colorName") as? String ?? "blue"
-                return StockHoldingEntity(
-                    id: id,
-                    stockName: stockName,
-                    purchaseAmount: purchaseAmount,
-                    colorName: colorName,
-                    createdAt: createdAt
-                )
+                mapToEntity(managedObject)
             }
         } catch {
             Logger.error("Fetch error: \(error.localizedDescription)")
             return []
         }
+    }
+
+    private func mapToEntity(_ managedObject: NSManagedObject) -> StockHoldingEntity? {
+        guard let id = managedObject.value(forKey: "id") as? UUID,
+              let stockName = managedObject.value(forKey: "stockName") as? String,
+              let createdAt = managedObject.value(forKey: "createdAt") as? Date else {
+            return nil
+        }
+        let colorName = managedObject.value(forKey: "colorName") as? String ?? "blue"
+        let quantity = managedObject.value(forKey: "quantity") as? Int64 ?? 0
+        let averagePrice = managedObject.value(forKey: "averagePrice") as? Double ?? 0
+
+        // 레거시 데이터 호환: quantity가 0이면 purchaseAmount로 계산
+        if quantity == 0 {
+            let purchaseAmount = managedObject.value(forKey: "purchaseAmount") as? Double ?? 0
+            return StockHoldingEntity(
+                id: id,
+                stockName: stockName,
+                quantity: purchaseAmount > 0 ? 1 : 0,
+                averagePrice: purchaseAmount,
+                colorName: colorName,
+                createdAt: createdAt
+            )
+        }
+
+        return StockHoldingEntity(
+            id: id,
+            stockName: stockName,
+            quantity: Int(quantity),
+            averagePrice: averagePrice,
+            colorName: colorName,
+            createdAt: createdAt
+        )
     }
 
     func save(_ stock: StockHoldingEntity) throws {
@@ -44,6 +64,8 @@ final class CoreDataStockRepository: StockRepositoryProtocol {
 
         managedObject.setValue(stock.id, forKey: "id")
         managedObject.setValue(stock.stockName, forKey: "stockName")
+        managedObject.setValue(Int64(stock.quantity), forKey: "quantity")
+        managedObject.setValue(stock.averagePrice, forKey: "averagePrice")
         managedObject.setValue(stock.purchaseAmount, forKey: "purchaseAmount")
         managedObject.setValue(stock.colorName, forKey: "colorName")
         managedObject.setValue(stock.createdAt, forKey: "createdAt")
@@ -61,6 +83,8 @@ final class CoreDataStockRepository: StockRepositoryProtocol {
         }
 
         managedObject.setValue(stock.stockName, forKey: "stockName")
+        managedObject.setValue(Int64(stock.quantity), forKey: "quantity")
+        managedObject.setValue(stock.averagePrice, forKey: "averagePrice")
         managedObject.setValue(stock.purchaseAmount, forKey: "purchaseAmount")
         managedObject.setValue(stock.colorName, forKey: "colorName")
 
@@ -95,20 +119,7 @@ final class CoreDataStockRepository: StockRepositoryProtocol {
         do {
             let results = try viewContext.fetch(request)
             let items = results.compactMap { managedObject -> StockHoldingEntity? in
-                guard let id = managedObject.value(forKey: "id") as? UUID,
-                      let stockName = managedObject.value(forKey: "stockName") as? String,
-                      let purchaseAmount = managedObject.value(forKey: "purchaseAmount") as? Double,
-                      let createdAt = managedObject.value(forKey: "createdAt") as? Date else {
-                    return nil
-                }
-                let colorName = managedObject.value(forKey: "colorName") as? String ?? "blue"
-                return StockHoldingEntity(
-                    id: id,
-                    stockName: stockName,
-                    purchaseAmount: purchaseAmount,
-                    colorName: colorName,
-                    createdAt: createdAt
-                )
+                mapToEntity(managedObject)
             }
 
             let hasMore = pagination.offset + pagination.limit < totalCount
@@ -151,5 +162,64 @@ final class CoreDataStockRepository: StockRepositoryProtocol {
             Logger.error("Sum error: \(error.localizedDescription)")
             return 0
         }
+    }
+
+    // MARK: - 매매일지 연동용 메서드
+
+    func fetchByStockName(_ stockName: String) -> StockHoldingEntity? {
+        let request = NSFetchRequest<NSManagedObject>(entityName: "StockHolding")
+        request.predicate = NSPredicate(format: "stockName == %@", stockName)
+        request.fetchLimit = 1
+
+        do {
+            let results = try viewContext.fetch(request)
+            guard let managedObject = results.first else { return nil }
+            return mapToEntity(managedObject)
+        } catch {
+            Logger.error("FetchByStockName error: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    func upsert(_ stock: StockHoldingEntity) throws {
+        let request = NSFetchRequest<NSManagedObject>(entityName: "StockHolding")
+        request.predicate = NSPredicate(format: "stockName == %@", stock.stockName)
+        request.fetchLimit = 1
+
+        let results = try viewContext.fetch(request)
+
+        if let existingObject = results.first {
+            // Update existing
+            existingObject.setValue(Int64(stock.quantity), forKey: "quantity")
+            existingObject.setValue(stock.averagePrice, forKey: "averagePrice")
+            existingObject.setValue(stock.purchaseAmount, forKey: "purchaseAmount")
+            existingObject.setValue(stock.colorName, forKey: "colorName")
+        } else {
+            // Insert new
+            let entity = NSEntityDescription.entity(forEntityName: "StockHolding", in: viewContext)!
+            let managedObject = NSManagedObject(entity: entity, insertInto: viewContext)
+
+            managedObject.setValue(stock.id, forKey: "id")
+            managedObject.setValue(stock.stockName, forKey: "stockName")
+            managedObject.setValue(Int64(stock.quantity), forKey: "quantity")
+            managedObject.setValue(stock.averagePrice, forKey: "averagePrice")
+            managedObject.setValue(stock.purchaseAmount, forKey: "purchaseAmount")
+            managedObject.setValue(stock.colorName, forKey: "colorName")
+            managedObject.setValue(stock.createdAt, forKey: "createdAt")
+        }
+
+        try viewContext.save()
+    }
+
+    func deleteByStockName(_ stockName: String) throws {
+        let request = NSFetchRequest<NSManagedObject>(entityName: "StockHolding")
+        request.predicate = NSPredicate(format: "stockName == %@", stockName)
+
+        let results = try viewContext.fetch(request)
+        for managedObject in results {
+            viewContext.delete(managedObject)
+        }
+
+        try viewContext.save()
     }
 }

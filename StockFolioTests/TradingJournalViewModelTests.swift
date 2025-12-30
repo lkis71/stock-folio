@@ -368,13 +368,22 @@ final class TradingJournalViewModelTests: XCTestCase {
 
     func test_refresh_shouldFetchJournalsAgain() {
         // Given
-        let initialCallCount = mockRepository.fetchAllCallCount
+        let initialJournalCount = sut.journals.count
+
+        // Add a journal to repository
+        mockRepository.journals.append(TradingJournalEntity(
+            tradeType: .buy,
+            tradeDate: Date(),
+            stockName: "NewStock",
+            quantity: 10,
+            price: 1000
+        ))
 
         // When
         sut.refresh()
 
-        // Then
-        XCTAssertEqual(mockRepository.fetchAllCallCount, initialCallCount + 1)
+        // Then (refresh should reload journals from repository)
+        XCTAssertEqual(sut.journals.count, initialJournalCount + 1)
     }
 
     // MARK: - Pagination Tests
@@ -399,16 +408,16 @@ final class TradingJournalViewModelTests: XCTestCase {
         sut = TradingJournalViewModel(repository: mockRepository)
 
         // Then
-        XCTAssertEqual(sut.journals.count, 20, "Should load initial page size (20)")
+        XCTAssertEqual(sut.journals.count, 10, "Should load initial page size (10)")
         XCTAssertTrue(sut.hasMore, "Should have more items")
         XCTAssertNotNil(sut.statistics, "Should load statistics")
         XCTAssertEqual(sut.statistics?.totalCount, 30, "Statistics should reflect total count")
     }
 
     func test_fetchMore_shouldLoadNextPage() {
-        // Given: 30개의 journal, 초기 로드 완료
+        // Given: 25개의 journal, 초기 로드 완료
         var journals: [TradingJournalEntity] = []
-        for i in 1...30 {
+        for i in 1...25 {
             let journal = TradingJournalEntity(
                 tradeType: .buy,
                 tradeDate: Date().addingTimeInterval(TimeInterval(-i * 86400)),
@@ -421,13 +430,18 @@ final class TradingJournalViewModelTests: XCTestCase {
         mockRepository.journals = journals
         sut = TradingJournalViewModel(repository: mockRepository)
 
-        XCTAssertEqual(sut.journals.count, 20, "Initial load should be 20")
+        XCTAssertEqual(sut.journals.count, 10, "Initial load should be 10")
 
         // When
         sut.fetchMore()
 
         // Then
-        XCTAssertEqual(sut.journals.count, 30, "Should load all 30 items")
+        XCTAssertEqual(sut.journals.count, 20, "Should load 20 items after first fetchMore")
+        XCTAssertTrue(sut.hasMore, "Should still have more items")
+
+        // Fetch remaining
+        sut.fetchMore()
+        XCTAssertEqual(sut.journals.count, 25, "Should load all 25 items")
         XCTAssertFalse(sut.hasMore, "Should not have more items")
         XCTAssertFalse(sut.isLoading, "Should not be loading")
     }
@@ -524,7 +538,11 @@ final class TradingJournalViewModelTests: XCTestCase {
         XCTAssertEqual(sut.statistics?.totalCount, 3)
         XCTAssertEqual(sut.statistics?.buyCount, 1)
         XCTAssertEqual(sut.statistics?.sellCount, 2)
-        XCTAssertEqual(sut.statistics?.totalRealizedProfit, 200, accuracy: 0.01)
+        if let profit = sut.statistics?.totalRealizedProfit {
+            XCTAssertEqual(profit, 200, accuracy: 0.01)
+        } else {
+            XCTFail("totalRealizedProfit should not be nil")
+        }
     }
 
     func test_applyFilter_shouldReloadWithFilteredStatistics() {
@@ -560,7 +578,11 @@ final class TradingJournalViewModelTests: XCTestCase {
         // Then: 필터링된 결과만 표시
         XCTAssertEqual(sut.journals.count, 1, "Should only show today's journals")
         XCTAssertEqual(sut.statistics?.totalCount, 1, "Statistics should reflect filtered count")
-        XCTAssertEqual(sut.statistics?.totalRealizedProfit, 100, accuracy: 0.01)
+        if let profit = sut.statistics?.totalRealizedProfit {
+            XCTAssertEqual(profit, 100, accuracy: 0.01)
+        } else {
+            XCTFail("totalRealizedProfit should not be nil")
+        }
     }
 
     func test_applyFilter_withStockName_shouldFilterCorrectly() {

@@ -18,6 +18,7 @@ final class TradingJournalViewModel: ObservableObject {
 
     private let repository: TradingJournalRepositoryProtocol
     private let stockRepository: StockRepositoryProtocol
+    private let syncService: PortfolioSyncServiceProtocol
     private let pageSize = 10
     private var currentOffset = 0
 
@@ -79,10 +80,12 @@ final class TradingJournalViewModel: ObservableObject {
 
     init(
         repository: TradingJournalRepositoryProtocol = CoreDataTradingJournalRepository(),
-        stockRepository: StockRepositoryProtocol = CoreDataStockRepository()
+        stockRepository: StockRepositoryProtocol = CoreDataStockRepository(),
+        syncService: PortfolioSyncServiceProtocol = PortfolioSyncService()
     ) {
         self.repository = repository
         self.stockRepository = stockRepository
+        self.syncService = syncService
         loadInitialData()
         updateAllStockNames()
         fetchPortfolioStocks()
@@ -190,8 +193,11 @@ final class TradingJournalViewModel: ObservableObject {
 
         do {
             try repository.save(journal)
+            // 포트폴리오 동기화
+            try syncService.syncOnAdd(journal: journal)
             loadInitialData()
             updateAllStockNames()
+            fetchPortfolioStocks()
         } catch {
             Logger.error("Save trading journal error: \(error.localizedDescription)")
         }
@@ -219,8 +225,11 @@ final class TradingJournalViewModel: ObservableObject {
 
         do {
             try repository.update(updatedJournal)
+            // 포트폴리오 동기화 (이전 영향 취소 → 새 영향 적용)
+            try syncService.syncOnUpdate(oldJournal: journal, newJournal: updatedJournal)
             loadInitialData()
             updateAllStockNames()
+            fetchPortfolioStocks()
         } catch {
             Logger.error("Update trading journal error: \(error.localizedDescription)")
         }
@@ -229,8 +238,11 @@ final class TradingJournalViewModel: ObservableObject {
     func deleteJournal(_ journal: TradingJournalEntity) {
         do {
             try repository.delete(journal)
+            // 포트폴리오 동기화 (해당 매매 영향 취소)
+            try syncService.syncOnDelete(journal: journal)
             loadInitialData()
             updateAllStockNames()
+            fetchPortfolioStocks()
         } catch {
             Logger.error("Delete trading journal error: \(error.localizedDescription)")
         }

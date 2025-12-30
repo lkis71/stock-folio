@@ -9,15 +9,18 @@ final class PortfolioViewModelTests: XCTestCase {
     private var sut: PortfolioViewModel!
     private var mockRepository: MockStockRepository!
     private var mockSeedMoneyStorage: MockSeedMoneyStorage!
+    private var mockSyncService: MockPortfolioSyncService!
 
     // MARK: - Setup & Teardown
     override func setUp() {
         super.setUp()
         mockRepository = MockStockRepository()
         mockSeedMoneyStorage = MockSeedMoneyStorage()
+        mockSyncService = MockPortfolioSyncService()
         sut = PortfolioViewModel(
             repository: mockRepository,
-            seedMoneyStorage: mockSeedMoneyStorage
+            seedMoneyStorage: mockSeedMoneyStorage,
+            syncService: mockSyncService
         )
     }
 
@@ -25,7 +28,17 @@ final class PortfolioViewModelTests: XCTestCase {
         sut = nil
         mockRepository = nil
         mockSeedMoneyStorage = nil
+        mockSyncService = nil
         super.tearDown()
+    }
+
+    // MARK: - Initialization Tests
+
+    func test_init_shouldCallRecalculateAll() {
+        // Given & When: ViewModel이 초기화됨 (setUp에서 이미 생성됨)
+
+        // Then: recalculateAll이 호출되어야 함
+        XCTAssertEqual(mockSyncService.recalculateAllCallCount, 1)
     }
 
     // MARK: - Seed Money Tests
@@ -53,22 +66,8 @@ final class PortfolioViewModelTests: XCTestCase {
         XCTAssertEqual(sut.seedMoney, newSeedMoney)
     }
 
-    // MARK: - Stock CRUD Tests
-
-    func test_addStock_withValidInput_shouldSaveToRepository() {
-        // Given
-        let stockName = "삼성전자"
-        let amount = 1_000_000.0
-
-        // When
-        sut.addStock(name: stockName, amount: amount)
-
-        // Then
-        XCTAssertEqual(mockRepository.saveCallCount, 1)
-        XCTAssertEqual(mockRepository.stocks.count, 1)
-        XCTAssertEqual(mockRepository.stocks.first?.stockName, stockName)
-        XCTAssertEqual(mockRepository.stocks.first?.purchaseAmount, amount)
-    }
+    // MARK: - Fetch Holdings Tests
+    // v3.0: CRUD 테스트 제거 (매매일지 기반 관리로 전환)
 
     func test_fetchHoldings_shouldUpdateHoldingsProperty() {
         // Given
@@ -81,33 +80,6 @@ final class PortfolioViewModelTests: XCTestCase {
 
         // Then
         XCTAssertEqual(sut.holdings.count, 2)
-    }
-
-    func test_deleteStock_shouldRemoveFromRepository() {
-        // Given
-        let stock = StockHoldingEntity(stockName: "삼성전자", purchaseAmount: 1_000_000)
-        mockRepository.stocks = [stock]
-        sut.fetchHoldings()
-
-        // When
-        sut.deleteStock(stock)
-
-        // Then
-        XCTAssertEqual(mockRepository.deleteCallCount, 1)
-        XCTAssertTrue(mockRepository.stocks.isEmpty)
-    }
-
-    func test_updateStock_shouldUpdateInRepository() {
-        // Given
-        let stock = StockHoldingEntity(stockName: "삼성전자", purchaseAmount: 1_000_000)
-        mockRepository.stocks = [stock]
-        sut.fetchHoldings()
-
-        // When
-        sut.updateStock(stock, name: "SK하이닉스", amount: 2_000_000, colorName: "green")
-
-        // Then
-        XCTAssertEqual(mockRepository.updateCallCount, 1)
     }
 
     // MARK: - Portfolio Calculation Tests
@@ -187,5 +159,75 @@ final class PortfolioViewModelTests: XCTestCase {
 
         // Then
         XCTAssertEqual(percentage, 40.0, accuracy: 0.01)
+    }
+
+    // MARK: - Statistics Tests (for StatCard)
+
+    func test_totalEvaluationAmount_withProfit_shouldCalculateCorrectly() {
+        // Given
+        mockSeedMoneyStorage.savedSeedMoney = 10_000_000
+        mockRepository.stocks = [
+            StockHoldingEntity(stockName: "삼성전자", purchaseAmount: 3_000_000)
+        ]
+        sut.loadSeedMoney()
+        sut.fetchHoldings()
+
+        // Mock 수익 (실제로는 매매일지에서 계산, 현재는 평가액 = 투자금액)
+        // TODO: 향후 실현/미실현 손익 기능 추가 시 업데이트
+
+        // When
+        let totalEvaluation = sut.totalEvaluationAmount
+
+        // Then
+        // 현재 v1: 평가액 = 투자금액 (손익 미반영)
+        XCTAssertEqual(totalEvaluation, 3_000_000, accuracy: 0.01)
+    }
+
+    func test_totalProfitLoss_withNoTrades_shouldReturnZero() {
+        // Given
+        mockSeedMoneyStorage.savedSeedMoney = 10_000_000
+        mockRepository.stocks = [
+            StockHoldingEntity(stockName: "삼성전자", purchaseAmount: 3_000_000)
+        ]
+        sut.loadSeedMoney()
+        sut.fetchHoldings()
+
+        // When
+        let profitLoss = sut.totalProfitLoss
+
+        // Then
+        // v1: 손익 계산 기능 없음 (향후 매매일지 연동 필요)
+        XCTAssertEqual(profitLoss, 0, accuracy: 0.01)
+    }
+
+    func test_totalReturnRate_withNoTrades_shouldReturnZero() {
+        // Given
+        mockSeedMoneyStorage.savedSeedMoney = 10_000_000
+        mockRepository.stocks = [
+            StockHoldingEntity(stockName: "삼성전자", purchaseAmount: 3_000_000)
+        ]
+        sut.loadSeedMoney()
+        sut.fetchHoldings()
+
+        // When
+        let returnRate = sut.totalReturnRate
+
+        // Then
+        // v1: 수익률 계산 기능 없음 (향후 매매일지 연동 필요)
+        XCTAssertEqual(returnRate, 0, accuracy: 0.01)
+    }
+
+    func test_totalReturnRate_withZeroInvestedAmount_shouldReturnZero() {
+        // Given
+        mockSeedMoneyStorage.savedSeedMoney = 10_000_000
+        mockRepository.stocks = []
+        sut.loadSeedMoney()
+        sut.fetchHoldings()
+
+        // When
+        let returnRate = sut.totalReturnRate
+
+        // Then
+        XCTAssertEqual(returnRate, 0)
     }
 }

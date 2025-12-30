@@ -8,7 +8,6 @@ final class TradingCalendarViewModel: ObservableObject {
     @Published var currentMonth: Date = Date()
     @Published var selectedDate: Date?
     @Published var showingDailyTrades: Bool = false
-    @Published private(set) var isStatExpanded: Bool = true
 
     private let repository: TradingJournalRepositoryProtocol
     private let calendar = Calendar.current
@@ -62,8 +61,13 @@ final class TradingCalendarViewModel: ObservableObject {
         self.dailySummaries = summaries
 
         // 월별 통계 계산
-        let totalProfit = allTrades.filter { $0.tradeType == .sell }.reduce(0) { $0 + $1.realizedProfit }
-        let winRate = calculateWinRate(for: allTrades)
+        let sellTrades = allTrades.filter { $0.tradeType == .sell }
+        let totalProfit = sellTrades.reduce(0) { $0 + $1.realizedProfit }
+
+        // 월 전체 수익률 계산: (총 실현손익 / 총 투자금액) × 100
+        let totalSellAmount = sellTrades.reduce(0) { $0 + $1.totalAmount }
+        let totalInvested = totalSellAmount - totalProfit  // 투자 원금
+        let profitRate = totalInvested > 0 ? (totalProfit / totalInvested) * 100 : 0
 
         let dailySummaryList = summaries.values.sorted { $0.date < $1.date }
 
@@ -72,19 +76,11 @@ final class TradingCalendarViewModel: ObservableObject {
             month: month,
             totalProfit: totalProfit,
             totalTradeCount: allTrades.count,
-            winRate: winRate,
+            profitRate: profitRate,
             dailySummaries: dailySummaryList
         )
 
         Logger.info("[TradingCalendar] Loaded month: \(year)-\(month), Trades: \(allTrades.count), Days with trades: \(summaries.count)")
-    }
-
-    private func calculateWinRate(for trades: [TradingJournalEntity]) -> Double {
-        let sellTrades = trades.filter { $0.tradeType == .sell }
-        guard !sellTrades.isEmpty else { return 0 }
-
-        let profitTrades = sellTrades.filter { $0.realizedProfit > 0 }
-        return (Double(profitTrades.count) / Double(sellTrades.count)) * 100
     }
 
     // MARK: - Navigation
@@ -128,14 +124,6 @@ final class TradingCalendarViewModel: ObservableObject {
     func getDailySummary(for date: Date) -> DailyTradingSummary? {
         let startOfDay = calendar.startOfDay(for: date)
         return dailySummaries[startOfDay]
-    }
-
-    // MARK: - Statistics
-
-    func toggleStatExpanded() {
-        withAnimation(.easeInOut(duration: 0.2)) {
-            isStatExpanded.toggle()
-        }
     }
 
     // MARK: - Calendar Helper Methods

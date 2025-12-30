@@ -19,6 +19,19 @@ struct PortfolioChartView: View {
         viewModel.holdings.sorted { viewModel.percentage(for: $0) > viewModel.percentage(for: $1) }
     }
 
+    /// 비중 순서에 따른 색상 반환
+    private func colorForIndex(_ index: Int) -> Color {
+        StockColor.fromIndex(index).color
+    }
+
+    /// 종목명으로 색상 조회 (비중 순서 기반)
+    private func colorForStockName(_ name: String) -> Color {
+        if let index = sortedHoldings.firstIndex(where: { $0.stockName == name }) {
+            return colorForIndex(index)
+        }
+        return .blue
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("포트폴리오 구성")
@@ -46,7 +59,7 @@ struct PortfolioChartView: View {
             // 차트 영역 (화면 너비 기준 정사각형에 가깝게)
             Chart {
                 // 투자된 종목들
-                ForEach(sortedHoldings) { holding in
+                ForEach(Array(sortedHoldings.enumerated()), id: \.element.id) { index, holding in
                     SectorMark(
                         angle: .value("금액", holding.purchaseAmount),
                         innerRadius: .ratio(0.5),
@@ -56,8 +69,8 @@ struct PortfolioChartView: View {
                     .cornerRadius(4)
                     .opacity(selectedItem == nil || selectedItem == holding.stockName ? 1.0 : 0.5)
                     .annotation(position: .overlay) {
-                        if viewModel.percentage(for: holding) >= 10 {
-                            let stockColor = StockColor(rawValue: holding.colorName) ?? .blue
+                        if viewModel.percentage(for: holding) >= 5 {
+                            let stockColor = StockColor.fromIndex(index)
                             Text(String(format: "%.0f%%", viewModel.percentage(for: holding)))
                                 .font(.caption2)
                                 .fontWeight(.bold)
@@ -78,7 +91,7 @@ struct PortfolioChartView: View {
                     .cornerRadius(4)
                     .opacity(selectedItem == nil || selectedItem == "현금" ? 1.0 : 0.5)
                     .annotation(position: .overlay) {
-                        if viewModel.cashPercentage >= 10 {
+                        if viewModel.cashPercentage >= 5 {
                             Text(String(format: "%.0f%%", viewModel.cashPercentage))
                                 .font(.caption2)
                                 .fontWeight(.bold)
@@ -109,10 +122,10 @@ struct PortfolioChartView: View {
         ]
 
         return LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(sortedHoldings) { holding in
+            ForEach(Array(sortedHoldings.enumerated()), id: \.element.id) { index, holding in
                 legendItem(
                     name: holding.stockName,
-                    color: holding.color,
+                    color: colorForIndex(index),
                     percentage: viewModel.percentage(for: holding)
                 )
             }
@@ -174,6 +187,8 @@ struct PortfolioChartView: View {
                 name: "현금",
                 amount: viewModel.remainingCash,
                 percentage: viewModel.cashPercentage,
+                quantity: nil,
+                averagePrice: nil,
                 color: .gray
             )
         } else if let holding = sortedHoldings.first(where: { $0.stockName == itemName }) {
@@ -181,12 +196,14 @@ struct PortfolioChartView: View {
                 name: holding.stockName,
                 amount: holding.purchaseAmount,
                 percentage: viewModel.percentage(for: holding),
-                color: holding.color
+                quantity: holding.quantity,
+                averagePrice: holding.averagePrice,
+                color: colorForStockName(holding.stockName)
             )
         }
     }
 
-    private func tooltipContent(name: String, amount: Double, percentage: Double, color: Color) -> some View {
+    private func tooltipContent(name: String, amount: Double, percentage: Double, quantity: Int?, averagePrice: Double?, color: Color) -> some View {
         VStack(spacing: 8) {
             // 종목명
             HStack(spacing: 6) {
@@ -201,8 +218,36 @@ struct PortfolioChartView: View {
 
             Divider()
 
-            // 금액 정보
+            // 상세 정보
             VStack(spacing: 4) {
+                // 보유 수량 (종목인 경우에만)
+                if let qty = quantity, qty > 0 {
+                    HStack {
+                        Text("보유수량")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text("\(qty)주")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .monospacedDigit()
+                    }
+                }
+
+                // 평균매입가 (종목인 경우에만)
+                if let avgPrice = averagePrice, avgPrice > 0 {
+                    HStack {
+                        Text("평균매입가")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Text(avgPrice.currencyFormatted)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .monospacedDigit()
+                    }
+                }
+
                 HStack {
                     Text("투자금액")
                         .font(.caption)
@@ -251,7 +296,9 @@ struct PortfolioChartView: View {
     }
 
     private var chartColorRange: [Color] {
-        var range = sortedHoldings.map { $0.color }
+        var range = sortedHoldings.enumerated().map { index, _ in
+            colorForIndex(index)
+        }
 
         if viewModel.remainingCash > 0 {
             range.append(.gray)
@@ -262,12 +309,13 @@ struct PortfolioChartView: View {
 
     /// 그라디언트 효과를 적용한 차트 색상 범위
     private var chartColorRangeWithGradient: [AnyShapeStyle] {
-        var range: [AnyShapeStyle] = sortedHoldings.map { holding in
-            AnyShapeStyle(
+        var range: [AnyShapeStyle] = sortedHoldings.enumerated().map { index, _ in
+            let color = colorForIndex(index)
+            return AnyShapeStyle(
                 LinearGradient(
                     colors: [
-                        holding.color,
-                        holding.color.opacity(0.7)
+                        color,
+                        color.opacity(0.7)
                     ],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing

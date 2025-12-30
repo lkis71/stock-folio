@@ -81,7 +81,8 @@ final class CoreDataIntegrationTests: XCTestCase {
         // When
         var updatedStock = repository.fetchAll().first!
         updatedStock.stockName = "SK하이닉스"
-        updatedStock.purchaseAmount = 2_000_000
+        updatedStock.quantity = 2
+        updatedStock.averagePrice = 1_000_000
         try repository.update(updatedStock)
 
         let fetchedStocks = repository.fetchAll()

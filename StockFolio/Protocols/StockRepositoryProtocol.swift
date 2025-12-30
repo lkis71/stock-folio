@@ -14,6 +14,11 @@ protocol StockRepositoryProtocol {
     // Statistics
     func fetchTotalCount() -> Int
     func fetchTotalInvestedAmount() -> Double
+
+    // 매매일지 연동용 메서드
+    func fetchByStockName(_ stockName: String) -> StockHoldingEntity?
+    func upsert(_ stock: StockHoldingEntity) throws
+    func deleteByStockName(_ stockName: String) throws
 }
 
 /// 시드머니 저장소 프로토콜 (SRP - 단일 책임 원칙)

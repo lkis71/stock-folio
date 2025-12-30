@@ -2,9 +2,9 @@ import SwiftUI
 
 /// 종목 리스트 뷰 (화면 설계서 기반)
 /// SRP: 종목 목록 표시만 담당
+/// v3.0: 매매일지 기반 관리 (편집/삭제 기능 제거)
 struct StockListView: View {
     @ObservedObject var viewModel: PortfolioViewModel
-    @State private var selectedStock: StockHoldingEntity?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -64,7 +64,7 @@ struct StockListView: View {
     // MARK: - Stock List Content
     private var stockListContent: some View {
         VStack(spacing: 0) {
-            // List를 사용하여 swipeActions 활성화
+            // List를 사용하여 일관된 스타일 유지
             List {
                 ForEach(sortedHoldings, id: \.element.id) { index, holding in
                     StockRowView(
@@ -72,25 +72,10 @@ struct StockListView: View {
                         percentage: viewModel.percentage(for: holding),
                         color: holding.color
                     )
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedStock = holding
-                    }
-                    // 스와이프 삭제 기능 (화면 설계서: 스와이프로 삭제)
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                viewModel.deleteStock(holding)
-                            }
-                        } label: {
-                            Label("삭제", systemImage: "trash")
-                        }
-                    }
                     .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .accessibilityElement(children: .combine)
-                    .accessibilityHint("탭하여 편집, 스와이프하여 삭제")
                 }
 
                 // 로딩 인디케이터
@@ -148,9 +133,6 @@ struct StockListView: View {
             .frame(height: calculateListHeight())
             .animation(.easeInOut(duration: 0.3), value: viewModel.holdings)
         }
-        .sheet(item: $selectedStock) { stock in
-            AddStockView(viewModel: viewModel, editingStock: stock)
-        }
     }
 
     /// List 높이 계산 (각 행 약 52pt + 상하 패딩 + 더보기 버튼)
@@ -163,8 +145,10 @@ struct StockListView: View {
 
 }
 
-// MARK: - Stock Row View
-/// 개별 종목 행 (SRP 준수)
+// MARK: - Stock Row View (v2.0 Compact Design)
+/// 개별 종목 행 (SRP 준수, 컴팩트 디자인 적용)
+/// 설계서 v2.0: 4pt 색상 바, 10pt 패딩, 컴팩트 폰트
+/// v3.0: 수량/평균가 표시 추가 (매매일지 연동)
 struct StockRowView: View {
     let holding: StockHoldingEntity
     let percentage: Double
@@ -172,7 +156,7 @@ struct StockRowView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // 좌측 색상 인디케이터
+            // 좌측 색상 인디케이터 (v2.0: 5pt → 4pt)
             color
                 .frame(width: 4)
                 .clipShape(RoundedRectangle(cornerRadius: 2))
@@ -185,22 +169,50 @@ struct StockRowView: View {
                         .fontWeight(.medium)
                         .lineLimit(1)
 
-                    Text(holding.purchaseAmount.currencyFormatted)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
+                    // 수량 × 평균가 표시
+                    HStack(spacing: 4) {
+                        if holding.quantity > 0 {
+                            Text("\(holding.quantity)주")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+
+                            Text("·")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+
+                            Text("평균 \(holding.averagePrice.currencyFormatted)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        } else {
+                            Text(holding.purchaseAmount.currencyFormatted)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .monospacedDigit()
+                        }
+                    }
                 }
 
                 Spacer()
 
-                // 비중
-                Text(String(format: "%.1f%%", percentage))
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(color)
-                    .monospacedDigit()
+                // 우측: 총 금액 + 비중
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(holding.purchaseAmount.currencyFormatted)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .monospacedDigit()
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
+
+                    Text(String(format: "%.1f%%", percentage))
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(color)
+                        .monospacedDigit()
+                }
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 10)  // v2.0: 12pt → 10pt
             .padding(.vertical, 10)
         }
         .background(Color(.secondarySystemBackground))

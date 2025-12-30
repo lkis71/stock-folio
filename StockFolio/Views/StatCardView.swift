@@ -31,7 +31,8 @@ struct StatCard: View {
                 // 제목 (라벨)
                 Text(title)
                     .font(.caption)
-                    .fontWeight(.semibold)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
 
                 // 주요 값
                 Text(value)
@@ -46,8 +47,8 @@ struct StatCard: View {
                 if let info = additionalInfo {
                     Text(info)
                         .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(valueColor)
+                        .fontWeight(.bold)
+                        .foregroundStyle(.primary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
@@ -68,13 +69,23 @@ struct PortfolioStatisticsSection: View {
     @ObservedObject var viewModel: PortfolioViewModel
     let onSeedMoneyTap: () -> Void
 
+    // 진한 파랑 (투자금용)
+    private var darkBlue: Color {
+        Color(red: 0.0, green: 0.3, blue: 0.7)
+    }
+
+    // 진한 초록 (남은 현금용)
+    private var darkGreen: Color {
+        Color(red: 0.0, green: 0.5, blue: 0.3)
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             // 1. 투자 금액 카드
             StatCard(
                 title: "투자금",
                 value: viewModel.totalInvestedAmount.currencyFormatted,
-                valueColor: .blue,
+                valueColor: darkBlue,
                 additionalInfo: percentageText(viewModel.investedPercentage)
             )
 
@@ -82,7 +93,7 @@ struct PortfolioStatisticsSection: View {
             StatCard(
                 title: "남은 현금",
                 value: viewModel.remainingCash.currencyFormatted,
-                valueColor: .green,
+                valueColor: darkGreen,
                 additionalInfo: percentageText(viewModel.cashPercentage)
             )
         }
